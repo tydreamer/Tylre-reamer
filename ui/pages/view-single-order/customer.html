@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>View Signle Order</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="https://cdn.muicss.com/mui-0.10.3/css/mui.min.css" rel="stylesheet" type="text/css" />
+	<script src="https://cdn.muicss.com/mui-0.10.3/js/mui.min.js"></script>
+	<link href='https://fonts.googleapis.com/css?family=Titillium+Web:400,200,300,600,700' rel='stylesheet'
+		type='text/css'>
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<link rel="stylesheet" href="../../styles/global.css">
+	<link rel="stylesheet" href="single-order.css" />
+</head>
+
+<body>
+	<div class="page-layout-container">
+		<header>
+			<div class="mui-appbar mui--appbar-line-height">
+				<div class="mui-container-fluid d-flex align-item-center">
+
+					<div class="app-bar-leading mui-col-md-4">
+						<div class="app-name">
+							🍔 Food Delivery
+						</div>
+					</div>
+					<div class="app-bar-center mui-col-md-4">
+						<div class="user-name text-center">
+							Welcome, [Regular User's Name]!
+						</div>
+					</div>
+					<div class="app-bar-trailing mui-col-md-4">
+						<a href="../../pages/browse-meals/browse-meals.html">Browse Meals</a>
+						<a href="../../pages/cart/cart.html">Cart</a>
+						<a href="/index.html">Sign Out</a>
+					</div>
+				</div>
+			</div>
+		</header>
+		<main>
+			<div class="layout">
+				<div class="header">
+					<div class="mui-container">
+						<br>
+						<div class="title track-order">Order #12345</div>
+						<div class="mui-container">
+							<div class="col-md-12">
+								<div class="well">
+									<div class="form-horizontal">
+										<div class="mui-container">
+											<div class="col-md-12">
+												<div class="well">
+													<div class="order-details">
+														<div class="order-info">
+															<div><strong>Restaurant:</strong> Toptal's Pizzeria</div>
+															<div><strong>Created At:</strong> 11/15/2024 10:30 AM</div>
+															<div><strong>Current Status:</strong> In Route</div>
+															<div><strong>Status Updated At:</strong> 11/15/2024 11:05 AM</div>
+															<div><strong>Order Items:</strong>
+																<ul>
+																	<li>Pizza x2 ($10.99 each)</li>
+																	<li>Drink x1 ($2.50 each)</li>
+																</ul>
+															</div>
+															<div><strong>Coupon Code:</strong> SPECIAL20</div>
+															<div><strong>Discount Percentatge:</strong> 20%</div>
+															<div><strong>Tip Amount:</strong> $5.00</div>
+															<div><strong>Total Price:</strong> $15.00</div>
+														</div>
+														<div class="order-actions">
+															<button class="cancel-order-btn">Cancel Order</button>
+															<button class="mark-received-btn">Mark Received</button>
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<div class="title track-order">Timline:</div>
+									<ul class="timeline" id="timeline">
+										<li class="li complete">
+											<div class="timestamp">
+												<span class="date">11/15/2024 10:30 AM</span>
+											</div>
+											<div class="status">
+												<h4> Order Placed </h4>
+											</div>
+										</li>
+										<li class="li complete">
+											<div class="timestamp">
+												<span class="date">11/15/2024 10:45 AM</span>
+											</div>
+											<div class="status">
+												<h4> Processing </h4>
+											</div>
+										</li>
+										<li class="li complete">
+											<div class="timestamp">
+												<span class="date">11/15/2024 11:00 AM</span>
+											</div>
+											<div class="status">
+												<h4> In Route </h4>
+											</div>
+										</li>
+									</ul>
+
+		</main>
+
+		<footer>
+			<div class="text-center">
+				Toptal Food Delivery
+			</div>
+		</footer>
+
+	</div>
+</body>
+
+</html>

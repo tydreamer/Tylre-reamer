@@ -1,0 +1,218 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Create User</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.muicss.com/mui-0.10.3/css/mui.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.muicss.com/mui-0.10.3/js/mui.min.js"></script>
+
+    <link rel="stylesheet" href="../../styles/global.css">
+    <link rel="stylesheet" href="create.css" />
+
+</head>
+
+<body>
+    <div class="page-layout-container">
+        <header>
+            <div class="mui-appbar mui--appbar-line-height">
+                <div class="mui-container-fluid d-flex align-item-center">
+
+                    <div class="app-bar-leading mui-col-md-4">
+                        <div class="app-name">
+                            🍔 Food Delivery
+                        </div>
+                    </div>
+                    <div class="app-bar-center mui-col-md-4">
+                        <div class="user-name text-center">
+                            Welcome, [Admin's Name]!
+                        </div>
+                    </div>
+                    <div class="app-bar-trailing mui-col-md-4">
+                        <a href="../../pages/view-orders/admin.html">View Orders</a>
+                        <a href="/index.html">Sign Out</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="mui-container">
+                <h1 class="mui--text-center"><strong>Create & Block Users</strong></h1>
+
+                <div class="mui-panel">
+                    <div>
+                        <form class="mui-form" onsubmit="addItem()">
+                            <legend>Add New User</legend>
+                            <div class="mui-textfield mui-textfield--float-label">
+                                <input type="text" name="user-name" required />
+                                <label>Name</label>
+                            </div>
+                            <div class="mui-textfield mui-textfield--float-label">
+                                <input type="text" name="email" required />
+                                <label>Email</label>
+                            </div>
+                            <div class="mui-textfield mui-textfield--float-label">
+                                <input type="password" name="password" required />
+                                <label>Password</label>
+                            </div>
+                            <div class="mui-select">
+                                <select name="role" id="role">
+                                    <option value="" disabled selected>Role</option>
+                                    <option value="customer">Regualr User</option>
+                                    <option value="owner">Restaurant Owner</option>
+                                </select>
+                                <label>Role</label>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <button type="submit" class="mui-btn mui-btn--raised" style="margin-left: auto;">Create
+                                    User</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div>
+                        <table class="mui-table mui-table--bordered">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>User Name</th>
+                                    <th>Email</th>
+                                    <th>Password</th>
+                                    <th>Role</th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: center;">
+                                        <img class="card-image" src="../../assets/user.png" />
+                                    </td>
+                                    <td>User 1</td>
+                                    <td>user1@toptal.com</td>
+                                    <td>
+                                        <div class="password">
+                                            <span class="password-stars">********</span>
+                                            <span id="toggle-password" class="toggle-password-icon">&#x1F441;</span>
+                                        </div>
+                                    </td>
+                                    <td>Regualr User</td>
+                                    <td>
+                                        <button class="remove-button">Block</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center;">
+                                        <img class="card-image" src="../../assets/user.png" />
+                                    </td>
+                                    <td>User 2</td>
+                                    <td>user2@toptal.com</td>
+                                    <td>
+                                        <div class="password">
+                                            <span class="password-stars">********</span>
+                                            <span id="toggle-password" class="toggle-password-icon">&#x1F441;</span>
+                                        </div>
+                                    </td>
+                                    <td>Regualr User</td>
+                                    <td>
+                                        <button class="remove-button">Block</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center;">
+                                        <img class="card-image" src="../../assets/user.png" />
+                                    </td>
+                                    <td>User 3</td>
+                                    <td>user3@toptal.com</td>
+                                    <td>
+                                        <div class="password">
+                                            <span class="password-stars">********</span>
+                                            <span id="toggle-password" class="toggle-password-icon">&#x1F441;</span>
+                                        </div>
+                                    </td>
+                                    <td>Restaurant Owner</td>
+                                    <td>
+                                        <button class="remove-button">Block</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center;">
+                                        <img class="card-image" src="../../assets/user.png" />
+                                    </td>
+                                    <td>User 4</td>
+                                    <td>user4@toptal.com</td>
+                                    <td>
+                                        <div class="password">
+                                            <span class="password-stars">********</span>
+                                            <span id="toggle-password" class="toggle-password-icon">&#x1F441;</span>
+                                        </div>
+                                    </td>
+                                    <td>Restaurant Owner</td>
+                                    <td>
+                                        <button class="remove-button">Block</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-container" id="edit-modal">
+                <form class="mui-form modal-content" onsubmit="editItem()">
+                    <legend>Edit User</legend>
+                    <div class="mui-textfield mui-textfield--float-label">
+                        <input type="text" name="user-name" />
+                        <label>User Name</label>
+                    </div>
+                    <div class="mui-textfield mui-textfield--float-label">
+                        <input type="text" name="email" />
+                        <label>Email</label>
+                    </div>
+                    <div class="mui-textfield mui-textfield--float-label">
+                        <input type="password" name="password" />
+                        <label>Password</label>
+                    </div>
+                    <div class="mui-select">
+                        <select name="role" id="role">
+                            <option value="" disabled selected>Role</option>
+                            <option value="customer">Regualr User</option>
+                            <option value="owner">Restaurant Owner</option>
+                        </select>
+                        <label>Role</label>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <button type="submit" class="mui-btn mui-btn--raised" style="margin-left: auto;">Edit
+                            User</button>
+                    </div>
+                </form>
+            </div>
+
+            <script>
+                function addItem() { }
+
+                function activateModal() {
+                    event.preventDefault()
+                    const modalEl = document.getElementById("edit-modal")
+                    modalEl.style.display = "block"
+                }
+
+                function editItem() {
+                    const modalEl = document.getElementById("edit-modal")
+                    modalEl.style.display = "none"
+                }
+            </script>
+        </main>
+
+
+        <footer>
+            <div class="text-center">
+                Toptal Food Delivery
+            </div>
+        </footer>
+    </div>
+</body>
+
+</html>

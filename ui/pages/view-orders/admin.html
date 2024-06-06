@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>View Orders</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="https://cdn.muicss.com/mui-0.10.3/css/mui.min.css" rel="stylesheet" type="text/css" />
+	<script src="https://cdn.muicss.com/mui-0.10.3/js/mui.min.js"></script>
+	<link href='https://fonts.googleapis.com/css?family=Titillium+Web:400,200,300,600,700' rel='stylesheet'
+		type='text/css'>
+	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+	<link rel="stylesheet" href="../../styles/global.css">
+	<link rel="stylesheet" href="orders.css" />
+</head>
+
+<body>
+	<div class="page-layout-container">
+		<header>
+			<div class="mui-appbar mui--appbar-line-height">
+				<div class="mui-container-fluid d-flex align-item-center">
+
+					<div class="app-bar-leading mui-col-md-4">
+						<div class="app-name">
+							🍔 Food Delivery
+						</div>
+					</div>
+					<div class="app-bar-center mui-col-md-4">
+						<div class="user-name text-center">
+							Welcome, [Admin's Name]!
+						</div>
+					</div>
+					<div class="app-bar-trailing mui-col-md-4">
+						<a href="../../pages/create/user.html">Create User</a>
+						<a href="/index.html">Sign Out</a>
+					</div>
+				</div>
+			</div>
+		</header>
+		<main>
+			<div class="layout">
+				<div class="header">
+					<div class="mui-container">
+						<br>
+						<div class="title">Orders</div>
+						<div class="mui-container">
+							<div class="form-horizontal">
+								<div class="form-group" style="margin-top: -12px;">
+									<div class="form-horizontal">
+										<div class="form-group">
+
+											<div class="form-group">
+												<label for="inputOrderTrackingID" class="col-sm-2 control-label">Select Restaurant</label>
+												<div class="col-sm-6">
+													<div class="mui-select" style="margin-left: 15px;">
+														<select name="restaurant" id="restaurant">
+															<option value="" disabled selected>Restaurant</option>
+															<option value="restaurant">Restaurant 1</option>
+															<option value="restaurant">Restaurant 2</option>
+															<option value="restaurant">Restaurant 3</option>
+															<option value="restaurant">Restaurant 4</option>
+															<option value="restaurant">Restaurant 5</option>
+														</select>
+													</div>
+												</div>
+
+												<div class="col-sm-4">
+													<button type="button" id="shopGetOrderStatusID" class="btn btn-primary pull-right"
+														style="margin-left: 20px;"> Apply</button>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="description">Here are all of the orders</div>
+								<div class="table-container">
+									<table class="mui-table mui-table--bordered">
+										<thead>
+											<tr>
+												<th>Order ID</th>
+												<th>Order Date</th>
+												<th>Restaurant</th>
+												<th>User</th>
+												<th>Items</th>
+												<th>Total</th>
+												<th>Status</th>
+												<th></th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td><a href="/pages/view-single-order/admin.html">#123456</a></td>
+												<td>12-11-2023</td>
+												<td>Toptal's Pizzeria</td>
+												<td>Emily Johnson</td>
+												<td>Pizza, Pasta, Salad</td>
+												<td>50 USD</td>
+												<td>Delivered</td>
+												<td><button class="mark-received-btn">Mark Received</button></td>
+											</tr>
+											<tr>
+												<td><a href="/pages/view-single-order/admin.html">#789012</a></td>
+												<td>11-09-2023</td>
+												<td>Toptal's Pizzeria</td>
+												<td>Sarah Patel</td>
+												<td>Pad Thai, Green Curry</td>
+												<td>30 USD</td>
+												<td>In Route</td>
+												<td><button class="cancel-order-btn">Cancel Order</button></td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+		</main>
+
+		<footer>
+			<div class="text-center">
+				Toptal Food Delivery
+			</div>
+		</footer>
+
+	</div>
+</body>
+
+</html>

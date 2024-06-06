@@ -1,0 +1,225 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Create Meal</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.muicss.com/mui-0.10.3/css/mui.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.muicss.com/mui-0.10.3/js/mui.min.js"></script>
+
+    <link rel="stylesheet" href="../../styles/global.css">
+    <link rel="stylesheet" href="create.css" />
+
+</head>
+
+<body>
+    <div class="page-layout-container">
+        <header>
+            <div class="mui-appbar mui--appbar-line-height">
+                <div class="mui-container-fluid d-flex align-item-center">
+
+                    <div class="app-bar-leading mui-col-md-4">
+                        <div class="app-name">
+                            🍔 Food Delivery
+                        </div>
+                    </div>
+                    <div class="app-bar-center mui-col-md-4">
+                        <div class="user-name text-center">
+                            Welcome, [Restaurant Owner's Name]!
+                        </div>
+                    </div>
+                    <div class="app-bar-trailing mui-col-md-4">
+                        <a href="../../pages/browse-meals/browse-meals.html">Browse Meals</a>
+                        <a href="../../pages/view-orders/owner.html">View Orders</a>
+                        <a href="../../pages/create/restaurant.html">Create Restaurant</a>
+                        <a href="/index.html">Sign Out</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="mui-container">
+                <h1 class="mui--text-center"><strong>Create & Edit Meals</strong></h1>
+
+                <div class="mui-panel">
+                    <div>
+                        <form class="mui-form" onsubmit="addItem()">
+                            <legend>Add New Meal</legend>
+                            <div class="mui-textfield mui-textfield--float-label">
+                                <input type="text" name="meal-name" required />
+                                <label>Meal Name</label>
+                            </div>
+
+                            <div class="mui-textfield mui-textfield--float-label">
+                                <textarea name="meal-description" required></textarea>
+                                <label>Meal Description</label>
+                            </div>
+
+                            <div class="mui-textfield mui-textfield--float-label">
+                                <input type="number" step="any" name="meal-name" required />
+                                <label style="height: 100%;">Meal Price</label>
+                            </div>
+                            <div class="mui-select">
+                                <select name="meal-type" id="meal-type">
+                                    <option value="" disabled selected>Select Type</option>
+                                    <option value="breakfast">Breakfast</option>
+                                    <option value="lunch">Lunch</option>
+                                    <option value="dinner">Dinner</option>
+                                    <option value="appetizers">Appetizers</option>
+                                    <option value="dessert">Dessert</option>
+                                </select>
+                                <label>Type</label>
+                            </div>
+
+                            <div class="mui-select">
+                                <select name="restaurant-type" id="restaurant-type">
+                                    <option value="" disabled selected>Select Restaurant</option>
+                                    <option value="restaurant-1">restaurant 1</option>
+                                    <option value="restaurant-2">restaurant 2</option>
+                                    <option value="restaurant-3">restaurant 3</option>
+                                    <option value="restaurant-4">restaurant 4</option>
+                                </select>
+                                <label>Restaurant</label>
+                            </div>
+
+
+                            <div style="display: flex; align-items: center;">
+                                <button type="submit" class="mui-btn mui-btn--raised" style="margin-left: auto;">Create
+                                    Meal</button>
+                            </div>
+                        </form>
+
+                    </div>
+                    <div>
+                        <table class="mui-table mui-table--bordered">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Meal</th>
+                                    <th>Description</th>
+                                    <th>Price</th>
+                                    <th>Type</th>
+                                    <th>Restaurant</th>
+                                    <th></th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="text-align: center;">
+                                        <img class="card-image" src="../../assets/burger.png" />
+                                    </td>
+                                    <td>Meal1</td>
+                                    <td>This is the description</td>
+                                    <td>75$</td>
+                                    <td>Type1</td>
+                                    <td>Restaurant1</td>
+                                    <td>
+                                        <button class="edit-button" onclick="activateModal()">Edit</button>
+                                    </td>
+                                    <td>
+                                        <button class="remove-button">Remove</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center;">
+                                        <img class="card-image" src="../../assets/burger.png" />
+                                    </td>
+                                    <td>Meal2</td>
+                                    <td>This is the description</td>
+                                    <td>24.99$</td>
+                                    <td>Type2</td>
+                                    <td>Restaurant2</td>
+                                    <td>
+                                        <button class="edit-button" onclick="activateModal()">Edit</button>
+                                    </td>
+                                    <td>
+                                        <button class="remove-button">Remove</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: center;">
+                                        <img class="card-image" src="../../assets/burger.png" />
+                                    </td>
+                                    <td>Meal3</td>
+                                    <td>This is the description</td>
+                                    <td>15$</td>
+                                    <td>Type3</td>
+                                    <td>Restaurant3</td>
+                                    <td>
+                                        <button class="edit-button" onclick="activateModal()">Edit</button>
+                                    </td>
+                                    <td>
+                                        <button class="remove-button">Remove</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-container" id="edit-modal">
+                <form class="mui-form modal-content" onsubmit="editItem()">
+                    <legend>Edit Meal</legend>
+                    <div class="mui-textfield mui-textfield--float-label">
+                        <input type="text" name="meal-name" />
+                        <label>Meal Name</label>
+                    </div>
+
+                    <div class="mui-textfield mui-textfield--float-label">
+                        <textarea name="meal-description"></textarea>
+                        <label>Meal Description</label>
+                    </div>
+
+                    <div class="mui-textfield mui-textfield--float-label">
+                        <input type="number" step="any" name="meal-name" />
+                        <label style="height: 100%;">Meal Price</label>
+                    </div>
+                    <div class="mui-select">
+                        <select name="meal-type" id="meal-type">
+                            <option value="" disabled selected>Select Type</option>
+                            <option value="breakfast">Breakfast</option>
+                            <option value="lunch">Lunch</option>
+                            <option value="dinner">Dinner</option>
+                            <option value="appetizers">Appetizers</option>
+                            <option value="dessert">Dessert</option>
+                        </select>
+                        <label>Type</label>
+                    </div>
+
+                    <div style="display: flex; align-items: center;">
+                        <button type="submit" class="mui-btn mui-btn--raised" style="margin-left: auto;">Edit</button>
+                    </div>
+                </form>
+            </div>
+
+            <script>
+                function addItem() { }
+
+                function activateModal() {
+                    event.preventDefault()
+                    const modalEl = document.getElementById("edit-modal")
+                    modalEl.style.display = "block"
+                }
+
+                function editItem() {
+                    const modalEl = document.getElementById("edit-modal")
+                    modalEl.style.display = "none"
+                }
+            </script>
+        </main>
+
+
+        <footer>
+            <div class="text-center">
+                Toptal Food Delivery
+            </div>
+        </footer>
+    </div>
+</body>
+
+</html>

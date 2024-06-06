@@ -1,0 +1,147 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Cart</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.muicss.com/mui-0.10.3/css/mui.min.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.muicss.com/mui-0.10.3/js/mui.min.js"></script>
+
+  <link rel="stylesheet" href="../../styles/global.css">
+  <link rel="stylesheet" href="cart.css" />
+</head>
+
+<body>
+  <div class="page-layout-container">
+    <header>
+      <div class="mui-appbar mui--appbar-line-height">
+        <div class="mui-container-fluid d-flex align-item-center">
+
+          <div class="app-bar-leading mui-col-md-4">
+            <div class="app-name">
+              🍔 Food Delivery
+            </div>
+          </div>
+          <div class="app-bar-center mui-col-md-4">
+            <div class="user-name text-center">
+              Welcome, [Regular User's Name]!
+            </div>
+          </div>
+          <div class="app-bar-trailing mui-col-md-4">
+            <a href="../../pages/browse-restaurants/browse-restaurants.html">Browse Restaurants </a>
+            <a href="../../pages/view-orders/customer.html">Orders History</a>
+            <a href="/index.html">Sign Out</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="main">
+        <div class="cart">
+          <h3>Your Cart</h3>
+          <ul class="cart-items">
+            <li class="cart-item">
+              <img src="../../assets/meals/fried-rice.png" alt="Item 1">
+              <div class="item-details">
+                <h4>Item 1</h4>
+                <p>Price: $10</p>
+                <div class="item-quantity">
+                  <button class="quantity-btn">-</button>
+                  <span class="quantity">1</span>
+                  <button class="quantity-btn">+</button>
+                </div>
+                <button class="remove-btn">Remove</button>
+              </div>
+            </li>
+            <li class="cart-item">
+              <img src="../../assets/meals/lunch-box.png" alt="Item 2">
+              <div class="item-details">
+                <h4>Item 2</h4>
+                <p>Price: $15</p>
+                <div class="item-quantity">
+                  <button class="quantity-btn">-</button>
+                  <span class="quantity">2</span>
+                  <button class="quantity-btn">+</button>
+                </div>
+                <button class="remove-btn">Remove</button>
+              </div>
+            </li>
+            <li class="cart-item">
+              <img src="../../assets/meals/meal.png" alt="Item 3">
+              <div class="item-details">
+                <h4>Item 3</h4>
+                <p>Price: $30</p>
+                <div class="item-quantity">
+                  <button class="quantity-btn">-</button>
+                  <span class="quantity">3</span>
+                  <button class="quantity-btn">+</button>
+                </div>
+                <button class="remove-btn">Remove</button>
+              </div>
+            </li>
+            <li class="cart-item">
+              <img src="../../assets/meals/burger.png" alt="Item 2">
+              <div class="item-details">
+                <h4>Item 4</h4>
+                <p>Price: $5</p>
+                <div class="item-quantity">
+                  <button class="quantity-btn">-</button>
+                  <span class="quantity">1</span>
+                  <button class="quantity-btn">+</button>
+                </div>
+                <button class="remove-btn">Remove</button>
+              </div>
+            </li>
+            <li class="cart-item">
+              <img src="../../assets/meals/taiyaki.png" alt="Item 2">
+              <div class="item-details">
+                <h4>Item 5</h4>
+                <p>Price: $15</p>
+                <div class="item-quantity">
+                  <button class="quantity-btn">-</button>
+                  <span class="quantity">1</span>
+                  <button class="quantity-btn">+</button>
+                </div>
+                <button class="remove-btn">Remove</button>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="checkout-info">
+          <div class="coupon-section">
+            <label for="coupon-code">Enter Coupon Code:</label>
+            <input type="text" id="coupon-code" placeholder="e.g., DISCOUNT10">
+          </div>
+          <div class="tip-section">
+            <label for="tip-amount">Tip Amount ($):</label>
+            <input type="text" id="tip-amount" placeholder="Enter tip amount">
+          </div>
+          <div class="discount-section">
+            <p class="discount-text">You're eligible for a 10% discount on your order!</p>
+          </div>
+          <div class="price-before-discount">
+            <p class="price-before-discount-text">Original Price: <span class="original-price">$75</span></p>
+          </div>
+          <div class="total-price">
+            <h4>Total Price:</h4>
+            <span>$67.5</span>
+          </div>
+          <button class="checkout-btn">Checkout</button>
+        </div>
+      </div>
+    </main>
+
+
+    <footer>
+      <div class="text-center">
+        Toptal Food Delivery
+      </div>
+    </footer>
+  </div>
+</body>
+
+</html>
