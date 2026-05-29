@@ -1,3 +1,45 @@
-﻿@page "/"
+@page "/"
+@inject RestaurantService Restaurants
 
 <PageTitle>Food Delivery</PageTitle>
+
+<h1 class="mb-4">Restaurants</h1>
+
+@if (restaurants is null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (restaurants.Count == 0)
+{
+    <div class="alert alert-info">No restaurants available yet.</div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var restaurant in restaurants)
+        {
+            <div class="col">
+                <div class="card h-100">
+                    @if (!string.IsNullOrWhiteSpace(restaurant.ImageUrl))
+                    {
+                        <img src="@restaurant.ImageUrl" class="card-img-top" alt="@restaurant.Name"
+                             style="height: 180px; object-fit: cover;" />
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">@restaurant.Name</h5>
+                        <p class="card-text">@restaurant.Description</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<RestaurantDto>? restaurants;
+
+    protected override async Task OnInitializedAsync()
+    {
+        restaurants = await Restaurants.GetAllAsync();
+    }
+}
