@@ -15,5 +15,6 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<RestaurantService>();
+builder.Services.AddScoped<MealService>();
 
 await builder.Build().RunAsync();
