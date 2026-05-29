@@ -9,6 +9,7 @@ namespace FoodDelivery.API.Data;
 public static class DbSeeder
 {
     private sealed record RestaurantRow(string Name, string Description, string ImageUrl);
+    private sealed record MealRow(string RestaurantName, string Name, string Description, decimal Price);
 
     public static async Task SeedAsync(AppDbContext db)
     {
@@ -29,23 +30,47 @@ public static class DbSeeder
             await db.SaveChangesAsync();
         }
 
-        var csvPath = Path.Combine(AppContext.BaseDirectory, "Data", "Seed", "restaurants.csv");
-        if (!File.Exists(csvPath))
+        var restaurants = ReadCsv<RestaurantRow>("restaurants.csv")
+            .Select(r => new Restaurant
+            {
+                Name = r.Name,
+                Description = r.Description,
+                ImageUrl = r.ImageUrl,
+                OwnerId = owner.Id
+            })
+            .ToList();
+
+        if (restaurants.Count == 0)
             return;
-
-        using var reader = new StreamReader(csvPath);
-        using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
-        var rows = csv.GetRecords<RestaurantRow>();
-
-        var restaurants = rows.Select(r => new Restaurant
-        {
-            Name = r.Name,
-            Description = r.Description,
-            ImageUrl = r.ImageUrl,
-            OwnerId = owner.Id
-        });
 
         db.Restaurants.AddRange(restaurants);
         await db.SaveChangesAsync();
+
+        var restaurantIdsByName = restaurants.ToDictionary(r => r.Name, r => r.Id);
+
+        var meals = ReadCsv<MealRow>("meals.csv")
+            .Where(m => restaurantIdsByName.ContainsKey(m.RestaurantName))
+            .Select(m => new Meal
+            {
+                Name = m.Name,
+                Description = m.Description,
+                Price = m.Price,
+                RestaurantId = restaurantIdsByName[m.RestaurantName]
+            })
+            .ToList();
+
+        db.Meals.AddRange(meals);
+        await db.SaveChangesAsync();
+    }
+
+    private static List<T> ReadCsv<T>(string fileName)
+    {
+        var path = Path.Combine(AppContext.BaseDirectory, "Data", "Seed", fileName);
+        if (!File.Exists(path))
+            return [];
+
+        using var reader = new StreamReader(path);
+        using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
+        return csv.GetRecords<T>().ToList();
     }
 }
