@@ -1,9 +1,11 @@
 using System.Security.Claims;
 using FoodDelivery.API.Data;
 using FoodDelivery.API.DTOs;
+using FoodDelivery.API.Hubs;
 using FoodDelivery.API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace FoodDelivery.API.Controllers;
@@ -11,7 +13,7 @@ namespace FoodDelivery.API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class OrdersController(AppDbContext db) : ControllerBase
+public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : ControllerBase
 {
     protected int CurrentUserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
     protected string CurrentUserRole => User.FindFirstValue(ClaimTypes.Role)!;
@@ -139,6 +141,8 @@ public class OrdersController(AppDbContext db) : ControllerBase
         order.Status = newStatus;
         order.StatusHistory.Add(new OrderStatusHistory { Status = newStatus });
         await db.SaveChangesAsync();
+
+        await hub.Clients.Group($"order-{id}").SendAsync("OrderStatusUpdated", newStatus.ToString());
 
         return NoContent();
     }
