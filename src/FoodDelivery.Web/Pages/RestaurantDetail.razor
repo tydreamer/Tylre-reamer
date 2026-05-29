@@ -1,6 +1,7 @@
 @page "/restaurants/{Id:int}"
 @inject RestaurantService Restaurants
 @inject MealService Meals
+@inject CartService Cart
 
 @if (restaurant is null)
 {
@@ -37,8 +38,21 @@ else
                             <div>
                                 <h5 class="card-title">@meal.Name</h5>
                                 <p class="card-text text-muted">@meal.Description</p>
+                                @if (!meal.IsAvailable)
+                                {
+                                    <span class="badge bg-secondary">Unavailable</span>
+                                }
                             </div>
-                            <span class="badge bg-success fs-6 ms-3">@meal.Price.ToString("C")</span>
+                            <div class="text-end ms-3">
+                                <div class="badge bg-success fs-6 mb-2">@meal.Price.ToString("C")</div>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary"
+                                            disabled="@(!meal.IsAvailable)"
+                                            @onclick="() => AddToCart(meal)">
+                                        Add to cart
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -58,5 +72,11 @@ else
     {
         restaurant = await Restaurants.GetByIdAsync(Id);
         meals = await Meals.GetByRestaurantAsync(Id);
+    }
+
+    private void AddToCart(MealDto meal)
+    {
+        if (restaurant is not null)
+            Cart.Add(meal, restaurant.Name);
     }
 }

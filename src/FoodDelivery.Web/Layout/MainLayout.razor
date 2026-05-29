@@ -1,5 +1,7 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
 @inject AuthService Auth
+@inject CartService Cart
 @inject NavigationManager Navigation
 
 <div class="page">
@@ -11,6 +13,15 @@
         <div class="top-row px-4">
             <AuthorizeView>
                 <Authorized>
+                    <a class="btn btn-outline-secondary btn-sm position-relative" href="cart">
+                        Cart
+                        @if (Cart.TotalQuantity > 0)
+                        {
+                            <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">
+                                @Cart.TotalQuantity
+                            </span>
+                        }
+                    </a>
                     <span class="me-3">@context.User.FindFirst("name")?.Value</span>
                     <button class="btn btn-outline-secondary btn-sm" @onclick="SignOut">Sign Out</button>
                 </Authorized>
@@ -28,9 +39,19 @@
 </div>
 
 @code {
+    protected override void OnInitialized()
+    {
+        Cart.OnChange += StateHasChanged;
+    }
+
     private async Task SignOut()
     {
         await Auth.LogoutAsync();
         Navigation.NavigateTo("/sign-in");
+    }
+
+    public void Dispose()
+    {
+        Cart.OnChange -= StateHasChanged;
     }
 }
