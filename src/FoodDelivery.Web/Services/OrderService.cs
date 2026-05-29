@@ -17,4 +17,14 @@ public class OrderService(HttpClient http)
         var error = await response.Content.ReadAsStringAsync();
         return (false, null, error);
     }
+
+    public async Task<List<OrderResponse>> GetMyOrdersAsync()
+    {
+        return await http.GetFromJsonAsync<List<OrderResponse>>("api/orders") ?? [];
+    }
+
+    public async Task<OrderResponse?> GetByIdAsync(int id)
+    {
+        return await http.GetFromJsonAsync<OrderResponse>($"api/orders/{id}");
+    }
 }

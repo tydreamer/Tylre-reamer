@@ -1,0 +1,66 @@
+@page "/orders"
+@inject OrderService Orders
+
+<PageTitle>My Orders</PageTitle>
+
+<h1 class="mb-4">My Orders</h1>
+
+@if (orders is null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (orders.Count == 0)
+{
+    <div class="alert alert-info">You haven't placed any orders yet.</div>
+    <a href="/" class="btn btn-primary">Browse restaurants</a>
+}
+else
+{
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Order</th>
+                <th>Restaurant</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th class="text-end">Total</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in orders)
+            {
+                <tr>
+                    <td>#@order.Id</td>
+                    <td>@order.RestaurantName</td>
+                    <td>@order.CreatedAt.ToLocalTime().ToString("g")</td>
+                    <td><span class="badge @StatusClass(order.Status)">@order.Status</span></td>
+                    <td class="text-end">@order.TotalPrice.ToString("C")</td>
+                    <td class="text-end">
+                        <a href="orders/@order.Id" class="btn btn-sm btn-outline-primary">View</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<OrderResponse>? orders;
+
+    protected override async Task OnInitializedAsync()
+    {
+        orders = await Orders.GetMyOrdersAsync();
+    }
+
+    private static string StatusClass(string status) => status switch
+    {
+        "Placed" => "bg-secondary",
+        "Processing" => "bg-info",
+        "InRoute" => "bg-warning text-dark",
+        "Delivered" => "bg-primary",
+        "Received" => "bg-success",
+        "Cancelled" => "bg-danger",
+        _ => "bg-secondary"
+    };
+}
