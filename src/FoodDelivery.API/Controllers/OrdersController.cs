@@ -143,6 +143,41 @@ public class OrdersController(AppDbContext db) : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("{id}/duplicate")]
+    [Authorize(Roles = "Customer")]
+    public async Task<IActionResult> Duplicate(int id)
+    {
+        var original = await db.Orders
+            .Include(o => o.Items)
+            .FirstOrDefaultAsync(o => o.Id == id && o.CustomerId == CurrentUserId);
+
+        if (original is null) return NotFound();
+
+        var meals = await db.Meals
+            .Where(m => original.Items.Select(i => i.MealId).Contains(m.Id) && m.IsAvailable)
+            .ToListAsync();
+
+        var order = new Order
+        {
+            CustomerId = original.CustomerId,
+            RestaurantId = original.RestaurantId,
+            Tip = original.Tip,
+            TotalPrice = meals.Sum(m => original.Items.First(i => i.MealId == m.Id).Quantity * m.Price) + original.Tip,
+            Items = original.Items.Select(i => new OrderItem
+            {
+                MealId = i.MealId,
+                Quantity = i.Quantity,
+                UnitPrice = meals.FirstOrDefault(m => m.Id == i.MealId)?.Price ?? i.UnitPrice
+            }).ToList(),
+            StatusHistory = [new OrderStatusHistory { Status = OrderStatus.Placed }]
+        };
+
+        db.Orders.Add(order);
+        await db.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(GetById), new { id = order.Id }, new { order.Id });
+    }
+
     protected bool CanAccessOrder(Order order)
     {
         var userId = CurrentUserId;
