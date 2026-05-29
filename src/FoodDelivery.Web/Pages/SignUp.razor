@@ -1,12 +1,12 @@
-@page "/register"
+@page "/sign-up"
 @attribute [AllowAnonymous]
 @inject AuthService Auth
 @inject NavigationManager Navigation
 
 <div class="row justify-content-center mt-5">
     <div class="col-md-4">
-        <h3 class="mb-4">Create Account</h3>
-        <EditForm Model="model" OnValidSubmit="HandleRegister">
+        <h3 class="mb-4">Sign Up</h3>
+        <EditForm Model="model" OnValidSubmit="HandleSignUp">
             <DataAnnotationsValidator />
             <div class="mb-3">
                 <label class="form-label">Name</label>
@@ -35,21 +35,21 @@
                 <div class="alert alert-danger">@error</div>
             }
             <button class="btn btn-primary w-100" type="submit" disabled="@loading">
-                @(loading ? "Creating account..." : "Register")
+                @(loading ? "Signing up..." : "Sign Up")
             </button>
         </EditForm>
         <p class="mt-3 text-center">
-            Already have an account? <a href="/login">Sign In</a>
+            Already have an account? <a href="/sign-in">Sign In</a>
         </p>
     </div>
 </div>
 
 @code {
-    private readonly RegisterModel model = new();
+    private readonly SignUpModel model = new();
     private string? error;
     private bool loading;
 
-    private async Task HandleRegister()
+    private async Task HandleSignUp()
     {
         loading = true;
         error = null;
@@ -57,12 +57,12 @@
         loading = false;
 
         if (success)
-            Navigation.NavigateTo("/login");
+            Navigation.NavigateTo("/sign-in");
         else
-            error = "Registration failed. Email may already be in use.";
+            error = "Sign up failed. Email may already be in use.";
     }
 
-    private class RegisterModel
+    private class SignUpModel
     {
         [System.ComponentModel.DataAnnotations.Required]
         public string Name { get; set; } = "";

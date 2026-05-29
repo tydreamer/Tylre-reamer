@@ -1,4 +1,4 @@
-@page "/login"
+@page "/sign-in"
 @attribute [AllowAnonymous]
 @inject AuthService Auth
 @inject NavigationManager Navigation
@@ -6,7 +6,7 @@
 <div class="row justify-content-center mt-5">
     <div class="col-md-4">
         <h3 class="mb-4">Sign In</h3>
-        <EditForm Model="model" OnValidSubmit="HandleLogin">
+        <EditForm Model="model" OnValidSubmit="HandleSignIn">
             <DataAnnotationsValidator />
             <div class="mb-3">
                 <label class="form-label">Email</label>
@@ -27,17 +27,17 @@
             </button>
         </EditForm>
         <p class="mt-3 text-center">
-            Don't have an account? <a href="/register">Register</a>
+            Don't have an account? <a href="/sign-up">Sign Up</a>
         </p>
     </div>
 </div>
 
 @code {
-    private readonly LoginModel model = new();
+    private readonly SignInModel model = new();
     private string? error;
     private bool loading;
 
-    private async Task HandleLogin()
+    private async Task HandleSignIn()
     {
         loading = true;
         error = null;
@@ -50,7 +50,7 @@
             error = "Invalid email or password.";
     }
 
-    private class LoginModel
+    private class SignInModel
     {
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.EmailAddress]
