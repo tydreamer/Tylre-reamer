@@ -119,6 +119,30 @@ public class OrdersController(AppDbContext db) : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = order.Id }, MapToResponse(created));
     }
 
+    [HttpPut("{id}/status")]
+    public async Task<IActionResult> UpdateStatus(int id, UpdateOrderStatusRequest req)
+    {
+        var order = await db.Orders
+            .Include(o => o.Restaurant)
+            .Include(o => o.StatusHistory)
+            .FirstOrDefaultAsync(o => o.Id == id);
+
+        if (order is null) return NotFound();
+        if (!CanAccessOrder(order)) return Forbid();
+
+        if (!Enum.TryParse<OrderStatus>(req.Status, ignoreCase: true, out var newStatus))
+            return BadRequest("Invalid status.");
+
+        if (!IsValidTransition(order.Status, newStatus, CurrentUserRole))
+            return BadRequest($"Cannot transition from {order.Status} to {newStatus}.");
+
+        order.Status = newStatus;
+        order.StatusHistory.Add(new OrderStatusHistory { Status = newStatus });
+        await db.SaveChangesAsync();
+
+        return NoContent();
+    }
+
     protected bool CanAccessOrder(Order order)
     {
         var userId = CurrentUserId;
