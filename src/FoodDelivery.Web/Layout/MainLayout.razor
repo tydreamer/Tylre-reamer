@@ -22,7 +22,7 @@
                             </span>
                         }
                     </a>
-                    <span class="me-3">@context.User.FindFirst("name")?.Value</span>
+                    <span class="mx-3">@context.User.FindFirst("name")?.Value</span>
                     <button class="btn btn-outline-secondary btn-sm" @onclick="SignOut">Sign Out</button>
                 </Authorized>
                 <NotAuthorized>
