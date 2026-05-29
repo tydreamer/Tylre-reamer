@@ -4,7 +4,7 @@ using Microsoft.JSInterop;
 
 namespace FoodDelivery.Web.Services;
 
-public record LoginResponse(string Token);
+public record LoginResponse(string Token, string Name, string Email, string Role);
 
 public class AuthService(HttpClient http, IJSRuntime js, AuthenticationStateProvider authStateProvider)
 {
@@ -19,9 +19,9 @@ public class AuthService(HttpClient http, IJSRuntime js, AuthenticationStateProv
         return true;
     }
 
-    public async Task<bool> RegisterAsync(string email, string password, string role)
+    public async Task<bool> RegisterAsync(string name, string email, string password, string role)
     {
-        var response = await http.PostAsJsonAsync("api/auth/register", new { Email = email, Password = password, Role = role });
+        var response = await http.PostAsJsonAsync("api/auth/register", new { Name = name, Email = email, Password = password, Role = role });
         return response.IsSuccessStatusCode;
     }
 

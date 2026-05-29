@@ -26,6 +26,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
+    policy.WithOrigins("http://localhost:5196")
+          .AllowAnyHeader()
+          .AllowAnyMethod()
+          .AllowCredentials()));
+
 builder.Services.AddAuthorization();
 builder.Services.AddSignalR();
 builder.Services.AddControllers();
@@ -33,6 +39,7 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 app.UseHttpsRedirection();
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

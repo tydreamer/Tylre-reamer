@@ -9,6 +9,11 @@
         <EditForm Model="model" OnValidSubmit="HandleRegister">
             <DataAnnotationsValidator />
             <div class="mb-3">
+                <label class="form-label">Name</label>
+                <InputText class="form-control" @bind-Value="model.Name" />
+                <ValidationMessage For="() => model.Name" />
+            </div>
+            <div class="mb-3">
                 <label class="form-label">Email</label>
                 <InputText class="form-control" @bind-Value="model.Email" type="email" />
                 <ValidationMessage For="() => model.Email" />
@@ -48,7 +53,7 @@
     {
         loading = true;
         error = null;
-        var success = await Auth.RegisterAsync(model.Email, model.Password, model.Role);
+        var success = await Auth.RegisterAsync(model.Name, model.Email, model.Password, model.Role);
         loading = false;
 
         if (success)
@@ -59,6 +64,9 @@
 
     private class RegisterModel
     {
+        [System.ComponentModel.DataAnnotations.Required]
+        public string Name { get; set; } = "";
+
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.EmailAddress]
         public string Email { get; set; } = "";
