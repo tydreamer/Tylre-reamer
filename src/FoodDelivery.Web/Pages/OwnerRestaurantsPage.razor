@@ -1,0 +1,98 @@
+@page "/owner/restaurants"
+@attribute [Authorize(Roles = "Owner")]
+@inject RestaurantService Restaurants
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>My Restaurants</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="mb-0">My Restaurants</h1>
+    <a href="owner/restaurants/new" class="btn btn-primary">Add Restaurant</a>
+</div>
+
+@if (error is not null)
+{
+    <div class="alert alert-danger">@error</div>
+}
+
+@if (restaurants is null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (restaurants.Count == 0)
+{
+    <div class="alert alert-info">You don't have any restaurants yet.</div>
+}
+else
+{
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var restaurant in restaurants)
+            {
+                <tr>
+                    <td>@restaurant.Name</td>
+                    <td>@restaurant.Description</td>
+                    <td class="text-end text-nowrap">
+                        <a href="owner/restaurants/@restaurant.Id/edit" class="btn btn-sm btn-outline-primary">Edit</a>
+                        <button class="btn btn-sm btn-outline-danger"
+                                disabled="@(deletingId == restaurant.Id)"
+                                @onclick="() => DeleteAsync(restaurant)">
+                            @(deletingId == restaurant.Id ? "Deleting..." : "Delete")
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private List<RestaurantDto>? restaurants;
+    private string? error;
+    private int? deletingId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthStateTask is null) return;
+
+        var user = (await AuthStateTask).User;
+        var ownerId = user.GetUserId();
+        if (ownerId is null)
+        {
+            Navigation.NavigateTo("/sign-in");
+            return;
+        }
+
+        restaurants = await Restaurants.GetByOwnerAsync(ownerId.Value);
+    }
+
+    private async Task DeleteAsync(RestaurantDto restaurant)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", $"Delete \"{restaurant.Name}\"? This cannot be undone."))
+            return;
+
+        deletingId = restaurant.Id;
+        error = null;
+        var (success, deleteError) = await Restaurants.DeleteAsync(restaurant.Id);
+        deletingId = null;
+
+        if (!success)
+        {
+            error = deleteError ?? "Failed to delete restaurant.";
+            return;
+        }
+
+        restaurants!.Remove(restaurant);
+    }
+}

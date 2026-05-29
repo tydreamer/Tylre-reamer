@@ -1,0 +1,146 @@
+@page "/owner/restaurants/new"
+@page "/owner/restaurants/{Id:int}/edit"
+@attribute [Authorize(Roles = "Owner")]
+@inject RestaurantService Restaurants
+@inject NavigationManager Navigation
+
+<PageTitle>@(IsNew ? "Add Restaurant" : "Edit Restaurant")</PageTitle>
+
+<div class="mb-4">
+    <a href="owner/restaurants" class="btn btn-link ps-0">&larr; Back to my restaurants</a>
+    <h1>@(IsNew ? "Add Restaurant" : "Edit Restaurant")</h1>
+</div>
+
+@if (loadError is not null)
+{
+    <div class="alert alert-danger">@loadError</div>
+}
+else if (!IsNew && model is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-6">
+            <EditForm Model="formModel" OnValidSubmit="HandleSubmit">
+                <DataAnnotationsValidator />
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <InputText class="form-control" @bind-Value="formModel.Name" />
+                    <ValidationMessage For="() => formModel.Name" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <InputTextArea class="form-control" rows="3" @bind-Value="formModel.Description" />
+                    <ValidationMessage For="() => formModel.Description" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Image URL</label>
+                    <InputText class="form-control" @bind-Value="formModel.ImageUrl" />
+                    <ValidationMessage For="() => formModel.ImageUrl" />
+                </div>
+                @if (submitError is not null)
+                {
+                    <div class="alert alert-danger">@submitError</div>
+                }
+                <button class="btn btn-primary" type="submit" disabled="@saving">
+                    @(saving ? "Saving..." : IsNew ? "Create" : "Save")
+                </button>
+                <a href="owner/restaurants" class="btn btn-outline-secondary ms-2">Cancel</a>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int? Id { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    private bool IsNew => Id is null;
+    private RestaurantFormModel formModel = new();
+    private RestaurantDto? model;
+    private string? loadError;
+    private string? submitError;
+    private bool saving;
+    private int? ownerId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthStateTask is null) return;
+
+        var user = (await AuthStateTask).User;
+        ownerId = user.GetUserId();
+        if (ownerId is null)
+        {
+            Navigation.NavigateTo("/sign-in");
+            return;
+        }
+
+        if (IsNew) return;
+
+        model = await Restaurants.GetByIdAsync(Id!.Value);
+        if (model is null)
+        {
+            loadError = "Restaurant not found.";
+            return;
+        }
+
+        if (model.OwnerId != ownerId)
+        {
+            loadError = "You do not have permission to edit this restaurant.";
+            return;
+        }
+
+        formModel = new RestaurantFormModel
+        {
+            Name = model.Name,
+            Description = model.Description,
+            ImageUrl = model.ImageUrl
+        };
+    }
+
+    private async Task HandleSubmit()
+    {
+        saving = true;
+        submitError = null;
+        var request = new RestaurantUpsertRequest(formModel.Name, formModel.Description, formModel.ImageUrl);
+
+        if (IsNew)
+        {
+            var (success, _, error) = await Restaurants.CreateAsync(request);
+            saving = false;
+            if (!success)
+            {
+                submitError = error ?? "Failed to create restaurant.";
+                return;
+            }
+
+            Navigation.NavigateTo("owner/restaurants");
+            return;
+        }
+
+        var (updated, updateError) = await Restaurants.UpdateAsync(Id!.Value, request);
+        saving = false;
+        if (!updated)
+        {
+            submitError = updateError ?? "Failed to update restaurant.";
+            return;
+        }
+
+        Navigation.NavigateTo("owner/restaurants");
+    }
+
+    private class RestaurantFormModel
+    {
+        [System.ComponentModel.DataAnnotations.Required]
+        public string Name { get; set; } = "";
+
+        [System.ComponentModel.DataAnnotations.Required]
+        public string Description { get; set; } = "";
+
+        public string ImageUrl { get; set; } = "";
+    }
+}
