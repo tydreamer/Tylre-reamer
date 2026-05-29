@@ -37,7 +37,7 @@ public class JwtAuthStateProvider(IJSRuntime js, HttpClient http) : Authenticati
     private static IEnumerable<Claim> ParseClaims(string jwt)
     {
         var payload = jwt.Split('.')[1];
-        var padded = payload.Length % 4 switch
+        var padded = (payload.Length % 4) switch
         {
             2 => payload + "==",
             3 => payload + "=",
