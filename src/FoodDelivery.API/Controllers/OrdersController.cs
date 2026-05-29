@@ -51,6 +51,74 @@ public class OrdersController(AppDbContext db) : ControllerBase
         return Ok(MapToResponse(order));
     }
 
+    [HttpPost]
+    [Authorize(Roles = "Customer")]
+    public async Task<IActionResult> Place(PlaceOrderRequest req)
+    {
+        var customerId = CurrentUserId;
+
+        var customer = await db.Users.FindAsync(customerId);
+        if (customer is null || customer.IsBlocked)
+            return Forbid();
+
+        var restaurant = await db.Restaurants.FindAsync(req.RestaurantId);
+        if (restaurant is null) return NotFound("Restaurant not found.");
+
+        var mealIds = req.Items.Select(i => i.MealId).ToList();
+        var meals = await db.Meals
+            .Where(m => mealIds.Contains(m.Id) && m.RestaurantId == req.RestaurantId && m.IsAvailable)
+            .ToListAsync();
+
+        if (meals.Count != req.Items.Count)
+            return BadRequest("One or more meals are invalid or unavailable.");
+
+        decimal subtotal = req.Items.Sum(i => meals.First(m => m.Id == i.MealId).Price * i.Quantity);
+        decimal discount = 0;
+
+        Coupon? coupon = null;
+        if (!string.IsNullOrEmpty(req.CouponCode))
+        {
+            coupon = await db.Coupons.FirstOrDefaultAsync(c =>
+                c.Code == req.CouponCode && c.RestaurantId == req.RestaurantId &&
+                c.IsActive && c.ExpiresAt > DateTime.UtcNow);
+
+            if (coupon is null) return BadRequest("Invalid or expired coupon.");
+
+            discount = coupon.DiscountType == DiscountType.Percentage
+                ? subtotal * coupon.DiscountValue / 100
+                : coupon.DiscountValue;
+        }
+
+        var total = subtotal - discount + req.Tip;
+
+        var order = new Order
+        {
+            CustomerId = customerId,
+            RestaurantId = req.RestaurantId,
+            Tip = req.Tip,
+            CouponId = coupon?.Id,
+            TotalPrice = total,
+            Items = req.Items.Select(i => new OrderItem
+            {
+                MealId = i.MealId,
+                Quantity = i.Quantity,
+                UnitPrice = meals.First(m => m.Id == i.MealId).Price
+            }).ToList(),
+            StatusHistory = [new OrderStatusHistory { Status = OrderStatus.Placed }]
+        };
+
+        db.Orders.Add(order);
+        await db.SaveChangesAsync();
+
+        var created = await db.Orders
+            .Include(o => o.Items).ThenInclude(i => i.Meal)
+            .Include(o => o.Restaurant)
+            .Include(o => o.StatusHistory)
+            .FirstAsync(o => o.Id == order.Id);
+
+        return CreatedAtAction(nameof(GetById), new { id = order.Id }, MapToResponse(created));
+    }
+
     protected bool CanAccessOrder(Order order)
     {
         var userId = CurrentUserId;
