@@ -1,0 +1,143 @@
+@page "/cart"
+@implements IDisposable
+@inject CartService Cart
+@inject OrderService Orders
+@inject NavigationManager Navigation
+
+<PageTitle>Your Cart</PageTitle>
+
+<h1 class="mb-4">Your Cart</h1>
+
+@if (placedOrder is not null)
+{
+    <div class="alert alert-success">
+        <h5 class="alert-heading">Order placed!</h5>
+        <p class="mb-1">Your order <strong>#@placedOrder.Id</strong> has been placed.</p>
+        <p class="mb-0">Total charged: <strong>@placedOrder.TotalPrice.ToString("C")</strong></p>
+    </div>
+    <a href="/" class="btn btn-primary">Back to restaurants</a>
+}
+else if (Cart.IsEmpty)
+{
+    <div class="alert alert-info">Your cart is empty.</div>
+    <a href="/" class="btn btn-primary">Browse restaurants</a>
+}
+else
+{
+    <p class="text-muted">Ordering from <strong>@Cart.RestaurantName</strong></p>
+
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Meal</th>
+                <th class="text-end">Price</th>
+                <th class="text-center" style="width: 160px;">Quantity</th>
+                <th class="text-end">Total</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Cart.Items)
+            {
+                <tr>
+                    <td>@item.Meal.Name</td>
+                    <td class="text-end">@item.Meal.Price.ToString("C")</td>
+                    <td class="text-center">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button class="btn btn-outline-secondary" @onclick="() => Cart.SetQuantity(item.Meal.Id, item.Quantity - 1)">−</button>
+                            <span class="btn btn-outline-secondary disabled">@item.Quantity</span>
+                            <button class="btn btn-outline-secondary" @onclick="() => Cart.SetQuantity(item.Meal.Id, item.Quantity + 1)">+</button>
+                        </div>
+                    </td>
+                    <td class="text-end">@item.LineTotal.ToString("C")</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-danger" @onclick="() => Cart.Remove(item.Meal.Id)">Remove</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="row justify-content-end">
+        <div class="col-md-5">
+            <div class="mb-3">
+                <label class="form-label">Coupon code (optional)</label>
+                <input class="form-control" @bind="couponCode" placeholder="e.g. SAVE10" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Tip</label>
+                <input class="form-control" type="number" min="0" step="0.50" @bind="tip" />
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <span>Subtotal</span>
+                <span>@Cart.Subtotal.ToString("C")</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Tip</span>
+                <span>@tip.ToString("C")</span>
+            </div>
+            <hr />
+            <div class="d-flex justify-content-between fw-bold">
+                <span>Estimated total</span>
+                <span>@((Cart.Subtotal + tip).ToString("C"))</span>
+            </div>
+            <small class="text-muted d-block mb-3">Any coupon discount is applied when the order is placed.</small>
+
+            @if (error is not null)
+            {
+                <div class="alert alert-danger">@error</div>
+            }
+
+            <button class="btn btn-success w-100" @onclick="PlaceOrder" disabled="@placing">
+                @(placing ? "Placing order..." : "Place Order")
+            </button>
+        </div>
+    </div>
+}
+
+@code {
+    private decimal tip;
+    private string? couponCode;
+    private string? error;
+    private bool placing;
+    private OrderResponse? placedOrder;
+
+    protected override void OnInitialized()
+    {
+        Cart.OnChange += StateHasChanged;
+    }
+
+    private async Task PlaceOrder()
+    {
+        if (Cart.RestaurantId is null)
+            return;
+
+        placing = true;
+        error = null;
+
+        var request = new PlaceOrderRequest(
+            Cart.RestaurantId.Value,
+            Cart.Items.Select(i => new OrderItemRequest(i.Meal.Id, i.Quantity)).ToList(),
+            tip,
+            string.IsNullOrWhiteSpace(couponCode) ? null : couponCode);
+
+        var (success, order, err) = await Orders.PlaceOrderAsync(request);
+        placing = false;
+
+        if (success)
+        {
+            placedOrder = order;
+            Cart.Clear();
+        }
+        else
+        {
+            error = err;
+        }
+    }
+
+    public void Dispose()
+    {
+        Cart.OnChange -= StateHasChanged;
+    }
+}

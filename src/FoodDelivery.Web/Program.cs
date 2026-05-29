@@ -17,5 +17,6 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<RestaurantService>();
 builder.Services.AddScoped<MealService>();
 builder.Services.AddScoped<CartService>();
+builder.Services.AddScoped<OrderService>();
 
 await builder.Build().RunAsync();
