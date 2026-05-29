@@ -13,15 +13,15 @@
         <div class="top-row px-4">
             <AuthorizeView>
                 <Authorized>
-                    <a class="btn btn-outline-secondary btn-sm position-relative" href="cart">
-                        Cart
+                    <span class="position-relative">
+                        <a class="btn btn-outline-secondary btn-sm" href="cart">Cart</a>
                         @if (Cart.TotalQuantity > 0)
                         {
-                            <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">
+                            <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle" style="z-index:1">
                                 @Cart.TotalQuantity
                             </span>
                         }
-                    </a>
+                    </span>
                     <span class="mx-3">@context.User.FindFirst("name")?.Value</span>
                     <button class="btn btn-outline-secondary btn-sm" @onclick="SignOut">Sign Out</button>
                 </Authorized>
