@@ -27,4 +27,14 @@ public class OrderService(HttpClient http)
     {
         return await http.GetFromJsonAsync<OrderResponse>($"api/orders/{id}");
     }
+
+    public async Task<(bool Success, string? Error)> UpdateStatusAsync(int id, string status)
+    {
+        var response = await http.PutAsJsonAsync($"api/orders/{id}/status", new { Status = status });
+        if (response.IsSuccessStatusCode)
+            return (true, null);
+
+        var error = await response.Content.ReadAsStringAsync();
+        return (false, error);
+    }
 }
