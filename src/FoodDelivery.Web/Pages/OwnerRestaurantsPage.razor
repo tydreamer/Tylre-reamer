@@ -41,6 +41,7 @@ else
                     <td>@restaurant.Name</td>
                     <td>@restaurant.Description</td>
                     <td class="text-end text-nowrap">
+                        <a href="owner/restaurants/@restaurant.Id/meals" class="btn btn-sm btn-outline-secondary">Meals</a>
                         <a href="owner/restaurants/@restaurant.Id/edit" class="btn btn-sm btn-outline-primary">Edit</a>
                         <button class="btn btn-sm btn-outline-danger"
                                 disabled="@(deletingId == restaurant.Id)"

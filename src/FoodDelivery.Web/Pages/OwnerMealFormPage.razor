@@ -1,0 +1,175 @@
+@page "/owner/restaurants/{RestaurantId:int}/meals/new"
+@page "/owner/restaurants/{RestaurantId:int}/meals/{MealId:int}/edit"
+@attribute [Authorize(Roles = "Owner")]
+@inject RestaurantService Restaurants
+@inject MealService Meals
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+
+<PageTitle>@(IsNew ? "Add Meal" : "Edit Meal")</PageTitle>
+
+<div class="mb-4">
+    <a href="owner/restaurants/@RestaurantId/meals" class="btn btn-link ps-0">&larr; Back to meals</a>
+    <h1>@(IsNew ? "Add Meal" : "Edit Meal")</h1>
+    @if (restaurant is not null)
+    {
+        <p class="text-muted mb-0">@restaurant.Name</p>
+    }
+</div>
+
+@if (loadError is not null)
+{
+    <div class="alert alert-danger">@loadError</div>
+}
+else if (restaurant is null || (!IsNew && meal is null))
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-6">
+            <EditForm Model="formModel" OnValidSubmit="HandleSubmit">
+                <DataAnnotationsValidator />
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <InputText class="form-control" @bind-Value="formModel.Name" />
+                    <ValidationMessage For="() => formModel.Name" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <InputTextArea class="form-control" rows="3" @bind-Value="formModel.Description" />
+                    <ValidationMessage For="() => formModel.Description" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Image URL</label>
+                    <InputText class="form-control" @bind-Value="formModel.ImageUrl" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Price</label>
+                    <InputNumber class="form-control" @bind-Value="formModel.Price" />
+                    <ValidationMessage For="() => formModel.Price" />
+                </div>
+                @if (!IsNew)
+                {
+                    <div class="mb-3 form-check">
+                        <InputCheckbox class="form-check-input" @bind-Value="formModel.IsAvailable" />
+                        <label class="form-check-label">Available</label>
+                    </div>
+                }
+                @if (submitError is not null)
+                {
+                    <div class="alert alert-danger">@submitError</div>
+                }
+                <button class="btn btn-primary" type="submit" disabled="@saving">
+                    @(saving ? "Saving..." : IsNew ? "Create" : "Save")
+                </button>
+                <a href="owner/restaurants/@RestaurantId/meals" class="btn btn-outline-secondary ms-2">Cancel</a>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int RestaurantId { get; set; }
+    [Parameter] public int? MealId { get; set; }
+
+    private bool IsNew => MealId is null;
+    private RestaurantDto? restaurant;
+    private MealDto? meal;
+    private MealFormModel formModel = new();
+    private string? loadError;
+    private string? submitError;
+    private bool saving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthStateProvider.GetAuthenticationStateAsync()).User;
+        var ownerId = user.GetUserId();
+        if (ownerId is null)
+        {
+            loadError = "Unable to determine your account. Please sign in again.";
+            return;
+        }
+
+        restaurant = await Restaurants.GetByIdAsync(RestaurantId);
+        if (restaurant is null)
+        {
+            loadError = "Restaurant not found.";
+            return;
+        }
+
+        if (restaurant.OwnerId != ownerId)
+        {
+            loadError = "You do not have permission to manage meals for this restaurant.";
+            return;
+        }
+
+        if (IsNew) return;
+
+        meal = await Meals.GetByIdAsync(RestaurantId, MealId!.Value);
+        if (meal is null)
+        {
+            loadError = "Meal not found.";
+            return;
+        }
+
+        formModel = new MealFormModel
+        {
+            Name = meal.Name,
+            Description = meal.Description,
+            ImageUrl = meal.ImageUrl,
+            Price = meal.Price,
+            IsAvailable = meal.IsAvailable
+        };
+    }
+
+    private async Task HandleSubmit()
+    {
+        saving = true;
+        submitError = null;
+
+        if (IsNew)
+        {
+            var request = new MealCreateRequest(formModel.Name, formModel.Description, formModel.ImageUrl, formModel.Price);
+            var (success, _, error) = await Meals.CreateAsync(RestaurantId, request);
+            saving = false;
+            if (!success)
+            {
+                submitError = error ?? "Failed to create meal.";
+                return;
+            }
+
+            Navigation.NavigateTo($"owner/restaurants/{RestaurantId}/meals");
+            return;
+        }
+
+        var updateRequest = new MealUpdateRequest(formModel.Name, formModel.Description, formModel.ImageUrl, formModel.Price, formModel.IsAvailable);
+        var (updated, updateError) = await Meals.UpdateAsync(RestaurantId, MealId!.Value, updateRequest);
+        saving = false;
+        if (!updated)
+        {
+            submitError = updateError ?? "Failed to update meal.";
+            return;
+        }
+
+        Navigation.NavigateTo($"owner/restaurants/{RestaurantId}/meals");
+    }
+
+    private class MealFormModel
+    {
+        [System.ComponentModel.DataAnnotations.Required]
+        public string Name { get; set; } = "";
+
+        [System.ComponentModel.DataAnnotations.Required]
+        public string Description { get; set; } = "";
+
+        public string ImageUrl { get; set; } = "";
+
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.Range(0.01, double.MaxValue)]
+        public decimal Price { get; set; }
+
+        public bool IsAvailable { get; set; } = true;
+    }
+}

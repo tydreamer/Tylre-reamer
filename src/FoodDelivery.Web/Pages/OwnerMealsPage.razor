@@ -1,0 +1,122 @@
+@page "/owner/restaurants/{RestaurantId:int}/meals"
+@attribute [Authorize(Roles = "Owner")]
+@inject RestaurantService Restaurants
+@inject MealService Meals
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JS
+
+<PageTitle>@(restaurant?.Name ?? "Meals")</PageTitle>
+
+<div class="mb-4">
+    <a href="owner/restaurants" class="btn btn-link ps-0">&larr; Back to my restaurants</a>
+    @if (restaurant is not null)
+    {
+        <h1 class="mb-0">@restaurant.Name — Meals</h1>
+    }
+</div>
+
+@if (error is not null)
+{
+    <div class="alert alert-danger">@error</div>
+}
+
+@if (restaurant is null || meals is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="d-flex justify-content-end mb-3">
+        <a href="owner/restaurants/@RestaurantId/meals/new" class="btn btn-primary">Add Meal</a>
+    </div>
+
+    @if (meals.Count == 0)
+    {
+        <div class="alert alert-info">This restaurant has no meals yet.</div>
+    }
+    else
+    {
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Available</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var meal in meals)
+                {
+                    <tr>
+                        <td>@meal.Name</td>
+                        <td>@meal.Price.ToString("C")</td>
+                        <td>@(meal.IsAvailable ? "Yes" : "No")</td>
+                        <td class="text-end text-nowrap">
+                            <a href="owner/restaurants/@RestaurantId/meals/@meal.Id/edit" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <button class="btn btn-sm btn-outline-danger"
+                                    disabled="@(deletingId == meal.Id)"
+                                    @onclick="() => DeleteAsync(meal)">
+                                @(deletingId == meal.Id ? "Deleting..." : "Delete")
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    [Parameter] public int RestaurantId { get; set; }
+
+    private RestaurantDto? restaurant;
+    private List<MealDto>? meals;
+    private string? error;
+    private int? deletingId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthStateProvider.GetAuthenticationStateAsync()).User;
+        var ownerId = user.GetUserId();
+        if (ownerId is null)
+        {
+            error = "Unable to determine your account. Please sign in again.";
+            return;
+        }
+
+        restaurant = await Restaurants.GetByIdAsync(RestaurantId);
+        if (restaurant is null)
+        {
+            error = "Restaurant not found.";
+            return;
+        }
+
+        if (restaurant.OwnerId != ownerId)
+        {
+            error = "You do not have permission to manage meals for this restaurant.";
+            return;
+        }
+
+        meals = await Meals.GetByRestaurantAsync(RestaurantId);
+    }
+
+    private async Task DeleteAsync(MealDto meal)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", $"Delete \"{meal.Name}\"? This cannot be undone."))
+            return;
+
+        deletingId = meal.Id;
+        error = null;
+        var (success, deleteError) = await Meals.DeleteAsync(RestaurantId, meal.Id);
+        deletingId = null;
+
+        if (!success)
+        {
+            error = deleteError ?? "Failed to delete meal.";
+            return;
+        }
+
+        meals!.Remove(meal);
+    }
+}
