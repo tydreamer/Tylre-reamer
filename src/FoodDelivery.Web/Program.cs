@@ -14,5 +14,6 @@ builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(apiBaseUr
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, JwtAuthStateProvider>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<RestaurantService>();
 
 await builder.Build().RunAsync();
