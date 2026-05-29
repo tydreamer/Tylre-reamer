@@ -1,0 +1,200 @@
+@page "/owner/restaurants/{RestaurantId:int}/coupons"
+@attribute [Authorize(Roles = "Owner")]
+@inject RestaurantService Restaurants
+@inject CouponService Coupons
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JS
+
+<PageTitle>@(restaurant?.Name ?? "Coupons")</PageTitle>
+
+<div class="mb-4">
+    <a href="owner/restaurants" class="btn btn-link ps-0">&larr; Back to my restaurants</a>
+    @if (restaurant is not null)
+    {
+        <h1 class="mb-0">@restaurant.Name — Coupons</h1>
+    }
+</div>
+
+@if (error is not null)
+{
+    <div class="alert alert-danger">@error</div>
+}
+
+@if (restaurant is null || coupons is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-5 mb-4">
+            <h5 class="mb-3">Add Coupon</h5>
+            <EditForm Model="formModel" OnValidSubmit="CreateAsync">
+                <DataAnnotationsValidator />
+                <div class="mb-3">
+                    <label class="form-label">Code</label>
+                    <InputText class="form-control" @bind-Value="formModel.Code" />
+                    <ValidationMessage For="() => formModel.Code" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Discount type</label>
+                    <InputSelect class="form-select" @bind-Value="formModel.DiscountType">
+                        <option value="Fixed">Fixed</option>
+                        <option value="Percentage">Percentage</option>
+                    </InputSelect>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Discount value</label>
+                    <InputNumber class="form-control" @bind-Value="formModel.DiscountValue" />
+                    <ValidationMessage For="() => formModel.DiscountValue" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Expires</label>
+                    <InputDate class="form-control" @bind-Value="formModel.ExpiresAt" />
+                    <ValidationMessage For="() => formModel.ExpiresAt" />
+                </div>
+                @if (createError is not null)
+                {
+                    <div class="alert alert-danger">@createError</div>
+                }
+                <button class="btn btn-primary" type="submit" disabled="@creating">
+                    @(creating ? "Creating..." : "Add Coupon")
+                </button>
+            </EditForm>
+        </div>
+        <div class="col-md-7">
+            <h5 class="mb-3">Coupons</h5>
+            @if (coupons.Count == 0)
+            {
+                <div class="alert alert-info">No coupons yet.</div>
+            }
+            else
+            {
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Type</th>
+                            <th>Value</th>
+                            <th>Expires</th>
+                            <th>Active</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var coupon in coupons)
+                        {
+                            <tr>
+                                <td>@coupon.Code</td>
+                                <td>@coupon.DiscountType</td>
+                                <td>@coupon.DiscountValue.ToString(coupon.DiscountType == "Percentage" ? "0.##'%'" : "C")</td>
+                                <td>@coupon.ExpiresAt.ToLocalTime().ToString("d")</td>
+                                <td>@(coupon.IsActive ? "Yes" : "No")</td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            disabled="@(deletingId == coupon.Id)"
+                                            @onclick="() => DeleteAsync(coupon)">
+                                        @(deletingId == coupon.Id ? "Deleting..." : "Delete")
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int RestaurantId { get; set; }
+
+    private RestaurantDto? restaurant;
+    private List<CouponDto>? coupons;
+    private readonly CouponFormModel formModel = new() { ExpiresAt = DateTime.Today.AddDays(30) };
+    private string? error;
+    private string? createError;
+    private bool creating;
+    private int? deletingId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthStateProvider.GetAuthenticationStateAsync()).User;
+        var ownerId = user.GetUserId();
+        if (ownerId is null)
+        {
+            error = "Unable to determine your account. Please sign in again.";
+            return;
+        }
+
+        restaurant = await Restaurants.GetByIdAsync(RestaurantId);
+        if (restaurant is null)
+        {
+            error = "Restaurant not found.";
+            return;
+        }
+
+        if (restaurant.OwnerId != ownerId)
+        {
+            error = "You do not have permission to manage coupons for this restaurant.";
+            return;
+        }
+
+        coupons = await Coupons.GetByRestaurantAsync(RestaurantId);
+    }
+
+    private async Task CreateAsync()
+    {
+        creating = true;
+        createError = null;
+        var expiresAt = DateTime.SpecifyKind(formModel.ExpiresAt.Date, DateTimeKind.Utc).AddDays(1).AddTicks(-1);
+        var request = new CouponCreateRequest(formModel.Code, formModel.DiscountType, formModel.DiscountValue, expiresAt);
+        var (success, coupon, createErr) = await Coupons.CreateAsync(RestaurantId, request);
+        creating = false;
+
+        if (!success)
+        {
+            createError = createErr ?? "Failed to create coupon.";
+            return;
+        }
+
+        coupons!.Add(coupon!);
+        coupons = coupons.OrderByDescending(c => c.ExpiresAt).ToList();
+        formModel.Code = "";
+        formModel.DiscountValue = 0;
+    }
+
+    private async Task DeleteAsync(CouponDto coupon)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", $"Delete coupon \"{coupon.Code}\"?"))
+            return;
+
+        deletingId = coupon.Id;
+        error = null;
+        var (success, deleteError) = await Coupons.DeleteAsync(RestaurantId, coupon.Id);
+        deletingId = null;
+
+        if (!success)
+        {
+            error = deleteError ?? "Failed to delete coupon.";
+            return;
+        }
+
+        coupons!.Remove(coupon);
+    }
+
+    private class CouponFormModel
+    {
+        [System.ComponentModel.DataAnnotations.Required]
+        public string Code { get; set; } = "";
+
+        public string DiscountType { get; set; } = "Fixed";
+
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.Range(0.01, double.MaxValue)]
+        public decimal DiscountValue { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Required]
+        public DateTime ExpiresAt { get; set; }
+    }
+}
