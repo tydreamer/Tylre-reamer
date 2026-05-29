@@ -1,0 +1,61 @@
+@page "/login"
+@inject AuthService Auth
+@inject NavigationManager Navigation
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+        <h3 class="mb-4">Sign In</h3>
+        <EditForm Model="model" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <InputText class="form-control" @bind-Value="model.Email" type="email" />
+                <ValidationMessage For="() => model.Email" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <InputText class="form-control" @bind-Value="model.Password" type="password" />
+                <ValidationMessage For="() => model.Password" />
+            </div>
+            @if (error is not null)
+            {
+                <div class="alert alert-danger">@error</div>
+            }
+            <button class="btn btn-primary w-100" type="submit" disabled="@loading">
+                @(loading ? "Signing in..." : "Sign In")
+            </button>
+        </EditForm>
+        <p class="mt-3 text-center">
+            Don't have an account? <a href="/register">Register</a>
+        </p>
+    </div>
+</div>
+
+@code {
+    private readonly LoginModel model = new();
+    private string? error;
+    private bool loading;
+
+    private async Task HandleLogin()
+    {
+        loading = true;
+        error = null;
+        var success = await Auth.LoginAsync(model.Email, model.Password);
+        loading = false;
+
+        if (success)
+            Navigation.NavigateTo("/");
+        else
+            error = "Invalid email or password.";
+    }
+
+    private class LoginModel
+    {
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.EmailAddress]
+        public string Email { get; set; } = "";
+
+        [System.ComponentModel.DataAnnotations.Required]
+        public string Password { get; set; } = "";
+    }
+}
