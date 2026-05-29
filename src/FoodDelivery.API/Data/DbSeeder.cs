@@ -13,6 +13,12 @@ public static class DbSeeder
 
     public static async Task SeedAsync(AppDbContext db)
     {
+        await SeedRestaurantsAsync(db);
+        await SeedMealsAsync(db);
+    }
+
+    private static async Task SeedRestaurantsAsync(AppDbContext db)
+    {
         if (await db.Restaurants.AnyAsync())
             return;
 
@@ -45,8 +51,18 @@ public static class DbSeeder
 
         db.Restaurants.AddRange(restaurants);
         await db.SaveChangesAsync();
+    }
 
-        var restaurantIdsByName = restaurants.ToDictionary(r => r.Name, r => r.Id);
+    private static async Task SeedMealsAsync(AppDbContext db)
+    {
+        if (await db.Meals.AnyAsync())
+            return;
+
+        var restaurantIdsByName = await db.Restaurants
+            .ToDictionaryAsync(r => r.Name, r => r.Id);
+
+        if (restaurantIdsByName.Count == 0)
+            return;
 
         var meals = ReadCsv<MealRow>("meals.csv")
             .Where(m => restaurantIdsByName.ContainsKey(m.RestaurantName))
