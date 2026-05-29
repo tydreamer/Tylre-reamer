@@ -31,6 +31,14 @@ main {
         text-decoration: underline;
     }
 
+    .top-row ::deep .btn {
+        margin-left: 0.5rem;
+    }
+
+    .top-row ::deep .btn:hover {
+        text-decoration: none;
+    }
+
     .top-row ::deep a:first-child {
         overflow: hidden;
         text-overflow: ellipsis;
