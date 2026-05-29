@@ -1,0 +1,151 @@
+@page "/owner/orders/{Id:int}"
+@attribute [Authorize(Roles = "Owner")]
+@inject OrderService Orders
+@inject IJSRuntime JS
+
+@if (order is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <PageTitle>Order #@order.Id</PageTitle>
+
+    <div class="mb-4">
+        <a href="owner/orders" class="btn btn-link ps-0">&larr; Back to incoming orders</a>
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="mb-0">Order #@order.Id</h1>
+            <span class="badge fs-6 @StatusClass(order.Status)">@order.Status</span>
+        </div>
+        <p class="text-muted mb-0">
+            @order.RestaurantName · Customer #@order.CustomerId · @order.CreatedAt.ToLocalTime().ToString("f")
+        </p>
+    </div>
+
+    <div class="row">
+        <div class="col-md-7">
+            <h5>Items</h5>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Meal</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-end">Unit</th>
+                        <th class="text-end">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in order.Items)
+                    {
+                        <tr>
+                            <td>@item.MealName</td>
+                            <td class="text-center">@item.Quantity</td>
+                            <td class="text-end">@item.UnitPrice.ToString("C")</td>
+                            <td class="text-end">@((item.UnitPrice * item.Quantity).ToString("C"))</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-end">Tip</td>
+                        <td class="text-end">@order.Tip.ToString("C")</td>
+                    </tr>
+                    <tr class="fw-bold">
+                        <td colspan="3" class="text-end">Total</td>
+                        <td class="text-end">@order.TotalPrice.ToString("C")</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            @if (error is not null)
+            {
+                <div class="alert alert-danger">@error</div>
+            }
+
+            <div class="d-flex flex-wrap gap-2">
+                @foreach (var action in GetActions(order.Status))
+                {
+                    <button class="btn @action.ButtonClass"
+                            disabled="@busy"
+                            @onclick="() => UpdateStatusAsync(action.Status)">
+                        @action.Label
+                    </button>
+                }
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <h5>Status history</h5>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th class="text-end">Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in order.StatusHistory)
+                    {
+                        <tr>
+                            <td><span class="badge @StatusClass(entry.Status)">@entry.Status</span></td>
+                            <td class="text-end text-muted">@entry.ChangedAt.ToLocalTime().ToString("g")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private OrderResponse? order;
+    private string? error;
+    private bool busy;
+
+    protected override async Task OnInitializedAsync()
+    {
+        order = await Orders.GetByIdAsync(Id);
+    }
+
+    private async Task UpdateStatusAsync(string status)
+    {
+        if (status == "Cancelled" &&
+            !await JS.InvokeAsync<bool>("confirm", "Cancel this order?"))
+            return;
+
+        busy = true;
+        error = null;
+        var (success, err) = await Orders.UpdateStatusAsync(Id, status);
+        if (success)
+            order = await Orders.GetByIdAsync(Id);
+        else
+            error = err;
+        busy = false;
+    }
+
+    private static IEnumerable<(string Status, string Label, string ButtonClass)> GetActions(string status) =>
+        status switch
+        {
+            "Placed" =>
+            [
+                ("Processing", "Start processing", "btn-primary"),
+                ("Cancelled", "Cancel order", "btn-outline-danger")
+            ],
+            "Processing" => [("InRoute", "Mark in route", "btn-primary")],
+            "InRoute" => [("Delivered", "Mark delivered", "btn-primary")],
+            _ => []
+        };
+
+    private static string StatusClass(string status) => status switch
+    {
+        "Placed" => "bg-secondary",
+        "Processing" => "bg-info",
+        "InRoute" => "bg-warning text-dark",
+        "Delivered" => "bg-primary",
+        "Received" => "bg-success",
+        "Cancelled" => "bg-danger",
+        _ => "bg-secondary"
+    };
+}
