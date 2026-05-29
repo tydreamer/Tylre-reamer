@@ -1,0 +1,121 @@
+RestaurantName,Name,Description,Price
+Bella Napoli,Margherita Pizza,San Marzano tomato fresh mozzarella and basil,12.50
+Bella Napoli,Pepperoni Pizza,Classic pepperoni with mozzarella,14.00
+Bella Napoli,Spaghetti Carbonara,Egg pancetta and pecorino romano,13.50
+Bella Napoli,Tiramisu,Espresso-soaked ladyfingers and mascarpone,6.50
+Sakura Sushi,Salmon Nigiri,Two pieces of fresh salmon over rice,7.00
+Sakura Sushi,California Roll,Crab avocado and cucumber,8.50
+Sakura Sushi,Spicy Tuna Roll,Fresh tuna with spicy mayo,9.00
+Sakura Sushi,Miso Soup,Tofu seaweed and scallions,3.50
+El Toro Taqueria,Carne Asada Tacos,Grilled steak with onion and cilantro,9.50
+El Toro Taqueria,Chicken Burrito,Grilled chicken rice beans and salsa,10.00
+El Toro Taqueria,Cheese Quesadilla,Melted cheese in a grilled tortilla,7.50
+El Toro Taqueria,Chips and Guacamole,House-made guacamole with tortilla chips,5.50
+The Green Fork,Quinoa Power Bowl,Quinoa kale chickpeas and tahini,11.00
+The Green Fork,Avocado Toast,Sourdough avocado and chili flakes,8.50
+The Green Fork,Green Detox Juice,Spinach cucumber apple and ginger,6.00
+The Green Fork,Berry Smoothie Bowl,Mixed berries banana and granola,7.50
+Burger Republic,Classic Cheeseburger,Beef patty cheddar lettuce and tomato,10.50
+Burger Republic,Bacon BBQ Burger,Bacon onion rings and barbecue sauce,12.50
+Burger Republic,Crispy Fries,Golden hand-cut fries,4.00
+Burger Republic,Chocolate Milkshake,Thick and creamy chocolate shake,5.50
+Spice of India,Chicken Tikka Masala,Grilled chicken in creamy tomato sauce,13.00
+Spice of India,Lamb Rogan Josh,Slow-cooked lamb in aromatic spices,14.50
+Spice of India,Garlic Naan,Fresh baked flatbread with garlic,3.00
+Spice of India,Vegetable Samosa,Crispy pastry with spiced potato,4.50
+Le Petit Bistro,Coq au Vin,Chicken braised in red wine,16.00
+Le Petit Bistro,Beef Bourguignon,Beef stew with mushrooms and pearl onions,17.50
+Le Petit Bistro,French Onion Soup,Caramelized onions and melted gruyere,7.00
+Le Petit Bistro,Creme Brulee,Vanilla custard with caramel crust,6.50
+Dragon Wok,Kung Pao Chicken,Stir-fried chicken peanuts and chili,11.50
+Dragon Wok,Beef Chow Mein,Stir-fried noodles with beef,10.50
+Dragon Wok,Pork Dumplings,Steamed dumplings with dipping sauce,6.50
+Dragon Wok,Spring Rolls,Crispy vegetable spring rolls,4.50
+Mama Mia Trattoria,Lasagna Bolognese,Layered pasta with rich meat sauce,13.50
+Mama Mia Trattoria,Fettuccine Alfredo,Creamy parmesan pasta,12.50
+Mama Mia Trattoria,Caprese Salad,Tomato mozzarella and fresh basil,8.00
+Mama Mia Trattoria,Cannoli,Crisp shells with sweet ricotta,5.50
+The Smokehouse,Smoked Beef Brisket,Slow-smoked for twelve hours,16.00
+The Smokehouse,Pork Ribs,Fall-off-the-bone baby back ribs,15.50
+The Smokehouse,Pulled Pork Sandwich,Smoked pork with coleslaw,11.00
+The Smokehouse,Mac and Cheese,Creamy baked macaroni,5.50
+Ocean Catch,Grilled Salmon,Atlantic salmon with lemon butter,17.00
+Ocean Catch,Fish and Chips,Beer-battered cod with fries,13.50
+Ocean Catch,Garlic Shrimp,Sauteed shrimp in garlic butter,14.00
+Ocean Catch,Clam Chowder,Creamy New England chowder,7.50
+Pho Saigon,Beef Pho,Rice noodle soup with tender beef,11.50
+Pho Saigon,Chicken Banh Mi,Vietnamese baguette sandwich,8.50
+Pho Saigon,Fresh Spring Rolls,Shrimp and herbs in rice paper,6.50
+Pho Saigon,Vietnamese Iced Coffee,Sweet condensed milk coffee,4.50
+Athens Grill,Chicken Gyro,Grilled chicken with tzatziki,9.50
+Athens Grill,Lamb Souvlaki,Skewered grilled lamb,12.00
+Athens Grill,Greek Salad,Tomato cucumber feta and olives,8.50
+Athens Grill,Baklava,Layered phyllo with honey and nuts,5.00
+Seoul Kitchen,Bibimbap,Rice bowl with vegetables and egg,11.50
+Seoul Kitchen,Korean BBQ Beef,Marinated grilled bulgogi,14.00
+Seoul Kitchen,Kimchi Stew,Spicy fermented cabbage stew,10.50
+Seoul Kitchen,Mandu Dumplings,Pan-fried Korean dumplings,6.50
+The Breakfast Club,Buttermilk Pancakes,Fluffy stack with maple syrup,8.50
+The Breakfast Club,Eggs Benedict,Poached eggs and hollandaise,10.50
+The Breakfast Club,Western Omelette,Ham peppers and cheese,9.50
+The Breakfast Club,Fresh Brewed Coffee,House blend drip coffee,3.00
+Casa Mexicana,Chicken Enchiladas,Rolled tortillas with red sauce,11.50
+Casa Mexicana,Beef Fajitas,Sizzling beef with peppers and onions,13.50
+Casa Mexicana,Guacamole and Chips,Fresh guacamole with tortilla chips,6.00
+Casa Mexicana,Churros,Cinnamon sugar fried dough,5.00
+Thai Orchid,Pad Thai,Stir-fried rice noodles with peanuts,11.00
+Thai Orchid,Green Curry,Coconut curry with vegetables,12.00
+Thai Orchid,Tom Yum Soup,Spicy and sour shrimp soup,8.50
+Thai Orchid,Mango Sticky Rice,Sweet rice with fresh mango,6.00
+The Cheese Board,Classic Grilled Cheese,Three cheeses on sourdough,8.00
+The Cheese Board,Tomato Basil Soup,Creamy roasted tomato soup,6.00
+The Cheese Board,Charcuterie Plate,Cured meats and artisan cheeses,14.00
+The Cheese Board,Mac and Cheese Bites,Crispy fried mac bites,7.00
+Sultan Kebab,Chicken Doner Kebab,Spit-roasted chicken wrap,9.50
+Sultan Kebab,Lamb Pide,Turkish flatbread with spiced lamb,11.50
+Sultan Kebab,Hummus Plate,Creamy hummus with warm bread,6.50
+Sultan Kebab,Pistachio Baklava,Sweet layered pastry with pistachio,5.00
+Berlin Haus,Bratwurst Platter,Grilled sausage with sauerkraut,12.00
+Berlin Haus,Wiener Schnitzel,Breaded veal cutlet,15.00
+Berlin Haus,Soft Pretzel,Warm pretzel with mustard,4.50
+Berlin Haus,Black Forest Cake,Chocolate cherry layer cake,6.00
+The Noodle Bar,Tonkotsu Ramen,Rich pork bone broth ramen,12.50
+The Noodle Bar,Beef Udon,Thick noodles in savory broth,11.00
+The Noodle Bar,Pork Gyoza,Pan-fried pork dumplings,6.50
+The Noodle Bar,Edamame,Steamed soybeans with sea salt,4.00
+Sweet Tooth,Chocolate Lava Cake,Warm cake with a molten center,7.00
+Sweet Tooth,New York Cheesecake,Classic creamy cheesecake,6.50
+Sweet Tooth,Artisan Gelato,Choice of three scoops,5.50
+Sweet Tooth,Fruit Tart,Pastry with custard and fresh fruit,6.00
+Farm Table,Roasted Vegetable Bowl,Seasonal vegetables and grains,12.00
+Farm Table,Heirloom Tomato Salad,Local tomatoes and basil,9.50
+Farm Table,Grilled Chicken Plate,Free-range chicken and greens,14.00
+Farm Table,Apple Crumble,Warm spiced apples with oats,6.50
+The Curry House,Lamb Vindaloo,Fiery Goan-style curry,14.00
+The Curry House,Butter Chicken,Creamy tomato chicken curry,13.00
+The Curry House,Chicken Biryani,Fragrant spiced rice with chicken,12.50
+The Curry House,Mango Lassi,Sweet yogurt and mango drink,4.00
+Pizza Forno,Thin Crust Margherita,Crispy crust tomato and mozzarella,11.50
+Pizza Forno,Quattro Formaggi,Four cheese pizza,13.50
+Pizza Forno,Garlic Knots,Baked knots with garlic butter,5.00
+Pizza Forno,Caesar Salad,Romaine parmesan and croutons,7.50
+Rincon Latino,Beef Empanadas,Baked pastry with spiced beef,7.50
+Rincon Latino,Cheese Arepas,Grilled corn cakes with cheese,8.50
+Rincon Latino,Shrimp Ceviche,Citrus-marinated fresh shrimp,12.00
+Rincon Latino,Tres Leches Cake,Three milk sponge cake,6.00
+The Wing Spot,Buffalo Wings,Classic spicy buffalo wings,10.50
+The Wing Spot,BBQ Wings,Smoky barbecue glazed wings,10.50
+The Wing Spot,Chicken Tenders,Crispy breaded tenders,9.00
+The Wing Spot,Loaded Fries,Fries with cheese and bacon,6.50
+Veggie Delight,Falafel Wrap,Crispy falafel with tahini,8.50
+Veggie Delight,Buddha Bowl,Grains greens and roasted vegetables,11.00
+Veggie Delight,Green Smoothie,Spinach mango and banana,6.00
+Veggie Delight,Hummus and Veggies,Fresh vegetables with hummus,6.50
+Tokyo Teppan,Teppanyaki Steak,Grilled steak with vegetables,18.00
+Tokyo Teppan,Chicken Bento Box,Chicken rice and assorted sides,13.00
+Tokyo Teppan,Shrimp Tempura,Lightly battered fried shrimp,11.50
+Tokyo Teppan,Green Tea Ice Cream,Matcha ice cream,4.50
+The Coffee Corner,Avocado Toast,Sourdough with smashed avocado,8.00
+The Coffee Corner,Breakfast Burrito,Eggs cheese and potato,9.00
+The Coffee Corner,Cappuccino,Espresso with steamed milk,4.00
+The Coffee Corner,Blueberry Muffin,Fresh baked muffin,3.50

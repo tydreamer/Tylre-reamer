@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Data\Seed\restaurants.csv" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Data\Seed\*.csv" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
