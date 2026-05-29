@@ -53,13 +53,11 @@
     {
         loading = true;
         error = null;
-        var success = await Auth.RegisterAsync(model.Name, model.Email, model.Password, model.Role);
+        error = await Auth.RegisterAsync(model.Name, model.Email, model.Password, model.Role);
         loading = false;
 
-        if (success)
+        if (error is null)
             Navigation.NavigateTo("/sign-in");
-        else
-            error = "Sign up failed. Email may already be in use.";
     }
 
     private class SignUpModel

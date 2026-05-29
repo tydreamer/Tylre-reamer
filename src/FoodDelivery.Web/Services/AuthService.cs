@@ -19,10 +19,11 @@ public class AuthService(HttpClient http, IJSRuntime js, AuthenticationStateProv
         return true;
     }
 
-    public async Task<bool> RegisterAsync(string name, string email, string password, string role)
+    public async Task<string?> RegisterAsync(string name, string email, string password, string role)
     {
         var response = await http.PostAsJsonAsync("api/auth/register", new { Name = name, Email = email, Password = password, Role = role });
-        return response.IsSuccessStatusCode;
+        if (response.IsSuccessStatusCode) return null;
+        return await response.Content.ReadAsStringAsync();
     }
 
     public async Task LogoutAsync()
