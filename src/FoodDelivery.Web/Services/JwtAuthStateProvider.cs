@@ -45,6 +45,14 @@ public class JwtAuthStateProvider(IJSRuntime js, HttpClient http) : Authenticati
         };
         var jsonBytes = Convert.FromBase64String(padded);
         var kvps = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonBytes)!;
-        return kvps.Select(c => new Claim(c.Key, c.Value.ToString()));
+        return kvps.Select(c => new Claim(MapClaimType(c.Key), c.Value.ToString()));
     }
+
+    private static string MapClaimType(string jwtClaimType) => jwtClaimType switch
+    {
+        "sub" => ClaimTypes.NameIdentifier,
+        "email" => ClaimTypes.Email,
+        "role" => ClaimTypes.Role,
+        _ => jwtClaimType
+    };
 }
