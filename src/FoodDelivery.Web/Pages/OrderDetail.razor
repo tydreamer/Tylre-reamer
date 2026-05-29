@@ -1,7 +1,9 @@
 @page "/orders/{Id:int}"
+@implements IAsyncDisposable
 @inject OrderService Orders
 @inject MealService Meals
 @inject CartService Cart
+@inject OrderHubClient OrderHub
 @inject NavigationManager Navigation
 
 @if (order is null)
@@ -103,7 +105,25 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        await RefreshOrderAsync();
+        try
+        {
+            await OrderHub.ConnectAsync(Id, RefreshOrderAsync);
+        }
+        catch
+        {
+        }
+    }
+
+    private async Task RefreshOrderAsync()
+    {
         order = await Orders.GetByIdAsync(Id);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await OrderHub.DisposeAsync();
     }
 
     private async Task Cancel()

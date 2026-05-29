@@ -20,5 +20,6 @@ builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<CouponService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<OrderHubClient>();
 
 await builder.Build().RunAsync();
