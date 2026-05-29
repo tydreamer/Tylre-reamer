@@ -2,6 +2,7 @@
 @page "/owner/restaurants/{Id:int}/edit"
 @attribute [Authorize(Roles = "Owner")]
 @inject RestaurantService Restaurants
+@inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Navigation
 
 <PageTitle>@(IsNew ? "Add Restaurant" : "Edit Restaurant")</PageTitle>
@@ -56,9 +57,6 @@ else
 @code {
     [Parameter] public int? Id { get; set; }
 
-    [CascadingParameter]
-    private Task<AuthenticationState>? AuthStateTask { get; set; }
-
     private bool IsNew => Id is null;
     private RestaurantFormModel formModel = new();
     private RestaurantDto? model;
@@ -69,13 +67,11 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        if (AuthStateTask is null) return;
-
-        var user = (await AuthStateTask).User;
+        var user = (await AuthStateProvider.GetAuthenticationStateAsync()).User;
         ownerId = user.GetUserId();
         if (ownerId is null)
         {
-            Navigation.NavigateTo("/sign-in");
+            loadError = "Unable to determine your account. Please sign in again.";
             return;
         }
 

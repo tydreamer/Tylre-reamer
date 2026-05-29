@@ -1,7 +1,7 @@
 @page "/owner/restaurants"
 @attribute [Authorize(Roles = "Owner")]
 @inject RestaurantService Restaurants
-@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
 @inject IJSRuntime JS
 
 <PageTitle>My Restaurants</PageTitle>
@@ -55,22 +55,18 @@ else
 }
 
 @code {
-    [CascadingParameter]
-    private Task<AuthenticationState>? AuthStateTask { get; set; }
-
     private List<RestaurantDto>? restaurants;
     private string? error;
     private int? deletingId;
 
     protected override async Task OnInitializedAsync()
     {
-        if (AuthStateTask is null) return;
-
-        var user = (await AuthStateTask).User;
+        var user = (await AuthStateProvider.GetAuthenticationStateAsync()).User;
         var ownerId = user.GetUserId();
         if (ownerId is null)
         {
-            Navigation.NavigateTo("/sign-in");
+            error = "Unable to determine your account. Please sign in again.";
+            restaurants = [];
             return;
         }
 
