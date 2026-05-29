@@ -45,9 +45,22 @@
 </div>
 
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
     private readonly SignUpModel model = new();
     private string? error;
     private bool loading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthStateTask is not null)
+        {
+            var state = await AuthStateTask;
+            if (state.User.Identity?.IsAuthenticated == true)
+                Navigation.NavigateTo("/", replace: true);
+        }
+    }
 
     private async Task HandleSignUp()
     {
