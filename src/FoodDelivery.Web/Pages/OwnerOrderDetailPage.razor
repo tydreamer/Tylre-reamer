@@ -1,6 +1,7 @@
 @page "/owner/orders/{Id:int}"
 @attribute [Authorize(Roles = "Owner")]
 @inject OrderService Orders
+@inject UserService Users
 @inject IJSRuntime JS
 
 @if (order is null)
@@ -61,6 +62,10 @@ else
             {
                 <div class="alert alert-danger">@error</div>
             }
+            @if (blockSuccess is not null)
+            {
+                <div class="alert alert-success">@blockSuccess</div>
+            }
 
             <div class="d-flex flex-wrap gap-2">
                 @foreach (var action in GetActions(order.Status))
@@ -71,10 +76,21 @@ else
                         @action.Label
                     </button>
                 }
+                @if (!customerBlocked)
+                {
+                    <button class="btn btn-outline-danger"
+                            disabled="@busy"
+                            @onclick="BlockCustomerAsync">
+                        Block customer
+                    </button>
+                }
             </div>
         </div>
 
         <div class="col-md-5">
+            <h5>Customer</h5>
+            <p class="text-muted">Customer #@order.CustomerId</p>
+
             <h5>Status history</h5>
             <table class="table">
                 <thead>
@@ -102,6 +118,8 @@ else
 
     private OrderResponse? order;
     private string? error;
+    private string? blockSuccess;
+    private bool customerBlocked;
     private bool busy;
 
     protected override async Task OnInitializedAsync()
@@ -123,6 +141,29 @@ else
         else
             error = err;
         busy = false;
+    }
+
+    private async Task BlockCustomerAsync()
+    {
+        if (order is null) return;
+
+        if (!await JS.InvokeAsync<bool>("confirm", $"Block customer #{order.CustomerId}? They will not be able to sign in."))
+            return;
+
+        busy = true;
+        error = null;
+        blockSuccess = null;
+        var (success, err) = await Users.BlockCustomerAsync(order.CustomerId);
+        busy = false;
+
+        if (!success)
+        {
+            error = err ?? "Failed to block customer.";
+            return;
+        }
+
+        customerBlocked = true;
+        blockSuccess = $"Customer #{order.CustomerId} has been blocked.";
     }
 
     private static IEnumerable<(string Status, string Label, string ButtonClass)> GetActions(string status) =>
