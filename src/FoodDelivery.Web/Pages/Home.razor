@@ -19,17 +19,19 @@ else
         @foreach (var restaurant in restaurants)
         {
             <div class="col">
-                <div class="card h-100">
-                    @if (!string.IsNullOrWhiteSpace(restaurant.ImageUrl))
-                    {
-                        <img src="@restaurant.ImageUrl" class="card-img-top" alt="@restaurant.Name"
-                             style="height: 180px; object-fit: cover;" />
-                    }
-                    <div class="card-body">
-                        <h5 class="card-title">@restaurant.Name</h5>
-                        <p class="card-text">@restaurant.Description</p>
+                <a href="restaurants/@restaurant.Id" class="text-decoration-none text-dark">
+                    <div class="card h-100 shadow-sm restaurant-card">
+                        @if (!string.IsNullOrWhiteSpace(restaurant.ImageUrl))
+                        {
+                            <img src="@restaurant.ImageUrl" class="card-img-top" alt="@restaurant.Name"
+                                 style="height: 180px; object-fit: cover;" />
+                        }
+                        <div class="card-body">
+                            <h5 class="card-title">@restaurant.Name</h5>
+                            <p class="card-text">@restaurant.Description</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
         }
     </div>
