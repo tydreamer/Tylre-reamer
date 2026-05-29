@@ -1,5 +1,6 @@
 using System.Text;
 using FoodDelivery.API.Data;
+using FoodDelivery.API.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -26,6 +27,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddSignalR();
 builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -34,5 +36,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<OrderHub>("/hubs/orders");
 
 app.Run();
