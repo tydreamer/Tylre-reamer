@@ -1,3 +1,6 @@
+using System.Globalization;
+using CsvHelper;
+using CsvHelper.Configuration;
 using FoodDelivery.API.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -5,6 +8,8 @@ namespace FoodDelivery.API.Data;
 
 public static class DbSeeder
 {
+    private sealed record RestaurantRow(string Name, string Description, string ImageUrl);
+
     public static async Task SeedAsync(AppDbContext db)
     {
         if (await db.Restaurants.AnyAsync())
@@ -24,29 +29,23 @@ public static class DbSeeder
             await db.SaveChangesAsync();
         }
 
-        db.Restaurants.AddRange(
-            new Restaurant
-            {
-                Name = "Bella Napoli",
-                Description = "Wood-fired Neapolitan pizza and fresh pasta.",
-                ImageUrl = "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600",
-                OwnerId = owner.Id
-            },
-            new Restaurant
-            {
-                Name = "Sakura Sushi",
-                Description = "Authentic Japanese sushi and ramen bowls.",
-                ImageUrl = "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600",
-                OwnerId = owner.Id
-            },
-            new Restaurant
-            {
-                Name = "El Toro Taqueria",
-                Description = "Street-style tacos, burritos, and quesadillas.",
-                ImageUrl = "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600",
-                OwnerId = owner.Id
-            });
+        var csvPath = Path.Combine(AppContext.BaseDirectory, "Data", "Seed", "restaurants.csv");
+        if (!File.Exists(csvPath))
+            return;
 
+        using var reader = new StreamReader(csvPath);
+        using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture));
+        var rows = csv.GetRecords<RestaurantRow>();
+
+        var restaurants = rows.Select(r => new Restaurant
+        {
+            Name = r.Name,
+            Description = r.Description,
+            ImageUrl = r.ImageUrl,
+            OwnerId = owner.Id
+        });
+
+        db.Restaurants.AddRange(restaurants);
         await db.SaveChangesAsync();
     }
 }
