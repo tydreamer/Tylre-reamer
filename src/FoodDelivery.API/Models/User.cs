@@ -1,6 +1,6 @@
 namespace FoodDelivery.API.Models;
 
-public enum UserRole { Customer, Owner }
+public enum UserRole { Customer, Owner, Admin }
 
 public class User
 {

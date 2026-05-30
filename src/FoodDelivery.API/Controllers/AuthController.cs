@@ -20,7 +20,7 @@ public class AuthController(AppDbContext db, IConfiguration config) : Controller
         if (await db.Users.AnyAsync(u => u.Email == req.Email))
             return Conflict("Email already in use.");
 
-        if (!Enum.TryParse<UserRole>(req.Role, ignoreCase: true, out var role))
+        if (!Enum.TryParse<UserRole>(req.Role, ignoreCase: true, out var role) || role == UserRole.Admin)
             return BadRequest("Invalid role. Use 'Customer' or 'Owner'.");
 
         var user = new User

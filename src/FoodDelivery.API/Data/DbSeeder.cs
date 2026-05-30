@@ -13,8 +13,24 @@ public static class DbSeeder
 
     public static async Task SeedAsync(AppDbContext db)
     {
+        await SeedAdminAsync(db);
         await SeedRestaurantsAsync(db);
         await SeedMealsAsync(db);
+    }
+
+    private static async Task SeedAdminAsync(AppDbContext db)
+    {
+        if (await db.Users.AnyAsync(u => u.Role == UserRole.Admin))
+            return;
+
+        db.Users.Add(new User
+        {
+            Name = "Administrator",
+            Email = "admin@example.com",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Password123!"),
+            Role = UserRole.Admin
+        });
+        await db.SaveChangesAsync();
     }
 
     private static async Task SeedRestaurantsAsync(AppDbContext db)
