@@ -1,0 +1,173 @@
+@page "/admin/users"
+@attribute [Authorize(Roles = "Admin")]
+@inject UserService Users
+
+<PageTitle>Create & Block Users</PageTitle>
+
+<h1 class="mb-4">Create &amp; Block Users</h1>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Add New User</h5>
+                <EditForm Model="model" OnValidSubmit="CreateUser">
+                    <DataAnnotationsValidator />
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <InputText class="form-control" @bind-Value="model.Name" />
+                        <ValidationMessage For="() => model.Name" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <InputText class="form-control" type="email" @bind-Value="model.Email" />
+                        <ValidationMessage For="() => model.Email" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <InputText class="form-control" type="password" @bind-Value="model.Password" />
+                        <ValidationMessage For="() => model.Password" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Role</label>
+                        <InputSelect class="form-select" @bind-Value="model.Role">
+                            <option value="Customer">Regular User</option>
+                            <option value="Owner">Restaurant Owner</option>
+                        </InputSelect>
+                    </div>
+                    @if (error is not null)
+                    {
+                        <div class="alert alert-danger">@error</div>
+                    }
+                    <button class="btn btn-primary w-100" type="submit" disabled="@busy">Create User</button>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        @if (users is null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else if (users.Count == 0)
+        {
+            <div class="alert alert-info">No users yet.</div>
+        }
+        else
+        {
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in users)
+                    {
+                        <tr>
+                            <td>@user.Name</td>
+                            <td>@user.Email</td>
+                            <td>@(user.Role == "Customer" ? "Regular User" : "Restaurant Owner")</td>
+                            <td>
+                                @if (user.IsBlocked)
+                                {
+                                    <span class="badge bg-danger">Blocked</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                @if (!user.IsBlocked)
+                                {
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            disabled="@busy"
+                                            @onclick="() => Block(user.Id)">
+                                        Block
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@code {
+    private readonly CreateUserModel model = new();
+    private List<UserDto>? users;
+    private string? error;
+    private bool busy;
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await Users.GetAllAsync();
+    }
+
+    private async Task CreateUser()
+    {
+        busy = true;
+        error = null;
+
+        var request = new CreateUserRequest(model.Name, model.Email, model.Password, model.Role);
+        var (success, _, err) = await Users.CreateAsync(request);
+
+        if (success)
+        {
+            model.Reset();
+            users = await Users.GetAllAsync();
+        }
+        else
+        {
+            error = err;
+        }
+
+        busy = false;
+    }
+
+    private async Task Block(int userId)
+    {
+        busy = true;
+        error = null;
+
+        var (success, err) = await Users.BlockAsync(userId);
+        if (success)
+            users = await Users.GetAllAsync();
+        else
+            error = err;
+
+        busy = false;
+    }
+
+    private class CreateUserModel
+    {
+        [System.ComponentModel.DataAnnotations.Required]
+        public string Name { get; set; } = "";
+
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.EmailAddress]
+        public string Email { get; set; } = "";
+
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.MinLength(6)]
+        public string Password { get; set; } = "";
+
+        public string Role { get; set; } = "Customer";
+
+        public void Reset()
+        {
+            Name = "";
+            Email = "";
+            Password = "";
+            Role = "Customer";
+        }
+    }
+}
