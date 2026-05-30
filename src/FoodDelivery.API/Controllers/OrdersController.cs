@@ -121,6 +121,10 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
             .Include(o => o.StatusHistory)
             .FirstAsync(o => o.Id == order.Id);
 
+        var notification = new OrderStatusNotification(order.Id, restaurant.Name, OrderStatus.Placed.ToString());
+        await hub.Clients.Group($"user-{restaurant.OwnerId}")
+            .SendAsync("OrderStatusChanged", notification);
+
         return CreatedAtAction(nameof(GetById), new { id = order.Id }, MapToResponse(created));
     }
 

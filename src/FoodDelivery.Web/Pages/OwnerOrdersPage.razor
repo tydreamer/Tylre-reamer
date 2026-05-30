@@ -1,6 +1,8 @@
 @page "/owner/orders"
 @attribute [Authorize(Roles = "Owner")]
+@implements IDisposable
 @inject OrderService Orders
+@inject OrderNotificationService Notifications
 
 <PageTitle>Incoming Orders</PageTitle>
 
@@ -53,6 +55,23 @@ else
     protected override async Task OnInitializedAsync()
     {
         orders = await Orders.GetMyOrdersAsync();
+        Notifications.OnOrderStatusChanged += HandleOrderChanged;
+    }
+
+    private void HandleOrderChanged(OrderStatusNotification notification)
+    {
+        _ = RefreshAsync();
+    }
+
+    private async Task RefreshAsync()
+    {
+        orders = await Orders.GetMyOrdersAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Notifications.OnOrderStatusChanged -= HandleOrderChanged;
     }
 
     private static string StatusClass(string status) => status switch
