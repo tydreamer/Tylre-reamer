@@ -14,6 +14,13 @@ public class JwtAuthStateProvider(IJSRuntime js, HttpClient http) : Authenticati
         if (string.IsNullOrWhiteSpace(token))
             return Unauthenticated();
 
+        if (IsTokenExpired(token))
+        {
+            await js.InvokeVoidAsync("localStorage.removeItem", "jwt");
+            http.DefaultRequestHeaders.Authorization = null;
+            return Unauthenticated();
+        }
+
         http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(ParseClaims(token), "jwt")));
     }
@@ -46,6 +53,15 @@ public class JwtAuthStateProvider(IJSRuntime js, HttpClient http) : Authenticati
         var jsonBytes = Convert.FromBase64String(padded);
         var kvps = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonBytes)!;
         return kvps.Select(c => new Claim(MapClaimType(c.Key), c.Value.ToString()));
+    }
+
+    private static bool IsTokenExpired(string jwt)
+    {
+        var claims = ParseClaims(jwt);
+        var exp = claims.FirstOrDefault(c => c.Type == "exp")?.Value;
+        if (exp is null || !long.TryParse(exp, out var expSeconds))
+            return false;
+        return DateTimeOffset.UtcNow.ToUnixTimeSeconds() >= expSeconds;
     }
 
     private static string MapClaimType(string jwtClaimType) => jwtClaimType switch
