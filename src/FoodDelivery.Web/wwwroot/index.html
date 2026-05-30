@@ -29,6 +29,17 @@
         <span class="dismiss">🗙</span>
     </div>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
+    <script>
+        window.cartSync = {
+            register: function (dotNetRef) {
+                window.addEventListener('storage', function (e) {
+                    if (e.key === 'cart') {
+                        dotNetRef.invokeMethodAsync('OnCartChangedExternally');
+                    }
+                });
+            }
+        };
+    </script>
 </body>
 
 </html>

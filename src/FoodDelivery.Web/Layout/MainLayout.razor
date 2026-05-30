@@ -48,9 +48,10 @@
 </AuthorizeView>
 
 @code {
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         Cart.OnChange += StateHasChanged;
+        await Cart.InitializeAsync();
     }
 
     private async Task SignOut()
