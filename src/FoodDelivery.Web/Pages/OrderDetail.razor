@@ -68,6 +68,10 @@ else
                 {
                     <button class="btn btn-outline-danger" @onclick="Cancel" disabled="@busy">Cancel order</button>
                 }
+                @if (order.Status == "Delivered")
+                {
+                    <button class="btn btn-success" @onclick="MarkReceived" disabled="@busy">Mark as received</button>
+                }
                 <button class="btn btn-primary" @onclick="Reorder" disabled="@busy">Reorder</button>
             </div>
         </div>
@@ -131,6 +135,18 @@ else
         busy = true;
         error = null;
         var (success, err) = await Orders.UpdateStatusAsync(Id, "Cancelled");
+        if (success)
+            order = await Orders.GetByIdAsync(Id);
+        else
+            error = err;
+        busy = false;
+    }
+
+    private async Task MarkReceived()
+    {
+        busy = true;
+        error = null;
+        var (success, err) = await Orders.UpdateStatusAsync(Id, "Received");
         if (success)
             order = await Orders.GetByIdAsync(Id);
         else
