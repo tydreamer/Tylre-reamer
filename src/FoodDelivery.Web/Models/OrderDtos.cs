@@ -18,4 +18,5 @@ public record OrderResponse(
     decimal TotalPrice,
     DateTime CreatedAt,
     List<OrderItemResponse> Items,
-    List<OrderStatusHistoryResponse> StatusHistory);
+    List<OrderStatusHistoryResponse> StatusHistory
+);

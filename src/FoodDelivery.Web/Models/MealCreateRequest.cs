@@ -1,3 +1,8 @@
 namespace FoodDelivery.Web.Models;
 
-public record MealCreateRequest(string Name, string Description, string ImageUrl, decimal Price);
+public record MealCreateRequest(
+    string Name,
+    string Description,
+    string ImageUrl,
+    decimal Price
+);
