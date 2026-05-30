@@ -80,10 +80,8 @@
         public string Name { get; set; } = "";
 
         [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.EmailAddress]
         [System.ComponentModel.DataAnnotations.MaxLength(255)]
-        [System.ComponentModel.DataAnnotations.RegularExpression(
-            @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
-            ErrorMessage = "Enter a valid email address.")]
         public string Email { get; set; } = "";
 
         [System.ComponentModel.DataAnnotations.Required]
