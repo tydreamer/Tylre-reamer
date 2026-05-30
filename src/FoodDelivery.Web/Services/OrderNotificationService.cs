@@ -1,16 +1,19 @@
+using FoodDelivery.Web.Models;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
 
 namespace FoodDelivery.Web.Services;
 
-public class OrderHubClient(IJSRuntime js, IConfiguration config) : IAsyncDisposable
+public class OrderNotificationService(IJSRuntime js, IConfiguration config) : IAsyncDisposable
 {
     private HubConnection? _connection;
-    private int? _orderId;
 
-    public async Task ConnectAsync(int orderId, Func<Task> onStatusUpdated)
+    public event Action<OrderStatusNotification>? OnOrderStatusChanged;
+
+    public async Task StartAsync()
     {
-        await DisposeAsync();
+        if (_connection is not null)
+            return;
 
         var token = await js.InvokeAsync<string?>("localStorage.getItem", "jwt");
         if (string.IsNullOrWhiteSpace(token))
@@ -22,14 +25,12 @@ public class OrderHubClient(IJSRuntime js, IConfiguration config) : IAsyncDispos
             .WithAutomaticReconnect()
             .Build();
 
-        _connection.On<string>("OrderStatusUpdated", async _ =>
+        _connection.On<OrderStatusNotification>("OrderStatusChanged", notification =>
         {
-            await onStatusUpdated();
+            OnOrderStatusChanged?.Invoke(notification);
         });
 
         await _connection.StartAsync();
-        _orderId = orderId;
-        await _connection.InvokeAsync("JoinOrderGroup", orderId);
     }
 
     public async ValueTask DisposeAsync()
@@ -37,19 +38,7 @@ public class OrderHubClient(IJSRuntime js, IConfiguration config) : IAsyncDispos
         if (_connection is null)
             return;
 
-        if (_orderId is not null && _connection.State == HubConnectionState.Connected)
-        {
-            try
-            {
-                await _connection.InvokeAsync("LeaveOrderGroup", _orderId.Value);
-            }
-            catch
-            {
-            }
-        }
-
         await _connection.DisposeAsync();
         _connection = null;
-        _orderId = null;
     }
 }

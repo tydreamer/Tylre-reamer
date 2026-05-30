@@ -8,6 +8,8 @@ public record OrderItemResponse(int MealId, string MealName, int Quantity, decim
 
 public record OrderStatusHistoryResponse(string Status, DateTime ChangedAt);
 
+public record OrderStatusNotification(int OrderId, string RestaurantName, string Status);
+
 public record OrderResponse(
     int Id,
     int CustomerId,
