@@ -150,7 +150,7 @@ else
         busy = true;
         error = null;
         blockSuccess = null;
-        var (success, err) = await Users.BlockCustomerAsync(order.CustomerId);
+        var (success, err) = await Users.BlockAsync(order.CustomerId);
         busy = false;
 
         if (!success)
