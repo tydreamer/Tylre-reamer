@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
@@ -6,13 +7,12 @@ namespace FoodDelivery.API.Hubs;
 [Authorize]
 public class OrderHub : Hub
 {
-    public async Task JoinOrderGroup(int orderId)
+    public override async Task OnConnectedAsync()
     {
-        await Groups.AddToGroupAsync(Context.ConnectionId, $"order-{orderId}");
-    }
+        var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!string.IsNullOrEmpty(userId))
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"user-{userId}");
 
-    public async Task LeaveOrderGroup(int orderId)
-    {
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"order-{orderId}");
+        await base.OnConnectedAsync();
     }
 }

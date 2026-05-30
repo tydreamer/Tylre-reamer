@@ -10,6 +10,8 @@ public record PlaceOrderRequest(
 
 public record UpdateOrderStatusRequest(string Status);
 
+public record OrderStatusNotification(int OrderId, string RestaurantName, string Status);
+
 public record OrderItemResponse(int MealId, string MealName, int Quantity, decimal UnitPrice);
 
 public record OrderStatusHistoryResponse(string Status, DateTime ChangedAt);

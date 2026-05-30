@@ -145,7 +145,10 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
         order.StatusHistory.Add(new OrderStatusHistory { Status = newStatus });
         await db.SaveChangesAsync();
 
-        await hub.Clients.Group($"order-{id}").SendAsync("OrderStatusUpdated", newStatus.ToString());
+        var notification = new OrderStatusNotification(order.Id, order.Restaurant.Name, newStatus.ToString());
+        await hub.Clients
+            .Groups($"user-{order.CustomerId}", $"user-{order.Restaurant.OwnerId}")
+            .SendAsync("OrderStatusChanged", notification);
 
         return NoContent();
     }
