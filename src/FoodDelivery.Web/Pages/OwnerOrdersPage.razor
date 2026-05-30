@@ -34,7 +34,7 @@ else
                 <tr>
                     <td>#@order.Id</td>
                     <td>@order.RestaurantName</td>
-                    <td>#@order.CustomerId</td>
+                    <td>@order.CustomerName</td>
                     <td>@order.CreatedAt.ToLocalTime().ToString("g")</td>
                     <td><span class="badge @StatusClass(order.Status)">@order.Status</span></td>
                     <td class="text-end">@order.TotalPrice.ToString("C")</td>

@@ -17,6 +17,7 @@ public record OrderStatusHistoryResponse(string Status, DateTime ChangedAt);
 public record OrderResponse(
     int Id,
     int CustomerId,
+    string CustomerName,
     int RestaurantId,
     string RestaurantName,
     string Status,

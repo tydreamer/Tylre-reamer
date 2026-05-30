@@ -27,6 +27,7 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
         var query = db.Orders
             .Include(o => o.Items).ThenInclude(i => i.Meal)
             .Include(o => o.Restaurant)
+            .Include(o => o.Customer)
             .Include(o => o.StatusHistory)
             .AsQueryable();
 
@@ -44,6 +45,7 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
         var order = await db.Orders
             .Include(o => o.Items).ThenInclude(i => i.Meal)
             .Include(o => o.Restaurant)
+            .Include(o => o.Customer)
             .Include(o => o.StatusHistory)
             .FirstOrDefaultAsync(o => o.Id == id);
 
@@ -115,6 +117,7 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
         var created = await db.Orders
             .Include(o => o.Items).ThenInclude(i => i.Meal)
             .Include(o => o.Restaurant)
+            .Include(o => o.Customer)
             .Include(o => o.StatusHistory)
             .FirstAsync(o => o.Id == order.Id);
 
@@ -208,6 +211,7 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
     protected static OrderResponse MapToResponse(Order o) => new(
         o.Id,
         o.CustomerId,
+        o.Customer.Name,
         o.RestaurantId,
         o.Restaurant.Name,
         o.Status.ToString(),
