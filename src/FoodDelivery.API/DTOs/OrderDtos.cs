@@ -1,14 +1,22 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace FoodDelivery.API.DTOs;
 
-public record OrderItemRequest(int MealId, int Quantity);
+public record OrderItemRequest(
+    [property: Range(1, int.MaxValue)] int MealId,
+    [property: Range(1, 100)] int Quantity
+);
 
 public record PlaceOrderRequest(
-    int RestaurantId,
-    List<OrderItemRequest> Items,
-    decimal Tip,
-    string? CouponCode);
+    [property: Range(1, int.MaxValue)] int RestaurantId,
+    [property: Required, MinLength(1)] List<OrderItemRequest> Items,
+    [property: Range(0, 100_000)] decimal Tip,
+    [property: MaxLength(50)] string? CouponCode
+);
 
-public record UpdateOrderStatusRequest(string Status);
+public record UpdateOrderStatusRequest(
+    [property: Required] string Status
+);
 
 public record OrderStatusNotification(int OrderId, string RestaurantName, string Status);
 
