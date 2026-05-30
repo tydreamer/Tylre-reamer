@@ -46,7 +46,7 @@
         {
             var state = await AuthStateTask;
             if (state.User.Identity?.IsAuthenticated == true)
-                Navigation.NavigateTo("/", replace: true);
+                Navigation.NavigateTo(LandingPath(state.User.IsInRole("Admin") ? "Admin" : ""), replace: true);
         }
     }
 
@@ -54,14 +54,16 @@
     {
         loading = true;
         error = null;
-        var success = await Auth.LoginAsync(model.Email, model.Password);
+        var role = await Auth.LoginAsync(model.Email, model.Password);
         loading = false;
 
-        if (success)
-            Navigation.NavigateTo("/");
-        else
+        if (role is null)
             error = "Invalid email or password.";
+        else
+            Navigation.NavigateTo(LandingPath(role));
     }
+
+    private static string LandingPath(string role) => role == "Admin" ? "/admin/users" : "/";
 
     private class SignInModel
     {

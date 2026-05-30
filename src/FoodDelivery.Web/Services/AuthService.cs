@@ -8,15 +8,15 @@ public record LoginResponse(string Token, string Name, string Email, string Role
 
 public class AuthService(HttpClient http, IJSRuntime js, AuthenticationStateProvider authStateProvider)
 {
-    public async Task<bool> LoginAsync(string email, string password)
+    public async Task<string?> LoginAsync(string email, string password)
     {
         var response = await http.PostAsJsonAsync("api/auth/login", new { Email = email, Password = password });
-        if (!response.IsSuccessStatusCode) return false;
+        if (!response.IsSuccessStatusCode) return null;
 
         var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
         await js.InvokeVoidAsync("localStorage.setItem", "jwt", result!.Token);
         ((JwtAuthStateProvider)authStateProvider).NotifyUserAuthentication(result.Token);
-        return true;
+        return result.Role;
     }
 
     public async Task<string?> RegisterAsync(string name, string email, string password, string role)
