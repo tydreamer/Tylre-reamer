@@ -6,6 +6,15 @@
 <div class="row justify-content-center mt-5">
     <div class="col-md-4">
         <h3 class="mb-4">Sign In</h3>
+
+        @if (registered)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                Account created successfully. Sign in to continue.
+                <button type="button" class="btn-close" @onclick="() => registered = false"></button>
+            </div>
+        }
+
         <EditForm Model="model" OnValidSubmit="HandleSignIn">
             <DataAnnotationsValidator />
             <div class="mb-3">
@@ -39,9 +48,14 @@
     private readonly SignInModel model = new();
     private string? error;
     private bool loading;
+    private bool registered;
 
     protected override async Task OnInitializedAsync()
     {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        registered = query["registered"] == "true";
+
         if (AuthStateTask is not null)
         {
             var state = await AuthStateTask;
