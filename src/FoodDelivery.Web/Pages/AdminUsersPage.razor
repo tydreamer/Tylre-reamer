@@ -46,11 +46,11 @@
     </div>
 
     <div class="col-md-8">
-        @if (users is null)
+        @if (paged is null)
         {
             <p><em>Loading...</em></p>
         }
-        else if (users.Count == 0)
+        else if (paged.TotalCount == 0)
         {
             <div class="alert alert-info">No users yet.</div>
         }
@@ -67,7 +67,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var user in users)
+                    @foreach (var user in paged.Items)
                     {
                         <tr>
                             <td>@user.Name</td>
@@ -97,19 +97,56 @@
                     }
                 </tbody>
             </table>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                    Showing @((currentPage - 1) * pageSize + 1)–@(Math.Min(currentPage * pageSize, paged.TotalCount)) of @paged.TotalCount users
+                </small>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => GoToPage(currentPage - 1)">‹</button>
+                        </li>
+                        @for (var p = 1; p <= paged.TotalPages; p++)
+                        {
+                            var pageNum = p;
+                            <li class="page-item @(pageNum == currentPage ? "active" : "")">
+                                <button class="page-link" @onclick="() => GoToPage(pageNum)">@pageNum</button>
+                            </li>
+                        }
+                        <li class="page-item @(currentPage == paged.TotalPages ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => GoToPage(currentPage + 1)">›</button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
         }
     </div>
 </div>
 
 @code {
     private readonly CreateUserModel model = new();
-    private List<UserDto>? users;
+    private PagedResult<UserDto>? paged;
     private string? error;
     private bool busy;
+    private int currentPage = 1;
+    private const int pageSize = 10;
 
     protected override async Task OnInitializedAsync()
     {
-        users = await Users.GetAllAsync();
+        await LoadPageAsync();
+    }
+
+    private async Task LoadPageAsync()
+    {
+        paged = await Users.GetPageAsync(currentPage, pageSize);
+    }
+
+    private async Task GoToPage(int page)
+    {
+        if (paged is null || page < 1 || page > paged.TotalPages) return;
+        currentPage = page;
+        await LoadPageAsync();
     }
 
     private async Task CreateUser()
@@ -123,7 +160,7 @@
         if (success)
         {
             model.Reset();
-            users = await Users.GetAllAsync();
+            await LoadPageAsync();
         }
         else
         {
@@ -140,7 +177,7 @@
 
         var (success, err) = await Users.BlockAsync(userId);
         if (success)
-            users = await Users.GetAllAsync();
+            await LoadPageAsync();
         else
             error = err;
 

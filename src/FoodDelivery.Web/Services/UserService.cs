@@ -5,9 +5,9 @@ namespace FoodDelivery.Web.Services;
 
 public class UserService(HttpClient http)
 {
-    public async Task<List<UserDto>> GetAllAsync()
+    public async Task<PagedResult<UserDto>?> GetPageAsync(int page = 1, int pageSize = 10)
     {
-        return await http.GetFromJsonAsync<List<UserDto>>("api/users") ?? [];
+        return await http.GetFromJsonAsync<PagedResult<UserDto>>($"api/users?page={page}&pageSize={pageSize}");
     }
 
     public async Task<(bool Success, UserDto? User, string? Error)> CreateAsync(CreateUserRequest request)
