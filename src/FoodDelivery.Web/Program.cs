@@ -9,7 +9,7 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 var apiBaseUrl = builder.Configuration["ApiBaseUrl"]!;
-builder.Services.AddScoped<AuthExpiredHandler>();
+builder.Services.AddTransient<AuthExpiredHandler>();
 builder.Services.AddHttpClient("API", client => client.BaseAddress = new Uri(apiBaseUrl))
     .AddHttpMessageHandler<AuthExpiredHandler>();
 builder.Services.AddScoped(sp =>

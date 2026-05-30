@@ -1,14 +1,10 @@
 using System.Net;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 
 namespace FoodDelivery.Web.Services;
 
-public class AuthExpiredHandler(
-    IJSRuntime js,
-    AuthenticationStateProvider authStateProvider,
-    NavigationManager nav) : DelegatingHandler
+public class AuthExpiredHandler(IJSRuntime js, NavigationManager nav) : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, CancellationToken cancellationToken)
@@ -19,8 +15,7 @@ public class AuthExpiredHandler(
             request.RequestUri?.AbsolutePath.Contains("/api/auth/") != true)
         {
             await js.InvokeVoidAsync("localStorage.removeItem", "jwt");
-            ((JwtAuthStateProvider)authStateProvider).NotifyUserLoggedOut();
-            nav.NavigateTo("/sign-in");
+            nav.NavigateTo("/sign-in", forceLoad: true);
         }
 
         return response;
