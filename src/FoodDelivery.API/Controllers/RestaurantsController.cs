@@ -13,12 +13,27 @@ namespace FoodDelivery.API.Controllers;
 public class RestaurantsController(AppDbContext db) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 12,
+        [FromQuery] int? ownerId = null)
     {
-        var restaurants = await db.Restaurants
+        if (page < 1) page = 1;
+        if (pageSize < 1 || pageSize > 100) pageSize = 12;
+
+        var query = db.Restaurants.AsQueryable();
+        if (ownerId.HasValue)
+            query = query.Where(r => r.OwnerId == ownerId.Value);
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .OrderBy(r => r.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(r => new RestaurantResponse(r.Id, r.Name, r.Description, r.ImageUrl, r.OwnerId))
             .ToListAsync();
-        return Ok(restaurants);
+
+        return Ok(new PagedResult<RestaurantResponse>(items, totalCount, page, pageSize));
     }
 
     [HttpGet("{id}")]

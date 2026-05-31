@@ -5,9 +5,13 @@ namespace FoodDelivery.Web.Services;
 
 public class RestaurantService(HttpClient http)
 {
-    public async Task<List<RestaurantDto>> GetAllAsync()
+    public async Task<PagedResult<RestaurantDto>?> GetPageAsync(int page = 1, int pageSize = 12, int? ownerId = null)
     {
-        return await http.GetFromJsonAsync<List<RestaurantDto>>("api/restaurants") ?? [];
+        var url = $"api/restaurants?page={page}&pageSize={pageSize}";
+        if (ownerId.HasValue)
+            url += $"&ownerId={ownerId.Value}";
+
+        return await http.GetFromJsonAsync<PagedResult<RestaurantDto>>(url);
     }
 
     public async Task<RestaurantDto?> GetByIdAsync(int id)
@@ -17,8 +21,8 @@ public class RestaurantService(HttpClient http)
 
     public async Task<List<RestaurantDto>> GetByOwnerAsync(int ownerId)
     {
-        var all = await GetAllAsync();
-        return all.Where(r => r.OwnerId == ownerId).ToList();
+        var paged = await GetPageAsync(1, 100, ownerId);
+        return paged?.Items ?? [];
     }
 
     public async Task<(bool Success, RestaurantDto? Restaurant, string? Error)> CreateAsync(RestaurantUpsertRequest request)

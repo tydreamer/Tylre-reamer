@@ -5,18 +5,18 @@
 
 <h1 class="mb-4">Meals</h1>
 
-@if (meals is null)
+@if (paged is null)
 {
     <p><em>Loading...</em></p>
 }
-else if (meals.Count == 0)
+else if (paged.TotalCount == 0)
 {
     <div class="alert alert-info">No meals available yet.</div>
 }
 else
 {
     <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-        @foreach (var meal in meals)
+        @foreach (var meal in paged.Items)
         {
             <div class="col">
                 <a href="meals/@meal.Id" class="text-decoration-none text-dark">
@@ -43,13 +43,40 @@ else
             </div>
         }
     </div>
+
+    <PaginationBar CurrentPage="currentPage" TotalPages="paged.TotalPages"
+                   TotalCount="paged.TotalCount" PageSize="pageSize"
+                   PageSizeOptions="BrowsePageSizeOptions"
+                   OnPageChanged="GoToPage" OnPageSizeChanged="ChangePageSize" />
 }
 
 @code {
-    private List<MealBrowseDto>? meals;
+    private PagedResult<MealBrowseDto>? paged;
+    private int currentPage = 1;
+    private int pageSize = 12;
+    private static readonly int[] BrowsePageSizeOptions = [12, 24, 48];
 
     protected override async Task OnInitializedAsync()
     {
-        meals = await Meals.GetAllAsync();
+        await LoadPageAsync();
+    }
+
+    private async Task LoadPageAsync()
+    {
+        paged = await Meals.GetPageAsync(currentPage, pageSize);
+    }
+
+    private async Task GoToPage(int page)
+    {
+        if (paged is null || page < 1 || page > paged.TotalPages) return;
+        currentPage = page;
+        await LoadPageAsync();
+    }
+
+    private async Task ChangePageSize(int size)
+    {
+        pageSize = size;
+        currentPage = 1;
+        await LoadPageAsync();
     }
 }

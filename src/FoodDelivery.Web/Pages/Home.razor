@@ -1,23 +1,22 @@
 @page "/restaurants"
 @inject RestaurantService Restaurants
-@inject NavigationManager Navigation
 
 <PageTitle>Food Delivery</PageTitle>
 
 <h1 class="mb-4">Restaurants</h1>
 
-@if (restaurants is null)
+@if (paged is null)
 {
     <p><em>Loading...</em></p>
 }
-else if (restaurants.Count == 0)
+else if (paged.TotalCount == 0)
 {
     <div class="alert alert-info">No restaurants available yet.</div>
 }
 else
 {
     <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-        @foreach (var restaurant in restaurants)
+        @foreach (var restaurant in paged.Items)
         {
             <div class="col">
                 <a href="restaurants/@restaurant.Id" class="text-decoration-none text-dark">
@@ -36,13 +35,40 @@ else
             </div>
         }
     </div>
+
+    <PaginationBar CurrentPage="currentPage" TotalPages="paged.TotalPages"
+                   TotalCount="paged.TotalCount" PageSize="pageSize"
+                   PageSizeOptions="BrowsePageSizeOptions"
+                   OnPageChanged="GoToPage" OnPageSizeChanged="ChangePageSize" />
 }
 
 @code {
-    private List<RestaurantDto>? restaurants;
+    private PagedResult<RestaurantDto>? paged;
+    private int currentPage = 1;
+    private int pageSize = 12;
+    private static readonly int[] BrowsePageSizeOptions = [12, 24, 48];
 
     protected override async Task OnInitializedAsync()
     {
-        restaurants = await Restaurants.GetAllAsync();
+        await LoadPageAsync();
+    }
+
+    private async Task LoadPageAsync()
+    {
+        paged = await Restaurants.GetPageAsync(currentPage, pageSize);
+    }
+
+    private async Task GoToPage(int page)
+    {
+        if (paged is null || page < 1 || page > paged.TotalPages) return;
+        currentPage = page;
+        await LoadPageAsync();
+    }
+
+    private async Task ChangePageSize(int size)
+    {
+        pageSize = size;
+        currentPage = 1;
+        await LoadPageAsync();
     }
 }

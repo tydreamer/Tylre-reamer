@@ -5,9 +5,9 @@ namespace FoodDelivery.Web.Services;
 
 public class MealService(HttpClient http)
 {
-    public async Task<List<MealBrowseDto>> GetAllAsync()
+    public async Task<PagedResult<MealBrowseDto>?> GetPageAsync(int page = 1, int pageSize = 12)
     {
-        return await http.GetFromJsonAsync<List<MealBrowseDto>>("api/meals") ?? [];
+        return await http.GetFromJsonAsync<PagedResult<MealBrowseDto>>($"api/meals?page={page}&pageSize={pageSize}");
     }
 
     public async Task<MealBrowseDto?> GetBrowseByIdAsync(int mealId)

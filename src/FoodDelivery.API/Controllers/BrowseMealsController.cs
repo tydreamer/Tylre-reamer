@@ -10,11 +10,18 @@ namespace FoodDelivery.API.Controllers;
 public class BrowseMealsController(AppDbContext db) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 12)
     {
-        var meals = await db.Meals
+        if (page < 1) page = 1;
+        if (pageSize < 1 || pageSize > 100) pageSize = 12;
+
+        var query = db.Meals.AsQueryable();
+        var totalCount = await query.CountAsync();
+        var items = await query
             .OrderBy(m => m.Restaurant.Name)
             .ThenBy(m => m.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(m => new MealBrowseResponse(
                 m.Id,
                 m.Name,
@@ -26,7 +33,7 @@ public class BrowseMealsController(AppDbContext db) : ControllerBase
                 m.Restaurant.Name))
             .ToListAsync();
 
-        return Ok(meals);
+        return Ok(new PagedResult<MealBrowseResponse>(items, totalCount, page, pageSize));
     }
 
     [HttpGet("{id}")]
