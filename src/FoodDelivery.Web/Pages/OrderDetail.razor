@@ -68,7 +68,7 @@ else
             <div class="d-flex flex-wrap gap-2">
                 @if (CanCancel(order.Status))
                 {
-                    <button class="btn btn-outline-danger" @onclick="Cancel" disabled="@busy">Cancel order</button>
+                    <button class="btn btn-outline-danger" @onclick="() => showCancelDialog = true" disabled="@busy">Cancel order</button>
                 }
                 @if (order.Status == "Delivered")
                 {
@@ -101,6 +101,14 @@ else
             </div>
         </div>
     </div>
+
+    <ConfirmDialog @bind-IsVisible="showCancelDialog"
+                   Title="Cancel order"
+                   Message="Are you sure you want to cancel this order? This cannot be undone."
+                   ConfirmText="Cancel order"
+                   CancelText="Keep order"
+                   ConfirmButtonClass="btn-danger"
+                   OnConfirmed="CancelConfirmedAsync" />
 }
 
 @code {
@@ -110,6 +118,7 @@ else
     private OrderResponse? order;
     private string? error;
     private bool busy;
+    private bool showCancelDialog;
 
     protected override async Task OnInitializedAsync()
     {
@@ -135,7 +144,7 @@ else
         Notifications.OnOrderStatusChanged -= HandleStatusChanged;
     }
 
-    private async Task Cancel()
+    private async Task CancelConfirmedAsync()
     {
         busy = true;
         error = null;

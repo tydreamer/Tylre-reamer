@@ -1,0 +1,53 @@
+@if (IsVisible)
+{
+    <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="@TitleId">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="@TitleId">@Title</h5>
+                    <button type="button" class="btn-close" aria-label="Close" @onclick="DismissAsync"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">@Message</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="DismissAsync">@CancelText</button>
+                    <button type="button" class="btn @ConfirmButtonClass" @onclick="ConfirmAsync">@ConfirmText</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show" @onclick="DismissAsync"></div>
+}
+
+@code {
+    private readonly string TitleId = $"confirm-dialog-title-{Interlocked.Increment(ref nextTitleId)}";
+    private static int nextTitleId;
+
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    [Parameter] public EventCallback OnConfirmed { get; set; }
+    [Parameter] public string Title { get; set; } = "Confirm";
+    [Parameter] public string Message { get; set; } = "";
+    [Parameter] public string ConfirmText { get; set; } = "Confirm";
+    [Parameter] public string CancelText { get; set; } = "Cancel";
+    [Parameter] public string ConfirmButtonClass { get; set; } = "btn-primary";
+
+    private async Task ConfirmAsync()
+    {
+        await CloseAsync();
+        if (OnConfirmed.HasDelegate)
+            await OnConfirmed.InvokeAsync();
+    }
+
+    private Task DismissAsync() => CloseAsync();
+
+    private async Task CloseAsync()
+    {
+        if (!IsVisible)
+            return;
+
+        IsVisible = false;
+        await IsVisibleChanged.InvokeAsync(false);
+    }
+}

@@ -74,7 +74,7 @@ else
                 {
                     <button class="btn @action.ButtonClass"
                             disabled="@busy"
-                            @onclick="() => UpdateStatusAsync(action.Status)">
+                            @onclick="() => OnStatusActionAsync(action.Status)">
                         @action.Label
                     </button>
                 }
@@ -112,6 +112,14 @@ else
             </div>
         </div>
     </div>
+
+    <ConfirmDialog @bind-IsVisible="showCancelDialog"
+                   Title="Cancel order"
+                   Message="Are you sure you want to cancel this order? This cannot be undone."
+                   ConfirmText="Cancel order"
+                   CancelText="Keep order"
+                   ConfirmButtonClass="btn-danger"
+                   OnConfirmed="CancelOrderConfirmedAsync" />
 }
 
 @code {
@@ -122,18 +130,28 @@ else
     private string? blockSuccess;
     private bool customerBlocked;
     private bool busy;
+    private bool showCancelDialog;
 
     protected override async Task OnInitializedAsync()
     {
         order = await Orders.GetByIdAsync(Id);
     }
 
+    private Task OnStatusActionAsync(string status)
+    {
+        if (status == "Cancelled")
+        {
+            showCancelDialog = true;
+            return Task.CompletedTask;
+        }
+
+        return UpdateStatusAsync(status);
+    }
+
+    private Task CancelOrderConfirmedAsync() => UpdateStatusAsync("Cancelled");
+
     private async Task UpdateStatusAsync(string status)
     {
-        if (status == "Cancelled" &&
-            !await JS.InvokeAsync<bool>("confirm", "Cancel this order?"))
-            return;
-
         busy = true;
         error = null;
         var (success, err) = await Orders.UpdateStatusAsync(Id, status);
