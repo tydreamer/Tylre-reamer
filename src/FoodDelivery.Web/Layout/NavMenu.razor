@@ -19,12 +19,12 @@
                 <Authorized>
                     <div class="nav-item px-3">
                         <NavLink class="nav-link" href="restaurants" @onclick="CloseNavMenu">
-                            <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Restaurants
+                            <i class="bi bi-house-door-fill nav-icon" aria-hidden="true"></i> Restaurants
                         </NavLink>
                     </div>
                     <div class="nav-item px-3">
                         <NavLink class="nav-link" href="meals" @onclick="CloseNavMenu">
-                            <span class="bi bi-meal-nav-menu" aria-hidden="true"></span> Meals
+                            <span class="material-symbols-outlined nav-icon" aria-hidden="true">flatware</span> Meals
                         </NavLink>
                     </div>
                 </Authorized>
@@ -33,12 +33,12 @@
                 <Authorized>
                     <div class="nav-item px-3">
                         <NavLink class="nav-link" href="orders" @onclick="CloseNavMenu">
-                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> My Orders
+                            <i class="bi bi-receipt nav-icon" aria-hidden="true"></i> My Orders
                         </NavLink>
                     </div>
                     <div class="nav-item px-3">
                         <NavLink class="nav-link nav-link-with-badge" href="cart" @onclick="CloseNavMenu">
-                            <span class="bi bi-cart-nav-menu" aria-hidden="true"></span> Cart
+                            <i class="bi bi-cart3 nav-icon" aria-hidden="true"></i> Cart
                             @if (Cart.TotalQuantity > 0)
                             {
                                 <span class="nav-link-badge">@Cart.TotalQuantity</span>
@@ -51,12 +51,12 @@
                 <Authorized>
                     <div class="nav-item px-3">
                         <NavLink class="nav-link" href="owner/restaurants" @onclick="CloseNavMenu">
-                            <span class="bi bi-shop-nav-menu" aria-hidden="true"></span> My Restaurants
+                            <i class="bi bi-shop nav-icon" aria-hidden="true"></i> My Restaurants
                         </NavLink>
                     </div>
                     <div class="nav-item px-3">
                         <NavLink class="nav-link" href="owner/orders" @onclick="CloseNavMenu">
-                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Incoming Orders
+                            <i class="bi bi-receipt nav-icon" aria-hidden="true"></i> Incoming Orders
                         </NavLink>
                     </div>
                 </Authorized>
@@ -65,7 +65,7 @@
                 <Authorized>
                     <div class="nav-item px-3">
                         <NavLink class="nav-link" href="admin/users" @onclick="CloseNavMenu">
-                            <span class="bi bi-people-fill-nav-menu" aria-hidden="true"></span> Users
+                            <i class="bi bi-people-fill nav-icon" aria-hidden="true"></i> Users
                         </NavLink>
                     </div>
                 </Authorized>
