@@ -1,0 +1,30 @@
+@inject NavigationManager Navigation
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthStateTask is null)
+        {
+            Navigation.NavigateTo("/sign-in");
+            return;
+        }
+
+        var state = await AuthStateTask;
+
+        if (!state.User.Identity?.IsAuthenticated ?? true)
+        {
+            Navigation.NavigateTo("/sign-in");
+        }
+        else if (state.User.IsInRole("Admin"))
+        {
+            Navigation.NavigateTo("/admin/users", replace: true);
+        }
+        else
+        {
+            Navigation.NavigateTo("/sign-in");
+        }
+    }
+}
