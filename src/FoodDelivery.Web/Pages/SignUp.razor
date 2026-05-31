@@ -24,21 +24,53 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">Password</label>
-                <InputText class="form-control" @bind-Value="model.Password" type="password" />
+                <InputText class="form-control" @bind-Value="model.Password" @bind-Value:after="OnPasswordChanged" type="password" autocomplete="new-password" />
                 <FirstValidationMessage For="() => model.Password" />
+                @if (!string.IsNullOrEmpty(model.Password))
+                {
+                    <div class="password-strength mt-2" aria-live="polite">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span class="text-muted">Password strength</span>
+                            <span class="@StrengthLabelClass">@StrengthLabel</span>
+                        </div>
+                        <div class="progress" style="height: 4px;">
+                            <div class="progress-bar @StrengthBarClass" role="progressbar"
+                                 style="width: @(passwordStrength.Score * 100 / passwordStrength.MaxScore)%"
+                                 aria-valuenow="@passwordStrength.Score"
+                                 aria-valuemin="0"
+                                 aria-valuemax="@passwordStrength.MaxScore"></div>
+                        </div>
+                        <ul class="list-unstyled small text-muted mt-2 mb-0 password-requirements">
+                            @foreach (var req in PasswordRequirements)
+                            {
+                                <li class="@(req.Met ? "text-success" : "")">
+                                    @(req.Met ? "✓" : "○") @req.Label
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
             </div>
             <div class="mb-3">
-                <label class="form-label">Role</label>
-                <InputSelect class="form-select" @bind-Value="model.Role">
-                    <option value="Customer">Customer</option>
-                    <option value="Owner">Owner</option>
-                </InputSelect>
+                <label class="form-label">Confirm password</label>
+                <InputText class="form-control" @bind-Value="model.ConfirmPassword" type="password" autocomplete="new-password" />
+                <FirstValidationMessage For="() => model.ConfirmPassword" />
+            </div>
+            <div class="mb-3">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="roleSwitch"
+                           @bind="IsOwnerRole" />
+                    <label class="form-check-label" for="roleSwitch">
+                        @RoleLabel
+                    </label>
+                </div>
+                <div class="form-text">@(IsOwnerRole ? "Manage restaurants, meals, and orders." : "Browse restaurants and place orders.")</div>
             </div>
             @if (error is not null)
             {
                 <div class="alert alert-danger mb-3">@error</div>
             }
-            <button class="btn btn-primary w-100" type="submit" disabled="@loading">
+            <button class="btn btn-primary w-100" type="submit" disabled="@(loading || !CanSubmit)">
                 @(loading ? "Signing up..." : "Sign Up")
             </button>
         </EditForm>
@@ -54,8 +86,53 @@
     private Task<AuthenticationState>? AuthStateTask { get; set; }
 
     private readonly SignUpModel model = new();
+    private PasswordStrengthResult passwordStrength = PasswordStrengthResult.Evaluate("");
     private string? error;
     private bool loading;
+
+    private bool IsOwnerRole
+    {
+        get => model.Role == "Owner";
+        set => model.Role = value ? "Owner" : "Customer";
+    }
+
+    private string RoleLabel => IsOwnerRole ? "Restaurant owner account" : "Customer account";
+
+    private bool CanSubmit => passwordStrength.IsAcceptable
+        && !string.IsNullOrWhiteSpace(model.ConfirmPassword)
+        && model.Password == model.ConfirmPassword;
+
+    private string StrengthLabel => passwordStrength.Level switch
+    {
+        PasswordStrengthLevel.Empty => "—",
+        PasswordStrengthLevel.Weak => "Weak",
+        PasswordStrengthLevel.Fair => "Fair",
+        PasswordStrengthLevel.Strong => "Strong",
+        _ => "—"
+    };
+
+    private string StrengthLabelClass => passwordStrength.Level switch
+    {
+        PasswordStrengthLevel.Strong => "text-success fw-semibold",
+        PasswordStrengthLevel.Fair => "text-warning fw-semibold",
+        _ => "text-danger fw-semibold"
+    };
+
+    private string StrengthBarClass => passwordStrength.Level switch
+    {
+        PasswordStrengthLevel.Strong => "bg-success",
+        PasswordStrengthLevel.Fair => "bg-warning",
+        _ => "bg-danger"
+    };
+
+    private IReadOnlyList<(string Label, bool Met)> PasswordRequirements =>
+    [
+        ("At least 8 characters", model.Password.Length >= 8),
+        ("One uppercase letter", model.Password.Any(char.IsUpper)),
+        ("One lowercase letter", model.Password.Any(char.IsLower)),
+        ("One number", model.Password.Any(char.IsDigit)),
+        ("One special character", model.Password.Any(c => !char.IsLetterOrDigit(c)))
+    ];
 
     protected override async Task OnInitializedAsync()
     {
@@ -66,6 +143,8 @@
                 Navigation.NavigateTo("/restaurants", replace: true);
         }
     }
+
+    private void OnPasswordChanged() => passwordStrength = PasswordStrengthResult.Evaluate(model.Password);
 
     private async Task HandleSignUp()
     {
@@ -90,9 +169,13 @@
         public string Email { get; set; } = "";
 
         [System.ComponentModel.DataAnnotations.Required(ErrorMessage = ValidationMessages.PasswordRequired)]
-        [System.ComponentModel.DataAnnotations.MinLength(6, ErrorMessage = ValidationMessages.PasswordTooShort)]
         [System.ComponentModel.DataAnnotations.MaxLength(100, ErrorMessage = ValidationMessages.PasswordTooLong)]
+        [StrongPassword]
         public string Password { get; set; } = "";
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = ValidationMessages.PasswordConfirmRequired)]
+        [System.ComponentModel.DataAnnotations.Compare(nameof(Password), ErrorMessage = ValidationMessages.PasswordConfirmMismatch)]
+        public string ConfirmPassword { get; set; } = "";
 
         public string Role { get; set; } = "Customer";
     }

@@ -12,6 +12,9 @@ public static class ValidationMessages
     public const string PasswordRequired = "Password is required.";
     public const string PasswordTooShort = "Password must be at least 6 characters.";
     public const string PasswordTooLong = "Password cannot exceed 100 characters.";
+    public const string PasswordTooWeak = "Password does not meet strength requirements";
+    public const string PasswordConfirmRequired = "Please confirm your password.";
+    public const string PasswordConfirmMismatch = "Passwords do not match.";
 
     public const string CodeRequired = "Code is required.";
     public const string CodeTooLong = "Code cannot exceed 10 characters.";
