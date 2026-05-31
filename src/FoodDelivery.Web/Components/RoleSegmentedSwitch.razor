@@ -1,0 +1,38 @@
+<div class="role-segmented" role="group" aria-label="Account type">
+    <div class="role-segmented-track @(IsOwner ? "is-owner" : "")">
+        <span class="role-segmented-thumb" aria-hidden="true"></span>
+        <button type="button"
+                class="role-segmented-option @(IsOwner ? "" : "active")"
+                aria-pressed="@(!IsOwner)"
+                @onclick="() => SelectRoleAsync(CustomerRole)">
+            Customer
+        </button>
+        <button type="button"
+                class="role-segmented-option @(IsOwner ? "active" : "")"
+                aria-pressed="@IsOwner"
+                @onclick="() => SelectRoleAsync(OwnerRole)">
+            Owner
+        </button>
+    </div>
+</div>
+
+@code {
+    private const string CustomerRole = "Customer";
+    private const string OwnerRole = "Owner";
+
+    [Parameter]
+    public string Value { get; set; } = CustomerRole;
+
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    private bool IsOwner => Value == OwnerRole;
+
+    private async Task SelectRoleAsync(string role)
+    {
+        if (Value == role)
+            return;
+
+        await ValueChanged.InvokeAsync(role);
+    }
+}

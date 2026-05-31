@@ -57,14 +57,9 @@
                 <FirstValidationMessage For="() => model.ConfirmPassword" />
             </div>
             <div class="mb-3">
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch" id="roleSwitch"
-                           @bind="IsOwnerRole" />
-                    <label class="form-check-label" for="roleSwitch">
-                        @RoleLabel
-                    </label>
-                </div>
-                <div class="form-text">@(IsOwnerRole ? "Manage restaurants, meals, and orders." : "Browse restaurants and place orders.")</div>
+                <label class="form-label d-block mb-2">Account type</label>
+                <RoleSegmentedSwitch @bind-Value="model.Role" />
+                <div class="form-text mt-2">@(model.Role == "Owner" ? "Manage restaurants, meals, and orders." : "Browse restaurants and place orders.")</div>
             </div>
             @if (error is not null)
             {
@@ -91,14 +86,6 @@
     private PasswordStrengthResult passwordStrength = PasswordStrengthResult.Evaluate("");
     private string? error;
     private bool loading;
-
-    private bool IsOwnerRole
-    {
-        get => model.Role == "Owner";
-        set => model.Role = value ? "Owner" : "Customer";
-    }
-
-    private string RoleLabel => IsOwnerRole ? "Restaurant owner account" : "Customer account";
 
     private bool CanSubmit => passwordStrength.IsAcceptable
         && !string.IsNullOrWhiteSpace(model.ConfirmPassword)
