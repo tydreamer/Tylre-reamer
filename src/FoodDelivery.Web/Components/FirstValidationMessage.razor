@@ -36,7 +36,14 @@
 
     private void Refresh()
     {
-        message = EditContext?.GetValidationMessages(fieldId).FirstOrDefault();
+        var messages = EditContext?.GetValidationMessages(fieldId).ToList();
+        if (messages is null || messages.Count == 0)
+        {
+            message = null;
+            return;
+        }
+
+        message = messages.FirstOrDefault(m => !m.StartsWith("The ")) ?? messages[0];
     }
 
     public void Dispose()
