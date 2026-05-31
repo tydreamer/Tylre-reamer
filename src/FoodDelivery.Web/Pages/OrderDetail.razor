@@ -109,6 +109,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        await Cart.InitializeAsync();
         await RefreshOrderAsync();
         Notifications.OnOrderStatusChanged += HandleStatusChanged;
     }
@@ -163,7 +164,7 @@ else
         error = null;
 
         var meals = await Meals.GetByRestaurantAsync(order.RestaurantId);
-        Cart.Clear();
+        await Cart.ClearAsync();
 
         foreach (var item in order.Items)
         {
@@ -171,8 +172,7 @@ else
             if (meal is null)
                 continue;
 
-            for (var i = 0; i < item.Quantity; i++)
-                Cart.Add(meal, order.RestaurantName);
+            await Cart.AddAsync(meal, order.RestaurantName, item.Quantity);
         }
 
         busy = false;

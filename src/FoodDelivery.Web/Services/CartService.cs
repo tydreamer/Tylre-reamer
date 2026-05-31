@@ -15,9 +15,15 @@ public class CartService(IJSRuntime js) : IAsyncDisposable
 {
     private const string StorageKey = "cart";
 
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true
+    };
+
     private readonly Dictionary<int, CartItem> items = new();
     private DotNetObjectReference<CartService>? selfRef;
-    private bool initialized;
+    private bool listenerRegistered;
 
     public int? RestaurantId { get; private set; }
     public string? RestaurantName { get; private set; }
@@ -31,17 +37,27 @@ public class CartService(IJSRuntime js) : IAsyncDisposable
 
     public async Task InitializeAsync()
     {
-        if (initialized)
-            return;
-        initialized = true;
-
         await LoadAsync();
+
+        if (listenerRegistered)
+            return;
+
+        listenerRegistered = true;
         selfRef = DotNetObjectReference.Create(this);
         await js.InvokeVoidAsync("cartSync.register", selfRef);
     }
 
-    public void Add(MealDto meal, string restaurantName)
+    public async Task RefreshFromStorageAsync()
     {
+        await LoadAsync();
+        OnChange?.Invoke();
+    }
+
+    public async Task AddAsync(MealDto meal, string restaurantName, int quantity = 1)
+    {
+        if (quantity <= 0)
+            return;
+
         if (RestaurantId is not null && RestaurantId != meal.RestaurantId)
             ClearItems();
 
@@ -49,14 +65,14 @@ public class CartService(IJSRuntime js) : IAsyncDisposable
         RestaurantName = restaurantName;
 
         if (items.TryGetValue(meal.Id, out var existing))
-            existing.Quantity++;
+            existing.Quantity += quantity;
         else
-            items[meal.Id] = new CartItem(meal, 1);
+            items[meal.Id] = new CartItem(meal, quantity);
 
-        NotifyAndPersist();
+        await NotifyAndPersistAsync();
     }
 
-    public void SetQuantity(int mealId, int quantity)
+    public async Task SetQuantityAsync(int mealId, int quantity)
     {
         if (!items.TryGetValue(mealId, out var item))
             return;
@@ -66,19 +82,26 @@ public class CartService(IJSRuntime js) : IAsyncDisposable
         else
             item.Quantity = quantity;
 
-        NotifyAndPersist();
+        if (items.Count == 0)
+            ClearRestaurant();
+
+        await NotifyAndPersistAsync();
     }
 
-    public void Remove(int mealId)
+    public async Task RemoveAsync(int mealId)
     {
         items.Remove(mealId);
-        NotifyAndPersist();
+
+        if (items.Count == 0)
+            ClearRestaurant();
+
+        await NotifyAndPersistAsync();
     }
 
-    public void Clear()
+    public async Task ClearAsync()
     {
         ClearItems();
-        NotifyAndPersist();
+        await NotifyAndPersistAsync();
     }
 
     [JSInvokable]
@@ -91,43 +114,73 @@ public class CartService(IJSRuntime js) : IAsyncDisposable
     private void ClearItems()
     {
         items.Clear();
+        ClearRestaurant();
+    }
+
+    private void ClearRestaurant()
+    {
         RestaurantId = null;
         RestaurantName = null;
     }
 
-    private void NotifyAndPersist()
+    private async Task NotifyAndPersistAsync()
     {
         OnChange?.Invoke();
-        _ = SaveAsync();
+        await SaveAsync();
     }
 
     private async Task LoadAsync()
     {
-        var json = await js.InvokeAsync<string?>("localStorage.getItem", StorageKey);
+        try
+        {
+            var json = await js.InvokeAsync<string?>("localStorage.getItem", StorageKey);
 
-        ClearItems();
+            items.Clear();
+            ClearRestaurant();
 
-        if (string.IsNullOrWhiteSpace(json))
-            return;
+            if (string.IsNullOrWhiteSpace(json))
+                return;
 
-        var stored = JsonSerializer.Deserialize<StoredCart>(json);
-        if (stored is null)
-            return;
+            var stored = JsonSerializer.Deserialize<StoredCart>(json, JsonOptions);
+            if (stored?.Items is null || stored.Items.Count == 0)
+                return;
 
-        RestaurantId = stored.RestaurantId;
-        RestaurantName = stored.RestaurantName;
-        foreach (var item in stored.Items)
-            items[item.Meal.Id] = new CartItem(item.Meal, item.Quantity);
+            RestaurantId = stored.RestaurantId;
+            RestaurantName = stored.RestaurantName;
+
+            foreach (var item in stored.Items)
+            {
+                if (item.Meal is null || item.Quantity <= 0)
+                    continue;
+
+                items[item.Meal.Id] = new CartItem(item.Meal, item.Quantity);
+            }
+        }
+        catch (JsonException)
+        {
+            items.Clear();
+            ClearRestaurant();
+            await js.InvokeVoidAsync("localStorage.removeItem", StorageKey);
+        }
     }
 
     private async Task SaveAsync()
     {
+        if (items.Count == 0)
+        {
+            await js.InvokeVoidAsync("localStorage.removeItem", StorageKey);
+            return;
+        }
+
         var stored = new StoredCart(
             RestaurantId,
             RestaurantName,
             items.Values.Select(i => new StoredItem(i.Meal, i.Quantity)).ToList());
 
-        await js.InvokeVoidAsync("localStorage.setItem", StorageKey, JsonSerializer.Serialize(stored));
+        await js.InvokeVoidAsync(
+            "localStorage.setItem",
+            StorageKey,
+            JsonSerializer.Serialize(stored, JsonOptions));
     }
 
     public ValueTask DisposeAsync()

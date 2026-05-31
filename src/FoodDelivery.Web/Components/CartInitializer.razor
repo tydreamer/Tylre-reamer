@@ -1,0 +1,8 @@
+@inject CartService Cart
+@implements IDisposable
+
+@code {
+    protected override async Task OnInitializedAsync() => await Cart.InitializeAsync();
+
+    public void Dispose() { }
+}

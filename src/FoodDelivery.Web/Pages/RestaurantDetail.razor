@@ -48,7 +48,7 @@ else
                                 <div>
                                     <button class="btn btn-sm btn-outline-primary"
                                             disabled="@(!meal.IsAvailable)"
-                                            @onclick="() => AddToCart(meal)">
+                                            @onclick="async () => await AddToCart(meal)">
                                         Add to cart
                                     </button>
                                 </div>
@@ -70,13 +70,14 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        await Cart.InitializeAsync();
         restaurant = await Restaurants.GetByIdAsync(Id);
         meals = await Meals.GetByRestaurantAsync(Id);
     }
 
-    private void AddToCart(MealDto meal)
+    private async Task AddToCart(MealDto meal)
     {
         if (restaurant is not null)
-            Cart.Add(meal, restaurant.Name);
+            await Cart.AddAsync(meal, restaurant.Name);
     }
 }

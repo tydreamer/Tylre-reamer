@@ -43,6 +43,7 @@
 
 <AuthorizeView>
     <Authorized>
+        <CartInitializer />
         <NotificationToast />
     </Authorized>
 </AuthorizeView>
@@ -51,7 +52,13 @@
     protected override async Task OnInitializedAsync()
     {
         Cart.OnChange += StateHasChanged;
-        await Cart.InitializeAsync();
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        await Cart.RefreshFromStorageAsync();
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task SignOut()
@@ -63,5 +70,6 @@
     public void Dispose()
     {
         Cart.OnChange -= StateHasChanged;
+        Navigation.LocationChanged -= OnLocationChanged;
     }
 }
