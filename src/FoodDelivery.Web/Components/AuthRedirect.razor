@@ -1,30 +1,22 @@
 @inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
 
 @code {
-    [CascadingParameter]
-    private Task<AuthenticationState>? AuthStateTask { get; set; }
-
     protected override async Task OnInitializedAsync()
     {
-        if (AuthStateTask is null)
+        var user = (await AuthStateProvider.GetAuthenticationStateAsync()).User;
+
+        if (user.Identity?.IsAuthenticated != true)
         {
-            Navigation.NavigateTo("/sign-in");
+            Navigation.NavigateTo("/sign-in", replace: true);
             return;
         }
 
-        var state = await AuthStateTask;
-
-        if (!state.User.Identity?.IsAuthenticated ?? true)
-        {
-            Navigation.NavigateTo("/sign-in");
-        }
-        else if (state.User.IsInRole("Admin"))
-        {
+        if (user.IsInRole("Admin"))
             Navigation.NavigateTo("/admin/users", replace: true);
-        }
+        else if (user.IsInRole("Owner"))
+            Navigation.NavigateTo("/owner/restaurants", replace: true);
         else
-        {
-            Navigation.NavigateTo("/sign-in");
-        }
+            Navigation.NavigateTo("/restaurants", replace: true);
     }
 }
