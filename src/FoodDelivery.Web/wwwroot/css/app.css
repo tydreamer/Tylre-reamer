@@ -341,3 +341,10 @@ code {
     line-height: 1;
     padding: 0.25rem 0.5rem;
 }
+
+.order-items-cell {
+    max-width: 14rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
