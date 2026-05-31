@@ -24,7 +24,7 @@ public class UsersController(AppDbContext db) : ControllerBase
         var totalCount = await query.CountAsync();
 
         var items = await query
-            .OrderBy(u => u.Name)
+            .OrderByDescending(u => u.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(u => new UserResponse(u.Id, u.Name, u.Email, u.Role.ToString(), u.IsBlocked))

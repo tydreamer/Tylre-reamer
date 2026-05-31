@@ -6,6 +6,19 @@
 
 <h1 class="mb-4">Create &amp; Block Users</h1>
 
+@if (successMessage is not null)
+{
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
+        <div class="toast show" role="alert">
+            <div class="toast-header bg-success text-white">
+                <strong class="me-auto">Success</strong>
+                <button type="button" class="btn-close btn-close-white" @onclick="() => successMessage = null"></button>
+            </div>
+            <div class="toast-body">@successMessage</div>
+        </div>
+    </div>
+}
+
 <div class="row g-4">
     <div class="col-md-4">
         <div class="card">
@@ -117,6 +130,7 @@
     private readonly CreateUserModel model = new();
     private PagedResult<UserDto>? paged;
     private string? error;
+    private string? successMessage;
     private bool busy;
     private int currentPage = 1;
     private int pageSize = 10;
@@ -145,6 +159,13 @@
         await LoadPageAsync();
     }
 
+    private async Task AutoDismissToastAsync()
+    {
+        await Task.Delay(5000);
+        successMessage = null;
+        await InvokeAsync(StateHasChanged);
+    }
+
     private async Task CreateUser()
     {
         busy = true;
@@ -155,8 +176,11 @@
 
         if (success)
         {
+            var createdName = model.Name;
             model.Reset();
             await LoadPageAsync();
+            successMessage = $"User \"{createdName}\" was created successfully.";
+            _ = AutoDismissToastAsync();
         }
         else
         {
