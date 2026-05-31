@@ -63,35 +63,37 @@ else
             }
             else
             {
-                <table class="table align-middle">
-                    <thead>
-                        <tr>
-                            <th>Code</th>
-                            <th>Discount</th>
-                            <th>Expires</th>
-                            <th>Active</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var coupon in coupons)
-                        {
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
                             <tr>
-                                <td>@coupon.Code</td>
-                                <td>@coupon.DiscountValue.ToString("0.##")%</td>
-                                <td>@coupon.ExpiresAt.ToLocalTime().ToString("d")</td>
-                                <td>@(coupon.IsActive ? "Yes" : "No")</td>
-                                <td class="text-end">
-                                    <button class="btn btn-sm btn-outline-danger"
-                                            disabled="@(deletingId == coupon.Id)"
-                                            @onclick="() => DeleteAsync(coupon)">
-                                        @(deletingId == coupon.Id ? "Deleting..." : "Delete")
-                                    </button>
-                                </td>
+                                <th>Code</th>
+                                <th>Discount</th>
+                                <th>Expires</th>
+                                <th>Active</th>
+                                <th></th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach (var coupon in coupons)
+                            {
+                                <tr>
+                                    <td>@coupon.Code</td>
+                                    <td>@coupon.DiscountValue.ToString("0.##")%</td>
+                                    <td class="text-nowrap">@coupon.ExpiresAt.ToLocalTime().ToString("d")</td>
+                                    <td>@(coupon.IsActive ? "Yes" : "No")</td>
+                                    <td class="text-end text-nowrap">
+                                        <button class="btn btn-sm btn-outline-danger"
+                                                disabled="@(deletingId == coupon.Id)"
+                                                @onclick="() => DeleteAsync(coupon)">
+                                            @(deletingId == coupon.Id ? "Deleting..." : "Delete")
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             }
         </div>
     </div>

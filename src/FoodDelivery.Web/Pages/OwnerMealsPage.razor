@@ -36,34 +36,36 @@ else
     }
     else
     {
-        <table class="table align-middle">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Price</th>
-                    <th>Available</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var meal in meals)
-                {
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
                     <tr>
-                        <td>@meal.Name</td>
-                        <td>@meal.Price.ToString("C")</td>
-                        <td>@(meal.IsAvailable ? "Yes" : "No")</td>
-                        <td class="text-end text-nowrap">
-                            <a href="owner/restaurants/@RestaurantId/meals/@meal.Id/edit" class="btn btn-sm btn-outline-primary">Edit</a>
-                            <button class="btn btn-sm btn-outline-danger"
-                                    disabled="@(deletingId == meal.Id)"
-                                    @onclick="() => DeleteAsync(meal)">
-                                @(deletingId == meal.Id ? "Deleting..." : "Delete")
-                            </button>
-                        </td>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Available</th>
+                        <th></th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var meal in meals)
+                    {
+                        <tr>
+                            <td>@meal.Name</td>
+                            <td class="text-nowrap">@meal.Price.ToString("C")</td>
+                            <td>@(meal.IsAvailable ? "Yes" : "No")</td>
+                            <td class="text-end text-nowrap">
+                                <a href="owner/restaurants/@RestaurantId/meals/@meal.Id/edit" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <button class="btn btn-sm btn-outline-danger"
+                                        disabled="@(deletingId == meal.Id)"
+                                        @onclick="() => DeleteAsync(meal)">
+                                    @(deletingId == meal.Id ? "Deleting..." : "Delete")
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     }
 }
 

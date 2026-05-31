@@ -22,35 +22,37 @@ else
                    TotalCount="paged.TotalCount" PageSize="pageSize"
                    OnPageChanged="GoToPage" OnPageSizeChanged="ChangePageSize" />
 
-    <table class="table align-middle">
-        <thead>
-            <tr>
-                <th>Order</th>
-                <th>Restaurant</th>
-                <th>Customer</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th class="text-end">Total</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var order in paged.Items)
-            {
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead>
                 <tr>
-                    <td>#@order.Id</td>
-                    <td>@order.RestaurantName</td>
-                    <td>@order.CustomerName</td>
-                    <td>@order.CreatedAt.ToLocalTime().ToString("g")</td>
-                    <td><span class="badge @StatusClass(order.Status)">@order.Status</span></td>
-                    <td class="text-end">@order.TotalPrice.ToString("C")</td>
-                    <td class="text-end">
-                        <a href="owner/orders/@order.Id" class="btn btn-sm btn-outline-primary">View</a>
-                    </td>
+                    <th>Order</th>
+                    <th>Restaurant</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th class="text-end">Total</th>
+                    <th></th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var order in paged.Items)
+                {
+                    <tr>
+                        <td>#@order.Id</td>
+                        <td>@order.RestaurantName</td>
+                        <td>@order.CustomerName</td>
+                        <td class="text-nowrap">@order.CreatedAt.ToLocalTime().ToString("g")</td>
+                        <td><span class="badge @StatusClass(order.Status)">@order.Status</span></td>
+                        <td class="text-end text-nowrap">@order.TotalPrice.ToString("C")</td>
+                        <td class="text-end text-nowrap">
+                            <a href="owner/orders/@order.Id" class="btn btn-sm btn-outline-primary">View</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 
 @code {

@@ -26,34 +26,36 @@ else if (restaurants.Count == 0)
 }
 else
 {
-    <table class="table align-middle">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var restaurant in restaurants)
-            {
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead>
                 <tr>
-                    <td>@restaurant.Name</td>
-                    <td>@restaurant.Description</td>
-                    <td class="text-end text-nowrap">
-                        <a href="owner/restaurants/@restaurant.Id/meals" class="btn btn-sm btn-outline-secondary">Meals</a>
-                        <a href="owner/restaurants/@restaurant.Id/coupons" class="btn btn-sm btn-outline-secondary">Coupons</a>
-                        <a href="owner/restaurants/@restaurant.Id/edit" class="btn btn-sm btn-outline-primary">Edit</a>
-                        <button class="btn btn-sm btn-outline-danger"
-                                disabled="@(deletingId == restaurant.Id)"
-                                @onclick="() => DeleteAsync(restaurant)">
-                            @(deletingId == restaurant.Id ? "Deleting..." : "Delete")
-                        </button>
-                    </td>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th></th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var restaurant in restaurants)
+                {
+                    <tr>
+                        <td>@restaurant.Name</td>
+                        <td>@restaurant.Description</td>
+                        <td class="text-end text-nowrap">
+                            <a href="owner/restaurants/@restaurant.Id/meals" class="btn btn-sm btn-outline-secondary">Meals</a>
+                            <a href="owner/restaurants/@restaurant.Id/coupons" class="btn btn-sm btn-outline-secondary">Coupons</a>
+                            <a href="owner/restaurants/@restaurant.Id/edit" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <button class="btn btn-sm btn-outline-danger"
+                                    disabled="@(deletingId == restaurant.Id)"
+                                    @onclick="() => DeleteAsync(restaurant)">
+                                @(deletingId == restaurant.Id ? "Deleting..." : "Delete")
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 
 @code {

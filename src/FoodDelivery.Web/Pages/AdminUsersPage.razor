@@ -73,55 +73,57 @@
                            TotalCount="paged.TotalCount" PageSize="pageSize"
                            OnPageChanged="GoToPage" OnPageSizeChanged="ChangePageSize" />
 
-            <table class="table align-middle">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Status</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var user in paged.Items)
-                    {
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
                         <tr>
-                            <td>@user.Name</td>
-                            <td>@user.Email</td>
-                            <td>@(user.Role == "Customer" ? "Regular User" : "Restaurant Owner")</td>
-                            <td>
-                                @if (user.IsBlocked)
-                                {
-                                    <span class="badge bg-danger">Blocked</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-success">Active</span>
-                                }
-                            </td>
-                            <td class="text-end">
-                                @if (user.IsBlocked)
-                                {
-                                    <button class="btn btn-sm btn-outline-success"
-                                            disabled="@busy"
-                                            @onclick="() => Unblock(user.Id)">
-                                        Unblock
-                                    </button>
-                                }
-                                else
-                                {
-                                    <button class="btn btn-sm btn-outline-danger"
-                                            disabled="@busy"
-                                            @onclick="() => Block(user.Id)">
-                                        Block
-                                    </button>
-                                }
-                            </td>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th></th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in paged.Items)
+                        {
+                            <tr>
+                                <td>@user.Name</td>
+                                <td>@user.Email</td>
+                                <td>@(user.Role == "Customer" ? "Regular User" : "Restaurant Owner")</td>
+                                <td>
+                                    @if (user.IsBlocked)
+                                    {
+                                        <span class="badge bg-danger">Blocked</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                </td>
+                                <td class="text-end text-nowrap">
+                                    @if (user.IsBlocked)
+                                    {
+                                        <button class="btn btn-sm btn-outline-success"
+                                                disabled="@busy"
+                                                @onclick="() => Unblock(user.Id)">
+                                            Unblock
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-sm btn-outline-danger"
+                                                disabled="@busy"
+                                                @onclick="() => Block(user.Id)">
+                                            Block
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         }
     </div>
 </div>

@@ -31,37 +31,39 @@ else
 
     <div class="row g-4">
         <div class="col-md-7">
-            <table class="table align-middle">
-                <thead>
-                    <tr>
-                        <th>Meal</th>
-                        <th class="text-end">Price</th>
-                        <th class="text-center" style="width: 160px;">Quantity</th>
-                        <th class="text-end">Total</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Cart.Items)
-                    {
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
                         <tr>
-                            <td>@item.Meal.Name</td>
-                            <td class="text-end">@item.Meal.Price.ToString("C")</td>
-                            <td class="text-center">
-                                <div class="btn-group btn-group-sm" role="group">
-                                    <button class="btn btn-outline-secondary" @onclick="() => ChangeQuantity(item.Meal.Id, item.Quantity - 1)">−</button>
-                                    <span class="btn btn-outline-secondary disabled">@item.Quantity</span>
-                                    <button class="btn btn-outline-secondary" @onclick="() => ChangeQuantity(item.Meal.Id, item.Quantity + 1)">+</button>
-                                </div>
-                            </td>
-                            <td class="text-end">@item.LineTotal.ToString("C")</td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveItem(item.Meal.Id)">Remove</button>
-                            </td>
+                            <th>Meal</th>
+                            <th class="text-end">Price</th>
+                            <th class="text-center text-nowrap">Quantity</th>
+                            <th class="text-end">Total</th>
+                            <th></th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Cart.Items)
+                        {
+                            <tr>
+                                <td>@item.Meal.Name</td>
+                                <td class="text-end text-nowrap">@item.Meal.Price.ToString("C")</td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button class="btn btn-outline-secondary" @onclick="() => ChangeQuantity(item.Meal.Id, item.Quantity - 1)">−</button>
+                                        <span class="btn btn-outline-secondary disabled">@item.Quantity</span>
+                                        <button class="btn btn-outline-secondary" @onclick="() => ChangeQuantity(item.Meal.Id, item.Quantity + 1)">+</button>
+                                    </div>
+                                </td>
+                                <td class="text-end text-nowrap">@item.LineTotal.ToString("C")</td>
+                                <td class="text-end text-nowrap">
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveItem(item.Meal.Id)">Remove</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div class="col-md-5">

@@ -1,5 +1,5 @@
-<div class="d-flex justify-content-between align-items-center mb-2">
-    <div class="d-flex align-items-center gap-2">
+<div class="pagination-bar d-flex flex-column flex-sm-row flex-wrap gap-2 justify-content-between align-items-stretch align-items-sm-center mb-2">
+    <div class="d-flex flex-wrap align-items-center gap-2">
         <small class="text-muted">Rows per page:</small>
         <select class="form-select form-select-sm" style="width: auto;" value="@PageSize"
                 @onchange="e => OnPageSizeChanged.InvokeAsync(int.Parse(e.Value!.ToString()!))">
@@ -8,27 +8,54 @@
                 <option value="@size">@size</option>
             }
         </select>
-        <small class="text-muted">
+        <small class="text-muted text-nowrap">
             @((CurrentPage - 1) * PageSize + 1)–@(Math.Min(CurrentPage * PageSize, TotalCount)) of @TotalCount
         </small>
     </div>
-    <nav>
-        <ul class="pagination pagination-sm mb-0">
-            <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
-                <button class="page-link" @onclick="() => OnPageChanged.InvokeAsync(CurrentPage - 1)">‹</button>
-            </li>
-            @for (var p = 1; p <= TotalPages; p++)
-            {
-                var pageNum = p;
-                <li class="page-item @(pageNum == CurrentPage ? "active" : "")">
-                    <button class="page-link" @onclick="() => OnPageChanged.InvokeAsync(pageNum)">@pageNum</button>
+
+    @if (TotalPages > 0)
+    {
+        <div class="d-flex d-sm-none align-items-center justify-content-between gap-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary"
+                    disabled="@(CurrentPage == 1)"
+                    @onclick="() => OnPageChanged.InvokeAsync(CurrentPage - 1)">
+                Previous
+            </button>
+            <span class="small text-muted text-nowrap">Page @CurrentPage of @TotalPages</span>
+            <button type="button" class="btn btn-sm btn-outline-secondary"
+                    disabled="@(CurrentPage == TotalPages)"
+                    @onclick="() => OnPageChanged.InvokeAsync(CurrentPage + 1)">
+                Next
+            </button>
+        </div>
+
+        <nav class="d-none d-sm-block pagination-bar-nav">
+            <ul class="pagination pagination-sm mb-0 flex-nowrap">
+                <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                    <button type="button" class="page-link" @onclick="() => OnPageChanged.InvokeAsync(CurrentPage - 1)">‹</button>
                 </li>
-            }
-            <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
-                <button class="page-link" @onclick="() => OnPageChanged.InvokeAsync(CurrentPage + 1)">›</button>
-            </li>
-        </ul>
-    </nav>
+                @foreach (var entry in GetPageEntries())
+                {
+                    @if (entry is null)
+                    {
+                        <li class="page-item disabled">
+                            <span class="page-link">…</span>
+                        </li>
+                    }
+                    else
+                    {
+                        var pageNum = entry.Value;
+                        <li class="page-item @(pageNum == CurrentPage ? "active" : "")">
+                            <button type="button" class="page-link" @onclick="() => OnPageChanged.InvokeAsync(pageNum)">@pageNum</button>
+                        </li>
+                    }
+                }
+                <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                    <button type="button" class="page-link" @onclick="() => OnPageChanged.InvokeAsync(CurrentPage + 1)">›</button>
+                </li>
+            </ul>
+        </nav>
+    }
 </div>
 
 @code {
@@ -39,4 +66,34 @@
     [Parameter] public int[] PageSizeOptions { get; set; } = [10, 25, 50];
     [Parameter, EditorRequired] public EventCallback<int> OnPageChanged { get; set; }
     [Parameter, EditorRequired] public EventCallback<int> OnPageSizeChanged { get; set; }
+
+    private IEnumerable<int?> GetPageEntries()
+    {
+        if (TotalPages <= 1)
+            return TotalPages == 1 ? [1] : [];
+
+        if (TotalPages <= 7)
+            return Enumerable.Range(1, TotalPages).Select(p => (int?)p);
+
+        var pages = new SortedSet<int> { 1, TotalPages, CurrentPage };
+        for (var offset = -1; offset <= 1; offset++)
+        {
+            var page = CurrentPage + offset;
+            if (page >= 1 && page <= TotalPages)
+                pages.Add(page);
+        }
+
+        var result = new List<int?>();
+        var previous = 0;
+        foreach (var page in pages)
+        {
+            if (previous > 0 && page - previous > 1)
+                result.Add(null);
+
+            result.Add(page);
+            previous = page;
+        }
+
+        return result;
+    }
 }

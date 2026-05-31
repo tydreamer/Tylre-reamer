@@ -26,37 +26,39 @@ else
     <div class="row">
         <div class="col-md-7">
             <h5>Items</h5>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Meal</th>
-                        <th class="text-center">Qty</th>
-                        <th class="text-end">Unit</th>
-                        <th class="text-end">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in order.Items)
-                    {
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
                         <tr>
-                            <td>@item.MealName</td>
-                            <td class="text-center">@item.Quantity</td>
-                            <td class="text-end">@item.UnitPrice.ToString("C")</td>
-                            <td class="text-end">@((item.UnitPrice * item.Quantity).ToString("C"))</td>
+                            <th>Meal</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-end">Unit</th>
+                            <th class="text-end">Total</th>
                         </tr>
-                    }
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="3" class="text-end">Tip</td>
-                        <td class="text-end">@order.Tip.ToString("C")</td>
-                    </tr>
-                    <tr class="fw-bold">
-                        <td colspan="3" class="text-end">Total</td>
-                        <td class="text-end">@order.TotalPrice.ToString("C")</td>
-                    </tr>
-                </tfoot>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in order.Items)
+                        {
+                            <tr>
+                                <td>@item.MealName</td>
+                                <td class="text-center">@item.Quantity</td>
+                                <td class="text-end text-nowrap">@item.UnitPrice.ToString("C")</td>
+                                <td class="text-end text-nowrap">@((item.UnitPrice * item.Quantity).ToString("C"))</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-end">Tip</td>
+                            <td class="text-end text-nowrap">@order.Tip.ToString("C")</td>
+                        </tr>
+                        <tr class="fw-bold">
+                            <td colspan="3" class="text-end">Total</td>
+                            <td class="text-end text-nowrap">@order.TotalPrice.ToString("C")</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
 
             @if (error is not null)
             {
@@ -78,23 +80,25 @@ else
 
         <div class="col-md-5">
             <h5>Status history</h5>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Status</th>
-                        <th class="text-end">Time</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var entry in order.StatusHistory)
-                    {
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
                         <tr>
-                            <td><span class="badge @StatusClass(entry.Status)">@entry.Status</span></td>
-                            <td class="text-end text-muted">@entry.ChangedAt.ToLocalTime().ToString("g")</td>
+                            <th>Status</th>
+                            <th class="text-end">Time</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var entry in order.StatusHistory)
+                        {
+                            <tr>
+                                <td><span class="badge @StatusClass(entry.Status)">@entry.Status</span></td>
+                                <td class="text-end text-muted text-nowrap">@entry.ChangedAt.ToLocalTime().ToString("g")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 }
