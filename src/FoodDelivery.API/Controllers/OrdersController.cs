@@ -207,7 +207,6 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
             (OrderStatus.Placed, OrderStatus.Cancelled, "Customer") => true,
             (OrderStatus.Placed, OrderStatus.Cancelled, "Owner") => true,
             (OrderStatus.Placed, OrderStatus.Processing, "Owner") => true,
-            (OrderStatus.Processing, OrderStatus.Cancelled, "Customer") => true,
             (OrderStatus.Processing, OrderStatus.InRoute, "Owner") => true,
             (OrderStatus.InRoute, OrderStatus.Delivered, "Owner") => true,
             (OrderStatus.Delivered, OrderStatus.Received, "Customer") => true,

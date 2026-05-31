@@ -183,7 +183,7 @@ else
             Navigation.NavigateTo("/cart");
     }
 
-    private static bool CanCancel(string status) => status is "Placed" or "Processing";
+    private static bool CanCancel(string status) => status is "Placed";
 
     private static string StatusClass(string status) => status switch
     {
