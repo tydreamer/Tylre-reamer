@@ -18,9 +18,9 @@ public class OrderService(HttpClient http)
         return (false, null, error);
     }
 
-    public async Task<List<OrderResponse>> GetMyOrdersAsync()
+    public async Task<PagedResult<OrderResponse>?> GetMyOrdersAsync(int page = 1, int pageSize = 10)
     {
-        return await http.GetFromJsonAsync<List<OrderResponse>>("api/orders") ?? [];
+        return await http.GetFromJsonAsync<PagedResult<OrderResponse>>($"api/orders?page={page}&pageSize={pageSize}");
     }
 
     public async Task<OrderResponse?> GetByIdAsync(int id)

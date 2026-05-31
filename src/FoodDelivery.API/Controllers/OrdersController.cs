@@ -19,8 +19,11 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
     protected string CurrentUserRole => User.FindFirstValue(ClaimTypes.Role)!;
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
+        if (page < 1) page = 1;
+        if (pageSize < 1 || pageSize > 100) pageSize = 10;
+
         var userId = CurrentUserId;
         var role = CurrentUserRole;
 
@@ -35,8 +38,17 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
             ? query.Where(o => o.Restaurant.OwnerId == userId)
             : query.Where(o => o.CustomerId == userId);
 
-        var orders = await query.OrderByDescending(o => o.CreatedAt).ToListAsync();
-        return Ok(orders.Select(MapToResponse));
+        query = query.OrderByDescending(o => o.CreatedAt);
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return Ok(new PagedResult<OrderResponse>(
+            items.Select(MapToResponse).ToList(),
+            totalCount, page, pageSize));
     }
 
     [HttpGet("{id}")]
