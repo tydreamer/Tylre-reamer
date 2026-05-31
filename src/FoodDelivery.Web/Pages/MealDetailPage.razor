@@ -1,8 +1,6 @@
 @page "/meals/{Id:int}"
 @inject MealService Meals
 @inject CartService Cart
-@inject NavigationManager Navigation
-
 @if (!loaded)
 {
     <p><em>Loading...</em></p>
@@ -49,6 +47,10 @@ else
             }
             else
             {
+                @if (cartSuccessMessage is not null)
+                {
+                    <div class="alert alert-success">@cartSuccessMessage</div>
+                }
                 @if (cartMessage is not null)
                 {
                     <div class="alert alert-warning">@cartMessage</div>
@@ -84,6 +86,7 @@ else
     private int quantity = 1;
     private bool busy;
     private string? cartMessage;
+    private string? cartSuccessMessage;
 
     protected override async Task OnInitializedAsync()
     {
@@ -106,6 +109,7 @@ else
             return;
 
         cartMessage = null;
+        cartSuccessMessage = null;
 
         if (!Cart.IsEmpty && Cart.RestaurantId != meal.RestaurantId)
         {
@@ -123,8 +127,12 @@ else
             meal.IsAvailable,
             meal.RestaurantId);
 
-        await Cart.AddAsync(mealDto, meal.RestaurantName, quantity);
+        var addedQty = quantity;
+        await Cart.AddAsync(mealDto, meal.RestaurantName, addedQty);
         busy = false;
-        Navigation.NavigateTo("/cart");
+        quantity = 1;
+        cartSuccessMessage = addedQty == 1
+            ? $"Added {meal.Name} to your cart."
+            : $"Added {addedQty} × {meal.Name} to your cart.";
     }
 }

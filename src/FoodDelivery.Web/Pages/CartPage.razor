@@ -2,7 +2,6 @@
 @implements IDisposable
 @inject CartService Cart
 @inject OrderService Orders
-@inject NavigationManager Navigation
 
 <PageTitle>Your Cart</PageTitle>
 
@@ -27,7 +26,12 @@ else if (Cart.IsEmpty)
 }
 else
 {
-    <p class="text-muted">Ordering from <strong>@Cart.RestaurantName</strong></p>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <p class="text-muted mb-0">Ordering from <strong>@Cart.RestaurantName</strong></p>
+        <button type="button" class="btn btn-outline-danger btn-sm" @onclick="() => showClearDialog = true">
+            Clear cart
+        </button>
+    </div>
 
     <div class="row g-4">
         <div class="col-md-7">
@@ -146,6 +150,14 @@ else
             </div>
         </div>
     </div>
+
+    <ConfirmDialog @bind-IsVisible="showClearDialog"
+                   Title="Clear cart"
+                   Message="Remove all items from your cart? This cannot be undone."
+                   ConfirmText="Clear cart"
+                   CancelText="Keep items"
+                   ConfirmButtonClass="btn-danger"
+                   OnConfirmed="ClearCartConfirmedAsync" />
 }
 
 @code {
@@ -153,6 +165,7 @@ else
     private string? couponCode;
     private string? error;
     private bool placing;
+    private bool showClearDialog;
     private OrderResponse? placedOrder;
 
     protected override async Task OnInitializedAsync()
@@ -173,6 +186,14 @@ else
         Cart.SetQuantityAsync(mealId, quantity + 1);
 
     private async Task RemoveItem(int mealId) => await Cart.RemoveAsync(mealId);
+
+    private async Task ClearCartConfirmedAsync()
+    {
+        await Cart.ClearAsync();
+        tip = 0;
+        couponCode = null;
+        error = null;
+    }
 
     private async Task PlaceOrder()
     {
