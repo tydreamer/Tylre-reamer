@@ -56,7 +56,8 @@ main {
     text-decoration: none;
 }
 
-@media (max-width: 640.98px) {
+/* Below lg: stacked layout with collapsible nav (full-width content for tablets) */
+@media (max-width: 991.98px) {
     .top-row {
         justify-content: stretch;
     }
@@ -66,7 +67,7 @@ main {
     }
 }
 
-@media (min-width: 641px) {
+@media (min-width: 992px) {
     .page {
         flex-direction: row;
     }
@@ -76,6 +77,7 @@ main {
         height: 100vh;
         position: sticky;
         top: 0;
+        flex-shrink: 0;
     }
 
     .top-row {
