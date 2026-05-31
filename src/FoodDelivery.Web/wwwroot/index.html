@@ -17,11 +17,21 @@
 <body>
     <div id="app">
         <div class="blazor-load-screen">
-            <svg class="loading-progress">
-                <circle r="40%" cx="50%" cy="50%" />
-                <circle r="40%" cx="50%" cy="50%" />
-            </svg>
-            <div class="loading-progress-text"></div>
+            <div class="load-content">
+                <p class="load-brand-name">Food Delivery</p>
+                <svg class="loading-progress" viewBox="0 0 100 100" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="blazor-progress-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#ea580c" />
+                            <stop offset="50%" stop-color="#fb923c" />
+                            <stop offset="100%" stop-color="#fdba74" />
+                        </linearGradient>
+                    </defs>
+                    <circle r="40%" cx="50%" cy="50%" pathLength="100" />
+                    <circle r="40%" cx="50%" cy="50%" pathLength="100" />
+                </svg>
+                <div class="loading-progress-text" aria-live="polite"></div>
+            </div>
         </div>
     </div>
 

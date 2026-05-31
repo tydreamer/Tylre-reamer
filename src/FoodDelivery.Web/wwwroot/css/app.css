@@ -107,38 +107,73 @@ a, .btn-link {
     z-index: 1;
 }
 
-.loading-progress-text {
-    color: #fff;
+.load-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    animation: load-content-in 0.55s ease-out both;
+}
+
+@keyframes load-content-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.load-brand-name {
+    margin: 0 0 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: rgba(255, 255, 255, 0.92);
 }
 
 .loading-progress {
     display: block;
-    width: 8rem;
-    height: 8rem;
+    width: 6.5rem;
+    height: 6.5rem;
+    shape-rendering: geometricPrecision;
 }
 
-    .loading-progress circle {
-        fill: none;
-        stroke: #e0e0e0;
-        stroke-width: 0.6rem;
-        transform-origin: 50% 50%;
-        transform: rotate(-90deg);
-    }
+.loading-progress circle {
+    fill: none;
+    stroke-width: 5;
+    transform-origin: 50% 50%;
+    transform: rotate(-90deg);
+}
 
-        .loading-progress circle:last-child {
-            stroke: #1b6ec2;
-            stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
-            transition: stroke-dasharray 0.05s ease-in-out;
-        }
+.loading-progress circle:first-child {
+    stroke: rgba(255, 255, 255, 0.22);
+}
+
+.loading-progress circle:last-child {
+    stroke: url(#blazor-progress-gradient);
+    stroke-linecap: round;
+    stroke-dasharray: var(--blazor-load-percentage, 0%) 100;
+    transition: stroke-dasharray 0.35s cubic-bezier(0.33, 1, 0.68, 1);
+    filter: drop-shadow(0 0 8px rgba(251, 146, 60, 0.4));
+}
 
 .loading-progress-text {
+    margin-top: 1rem;
     text-align: center;
-    font-weight: bold;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+    color: rgba(255, 255, 255, 0.82);
+    min-height: 1.35em;
 }
 
-    .loading-progress-text:after {
-        content: var(--blazor-load-percentage-text, "Loading");
-    }
+.loading-progress-text::after {
+    content: var(--blazor-load-percentage-text, "Loading");
+}
 
 code {
     color: #c02d76;
