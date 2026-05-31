@@ -24,7 +24,7 @@ public class CouponsController(AppDbContext db) : ControllerBase
 
         var coupons = await db.Coupons
             .Where(c => c.RestaurantId == restaurantId)
-            .Select(c => new CouponResponse(c.Id, c.Code, c.DiscountType.ToString(), c.DiscountValue, c.ExpiresAt, c.IsActive))
+            .Select(c => new CouponResponse(c.Id, c.Code, c.DiscountValue, c.ExpiresAt, c.IsActive))
             .ToListAsync();
 
         return Ok(coupons);
@@ -37,16 +37,13 @@ public class CouponsController(AppDbContext db) : ControllerBase
         if (restaurant is null) return NotFound();
         if (restaurant.OwnerId != CurrentUserId) return Forbid();
 
-        if (!Enum.TryParse<DiscountType>(req.DiscountType, ignoreCase: true, out var discountType))
-            return BadRequest("Invalid discount type. Use 'Fixed' or 'Percentage'.");
-
         if (await db.Coupons.AnyAsync(c => c.Code == req.Code))
             return Conflict("Coupon code already exists.");
 
         var coupon = new Coupon
         {
             Code = req.Code,
-            DiscountType = discountType,
+            DiscountType = DiscountType.Percentage,
             DiscountValue = req.DiscountValue,
             RestaurantId = restaurantId,
             ExpiresAt = req.ExpiresAt
@@ -56,7 +53,7 @@ public class CouponsController(AppDbContext db) : ControllerBase
         await db.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetAll), new { restaurantId },
-            new CouponResponse(coupon.Id, coupon.Code, coupon.DiscountType.ToString(), coupon.DiscountValue, coupon.ExpiresAt, coupon.IsActive));
+            new CouponResponse(coupon.Id, coupon.Code, coupon.DiscountValue, coupon.ExpiresAt, coupon.IsActive));
     }
 
     [HttpDelete("{id}")]

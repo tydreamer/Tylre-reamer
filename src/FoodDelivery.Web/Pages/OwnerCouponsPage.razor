@@ -37,15 +37,8 @@ else
                     <ValidationMessage For="() => formModel.Code" />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Discount type</label>
-                    <InputSelect class="form-select" @bind-Value="formModel.DiscountType">
-                        <option value="Fixed">Fixed</option>
-                        <option value="Percentage">Percentage</option>
-                    </InputSelect>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Discount value</label>
-                    <InputNumber class="form-control" @bind-Value="formModel.DiscountValue" />
+                    <label class="form-label">Discount (%)</label>
+                    <InputNumber class="form-control" @bind-Value="formModel.DiscountValue" min="1" max="100" />
                     <ValidationMessage For="() => formModel.DiscountValue" />
                 </div>
                 <div class="mb-3">
@@ -74,8 +67,7 @@ else
                     <thead>
                         <tr>
                             <th>Code</th>
-                            <th>Type</th>
-                            <th>Value</th>
+                            <th>Discount</th>
                             <th>Expires</th>
                             <th>Active</th>
                             <th></th>
@@ -86,8 +78,7 @@ else
                         {
                             <tr>
                                 <td>@coupon.Code</td>
-                                <td>@coupon.DiscountType</td>
-                                <td>@coupon.DiscountValue.ToString(coupon.DiscountType == "Percentage" ? "0.##'%'" : "C")</td>
+                                <td>@coupon.DiscountValue.ToString("0.##")%</td>
                                 <td>@coupon.ExpiresAt.ToLocalTime().ToString("d")</td>
                                 <td>@(coupon.IsActive ? "Yes" : "No")</td>
                                 <td class="text-end">
@@ -148,7 +139,7 @@ else
         creating = true;
         createError = null;
         var expiresAt = DateTime.SpecifyKind(formModel.ExpiresAt.Date, DateTimeKind.Utc).AddDays(1).AddTicks(-1);
-        var request = new CouponCreateRequest(formModel.Code, formModel.DiscountType, formModel.DiscountValue, expiresAt);
+        var request = new CouponCreateRequest(formModel.Code, formModel.DiscountValue, expiresAt);
         var (success, coupon, createErr) = await Coupons.CreateAsync(RestaurantId, request);
         creating = false;
 
@@ -186,12 +177,11 @@ else
     private class CouponFormModel
     {
         [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.MaxLength(10)]
         public string Code { get; set; } = "";
 
-        public string DiscountType { get; set; } = "Fixed";
-
         [System.ComponentModel.DataAnnotations.Required]
-        [System.ComponentModel.DataAnnotations.Range(0.01, double.MaxValue)]
+        [System.ComponentModel.DataAnnotations.Range(1, 100, ErrorMessage = "Discount must be between 1 and 100.")]
         public decimal DiscountValue { get; set; }
 
         [System.ComponentModel.DataAnnotations.Required]
