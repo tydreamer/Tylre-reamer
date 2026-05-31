@@ -2,7 +2,6 @@
 @attribute [Authorize(Roles = "Owner")]
 @inject OrderService Orders
 @inject UserService Users
-@inject IJSRuntime JS
 
 @if (order is null)
 {
@@ -82,7 +81,7 @@ else
                 {
                     <button class="btn btn-outline-danger"
                             disabled="@busy"
-                            @onclick="BlockCustomerAsync">
+                            @onclick="() => showBlockDialog = true">
                         Block customer
                     </button>
                 }
@@ -120,6 +119,14 @@ else
                    CancelText="Keep order"
                    ConfirmButtonClass="btn-danger"
                    OnConfirmed="CancelOrderConfirmedAsync" />
+
+    <ConfirmDialog @bind-IsVisible="showBlockDialog"
+                   Title="Block customer"
+                   Message="@($"Block {order.CustomerName}? They will not be able to sign in.")"
+                   ConfirmText="Block customer"
+                   CancelText="Cancel"
+                   ConfirmButtonClass="btn-danger"
+                   OnConfirmed="BlockCustomerConfirmedAsync" />
 }
 
 @code {
@@ -131,6 +138,7 @@ else
     private bool customerBlocked;
     private bool busy;
     private bool showCancelDialog;
+    private bool showBlockDialog;
 
     protected override async Task OnInitializedAsync()
     {
@@ -162,12 +170,9 @@ else
         busy = false;
     }
 
-    private async Task BlockCustomerAsync()
+    private async Task BlockCustomerConfirmedAsync()
     {
         if (order is null) return;
-
-        if (!await JS.InvokeAsync<bool>("confirm", $"Block {order.CustomerName}? They will not be able to sign in."))
-            return;
 
         busy = true;
         error = null;

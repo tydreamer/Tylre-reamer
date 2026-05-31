@@ -114,7 +114,7 @@
                                     {
                                         <button class="btn btn-sm btn-outline-danger"
                                                 disabled="@busy"
-                                                @onclick="() => Block(user.Id)">
+                                                @onclick="() => RequestBlock(user)">
                                             Block
                                         </button>
                                     }
@@ -128,6 +128,14 @@
     </div>
 </div>
 
+<ConfirmDialog @bind-IsVisible="showBlockDialog"
+               Title="Block user"
+               Message="@blockDialogMessage"
+               ConfirmText="Block user"
+               CancelText="Cancel"
+               ConfirmButtonClass="btn-danger"
+               OnConfirmed="BlockConfirmedAsync" />
+
 @code {
     private readonly CreateUserModel model = new();
     private PagedResult<UserDto>? paged;
@@ -136,6 +144,9 @@
     private bool busy;
     private int currentPage = 1;
     private int pageSize = 10;
+    private bool showBlockDialog;
+    private int? pendingBlockUserId;
+    private string blockDialogMessage = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -192,7 +203,24 @@
         busy = false;
     }
 
-    private async Task Block(int userId)
+    private void RequestBlock(UserDto user)
+    {
+        pendingBlockUserId = user.Id;
+        blockDialogMessage = $"Block {user.Name}? They will not be able to sign in.";
+        showBlockDialog = true;
+    }
+
+    private async Task BlockConfirmedAsync()
+    {
+        if (pendingBlockUserId is null)
+            return;
+
+        await BlockAsync(pendingBlockUserId.Value);
+        pendingBlockUserId = null;
+        blockDialogMessage = "";
+    }
+
+    private async Task BlockAsync(int userId)
     {
         busy = true;
         error = null;
