@@ -1,0 +1,42 @@
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <div class="d-flex align-items-center gap-2">
+        <small class="text-muted">Rows per page:</small>
+        <select class="form-select form-select-sm" style="width: auto;" value="@PageSize"
+                @onchange="e => OnPageSizeChanged.InvokeAsync(int.Parse(e.Value!.ToString()!))">
+            @foreach (var size in PageSizeOptions)
+            {
+                <option value="@size">@size</option>
+            }
+        </select>
+        <small class="text-muted">
+            @((CurrentPage - 1) * PageSize + 1)–@(Math.Min(CurrentPage * PageSize, TotalCount)) of @TotalCount
+        </small>
+    </div>
+    <nav>
+        <ul class="pagination pagination-sm mb-0">
+            <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                <button class="page-link" @onclick="() => OnPageChanged.InvokeAsync(CurrentPage - 1)">‹</button>
+            </li>
+            @for (var p = 1; p <= TotalPages; p++)
+            {
+                var pageNum = p;
+                <li class="page-item @(pageNum == CurrentPage ? "active" : "")">
+                    <button class="page-link" @onclick="() => OnPageChanged.InvokeAsync(pageNum)">@pageNum</button>
+                </li>
+            }
+            <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                <button class="page-link" @onclick="() => OnPageChanged.InvokeAsync(CurrentPage + 1)">›</button>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public int CurrentPage { get; set; }
+    [Parameter, EditorRequired] public int TotalPages { get; set; }
+    [Parameter, EditorRequired] public int TotalCount { get; set; }
+    [Parameter, EditorRequired] public int PageSize { get; set; }
+    [Parameter] public int[] PageSizeOptions { get; set; } = [10, 25, 50];
+    [Parameter, EditorRequired] public EventCallback<int> OnPageChanged { get; set; }
+    [Parameter, EditorRequired] public EventCallback<int> OnPageSizeChanged { get; set; }
+}

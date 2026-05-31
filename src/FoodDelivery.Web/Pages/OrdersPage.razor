@@ -18,28 +18,9 @@ else if (paged.TotalCount == 0)
 }
 else
 {
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <small class="text-muted">
-            Showing @((currentPage - 1) * pageSize + 1)–@(Math.Min(currentPage * pageSize, paged.TotalCount)) of @paged.TotalCount orders
-        </small>
-        <nav>
-            <ul class="pagination pagination-sm mb-0">
-                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                    <button class="page-link" @onclick="() => GoToPage(currentPage - 1)">‹</button>
-                </li>
-                @for (var p = 1; p <= paged.TotalPages; p++)
-                {
-                    var pageNum = p;
-                    <li class="page-item @(pageNum == currentPage ? "active" : "")">
-                        <button class="page-link" @onclick="() => GoToPage(pageNum)">@pageNum</button>
-                    </li>
-                }
-                <li class="page-item @(currentPage == paged.TotalPages ? "disabled" : "")">
-                    <button class="page-link" @onclick="() => GoToPage(currentPage + 1)">›</button>
-                </li>
-            </ul>
-        </nav>
-    </div>
+    <PaginationBar CurrentPage="currentPage" TotalPages="paged.TotalPages"
+                   TotalCount="paged.TotalCount" PageSize="pageSize"
+                   OnPageChanged="GoToPage" OnPageSizeChanged="ChangePageSize" />
 
     <table class="table align-middle">
         <thead>
@@ -73,7 +54,7 @@ else
 @code {
     private PagedResult<OrderResponse>? paged;
     private int currentPage = 1;
-    private const int pageSize = 10;
+    private int pageSize = 10;
 
     protected override async Task OnInitializedAsync()
     {
@@ -90,6 +71,13 @@ else
     {
         if (paged is null || page < 1 || page > paged.TotalPages) return;
         currentPage = page;
+        await LoadPageAsync();
+    }
+
+    private async Task ChangePageSize(int size)
+    {
+        pageSize = size;
+        currentPage = 1;
         await LoadPageAsync();
     }
 
