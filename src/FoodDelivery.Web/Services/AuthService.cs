@@ -31,4 +31,25 @@ public class AuthService(HttpClient http, IJSRuntime js, AuthenticationStateProv
         await js.InvokeVoidAsync("localStorage.removeItem", "jwt");
         ((JwtAuthStateProvider)authStateProvider).NotifyUserLoggedOut();
     }
+
+    public async Task<(bool Success, string Message, string? ResetUrl)> ForgotPasswordAsync(string email)
+    {
+        var response = await http.PostAsJsonAsync("api/auth/forgot-password", new { Email = email });
+        if (!response.IsSuccessStatusCode)
+            return (false, "Unable to process your request. Please try again.", null);
+
+        var result = await response.Content.ReadFromJsonAsync<ForgotPasswordResponse>();
+        return (true, result?.Message ?? "If an account exists for this email, you will receive password reset instructions.", result?.ResetUrl);
+    }
+
+    public async Task<(bool Success, string? Error)> ResetPasswordAsync(string token, string newPassword)
+    {
+        var response = await http.PostAsJsonAsync("api/auth/reset-password", new { Token = token, NewPassword = newPassword });
+        if (response.IsSuccessStatusCode)
+            return (true, null);
+
+        return (false, await response.Content.ReadAsStringAsync());
+    }
 }
+
+public record ForgotPasswordResponse(string Message, string? ResetUrl);
