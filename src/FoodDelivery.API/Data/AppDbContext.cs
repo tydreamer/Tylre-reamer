@@ -40,6 +40,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .Property(m => m.Price)
             .HasPrecision(18, 2);
 
+        modelBuilder.Entity<Meal>()
+            .Property(m => m.ImageUrl)
+            .HasMaxLength(500);
+
+        modelBuilder.Entity<Restaurant>()
+            .Property(r => r.ImageUrl)
+            .HasMaxLength(500);
+
         modelBuilder.Entity<Coupon>()
             .Property(c => c.DiscountValue)
             .HasPrecision(18, 2);

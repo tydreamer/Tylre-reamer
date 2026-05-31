@@ -33,7 +33,12 @@ else
             @foreach (var meal in meals)
             {
                 <div class="col">
-                    <div class="card h-100">
+                    <div class="card h-100 shadow-sm">
+                        @if (!string.IsNullOrWhiteSpace(meal.ImageUrl))
+                        {
+                            <img src="@meal.ImageUrl" class="card-img-top" alt="@meal.Name"
+                                 style="height: 160px; object-fit: cover;" />
+                        }
                         <div class="card-body meal-card-body">
                             <div class="flex-grow-1">
                                 <h5 class="card-title">@meal.Name</h5>

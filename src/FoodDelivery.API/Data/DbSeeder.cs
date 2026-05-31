@@ -1,6 +1,7 @@
 using System.Globalization;
 using CsvHelper;
 using CsvHelper.Configuration;
+using FoodDelivery.API.Helpers;
 using FoodDelivery.API.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,13 +10,14 @@ namespace FoodDelivery.API.Data;
 public static class DbSeeder
 {
     private sealed record RestaurantRow(string Name, string Description, string ImageUrl);
-    private sealed record MealRow(string RestaurantName, string Name, string Description, decimal Price);
+    private sealed record MealRow(string RestaurantName, string Name, string Description, decimal Price, string? ImageUrl);
 
     public static async Task SeedAsync(AppDbContext db)
     {
         await SeedAdminAsync(db);
         await SeedRestaurantsAsync(db);
         await SeedMealsAsync(db);
+        await BackfillMealImagesAsync(db);
     }
 
     private static async Task SeedAdminAsync(AppDbContext db)
@@ -87,6 +89,7 @@ public static class DbSeeder
                 Name = m.Name,
                 Description = m.Description,
                 Price = m.Price,
+                ImageUrl = ResolveMealImageUrl(m),
                 RestaurantId = restaurantIdsByName[m.RestaurantName]
             })
             .ToList();
@@ -94,6 +97,26 @@ public static class DbSeeder
         db.Meals.AddRange(meals);
         await db.SaveChangesAsync();
     }
+
+    private static async Task BackfillMealImagesAsync(AppDbContext db)
+    {
+        var meals = await db.Meals
+            .Where(m => m.ImageUrl == "")
+            .ToListAsync();
+
+        if (meals.Count == 0)
+            return;
+
+        foreach (var meal in meals)
+            meal.ImageUrl = MealImageUrlBuilder.Build(meal.Name, meal.Id);
+
+        await db.SaveChangesAsync();
+    }
+
+    private static string ResolveMealImageUrl(MealRow row) =>
+        string.IsNullOrWhiteSpace(row.ImageUrl)
+            ? MealImageUrlBuilder.Build(row.Name, MealImageUrlBuilder.SeedFrom(row.RestaurantName, row.Name))
+            : row.ImageUrl.Trim();
 
     private static List<T> ReadCsv<T>(string fileName)
     {

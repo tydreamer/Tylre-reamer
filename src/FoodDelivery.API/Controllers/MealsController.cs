@@ -43,7 +43,7 @@ public class MealsController(AppDbContext db) : ControllerBase
         {
             Name = req.Name,
             Description = req.Description,
-            ImageUrl = req.ImageUrl,
+            ImageUrl = req.ImageUrl ?? string.Empty,
             Price = req.Price,
             RestaurantId = restaurantId
         };
@@ -67,7 +67,7 @@ public class MealsController(AppDbContext db) : ControllerBase
 
         meal.Name = req.Name;
         meal.Description = req.Description;
-        meal.ImageUrl = req.ImageUrl;
+        meal.ImageUrl = req.ImageUrl ?? string.Empty;
         meal.Price = req.Price;
         meal.IsAvailable = req.IsAvailable;
         await db.SaveChangesAsync();
