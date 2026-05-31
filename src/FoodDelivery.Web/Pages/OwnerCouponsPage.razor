@@ -34,17 +34,17 @@ else
                 <div class="mb-3">
                     <label class="form-label">Code</label>
                     <InputText class="form-control" @bind-Value="formModel.Code" />
-                    <ValidationMessage For="() => formModel.Code" />
+                    <FirstValidationMessage For="() => formModel.Code" />
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Discount (%)</label>
                     <InputNumber class="form-control" @bind-Value="formModel.DiscountValue" min="1" max="100" />
-                    <ValidationMessage For="() => formModel.DiscountValue" />
+                    <FirstValidationMessage For="() => formModel.DiscountValue" />
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Expires</label>
                     <InputDate class="form-control" @bind-Value="formModel.ExpiresAt" />
-                    <ValidationMessage For="() => formModel.ExpiresAt" />
+                    <FirstValidationMessage For="() => formModel.ExpiresAt" />
                 </div>
                 @if (createError is not null)
                 {

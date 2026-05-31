@@ -1,0 +1,47 @@
+@typeparam TValue
+@implements IDisposable
+
+@if (message is not null)
+{
+    <div class="validation-message">@message</div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public System.Linq.Expressions.Expression<Func<TValue>> For { get; set; } = default!;
+
+    [CascadingParameter]
+    private EditContext? EditContext { get; set; }
+
+    private string? message;
+    private FieldIdentifier fieldId;
+
+    protected override void OnParametersSet()
+    {
+        fieldId = FieldIdentifier.Create(For);
+        Refresh();
+    }
+
+    protected override void OnInitialized()
+    {
+        if (EditContext is not null)
+            EditContext.OnValidationStateChanged += OnValidationStateChanged;
+    }
+
+    private void OnValidationStateChanged(object? sender, ValidationStateChangedEventArgs e)
+    {
+        Refresh();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void Refresh()
+    {
+        message = EditContext?.GetValidationMessages(fieldId).FirstOrDefault();
+    }
+
+    public void Dispose()
+    {
+        if (EditContext is not null)
+            EditContext.OnValidationStateChanged -= OnValidationStateChanged;
+    }
+}

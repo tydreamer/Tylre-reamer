@@ -29,17 +29,17 @@ else
                 <div class="mb-3">
                     <label class="form-label">Name</label>
                     <InputText class="form-control" @bind-Value="formModel.Name" />
-                    <ValidationMessage For="() => formModel.Name" />
+                    <FirstValidationMessage For="() => formModel.Name" />
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Description</label>
                     <InputTextArea class="form-control" rows="3" @bind-Value="formModel.Description" />
-                    <ValidationMessage For="() => formModel.Description" />
+                    <FirstValidationMessage For="() => formModel.Description" />
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Image URL</label>
                     <InputText class="form-control" @bind-Value="formModel.ImageUrl" />
-                    <ValidationMessage For="() => formModel.ImageUrl" />
+                    <FirstValidationMessage For="() => formModel.ImageUrl" />
                 </div>
                 @if (submitError is not null)
                 {
