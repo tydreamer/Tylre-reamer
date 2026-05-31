@@ -125,8 +125,8 @@ public class CartService(IJSRuntime js) : IAsyncDisposable
 
     private async Task NotifyAndPersistAsync()
     {
-        OnChange?.Invoke();
         await SaveAsync();
+        OnChange?.Invoke();
     }
 
     private async Task LoadAsync()

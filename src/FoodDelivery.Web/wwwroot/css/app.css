@@ -329,3 +329,15 @@ code {
     font-weight: 600;
     white-space: nowrap;
 }
+
+.cart-qty-display {
+    display: inline-block;
+    min-width: 2rem;
+    text-align: center;
+    font-weight: 500;
+}
+
+.cart-remove-btn {
+    line-height: 1;
+    padding: 0.25rem 0.5rem;
+}
