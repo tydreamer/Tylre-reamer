@@ -1,21 +1,18 @@
 using System.ComponentModel.DataAnnotations;
+using static FoodDelivery.API.Constants.ValidationMessages;
 
 namespace FoodDelivery.API.DTOs;
 
 public record CreateRestaurantRequest(
-    [Required(ErrorMessage = "Name is required."),
-     MaxLength(100, ErrorMessage = "Name cannot exceed 100 characters.")] string Name,
-    [Required(ErrorMessage = "Description is required."),
-     MaxLength(500, ErrorMessage = "Description cannot exceed 500 characters.")] string Description,
-    [MaxLength(500, ErrorMessage = "Image URL cannot exceed 500 characters.")] string? ImageUrl
+    [Required(ErrorMessage = NameRequired), MaxLength(100, ErrorMessage = NameTooLong)] string Name,
+    [Required(ErrorMessage = DescriptionRequired), MaxLength(500, ErrorMessage = DescriptionTooLong)] string Description,
+    [MaxLength(500, ErrorMessage = ImageUrlTooLong)] string? ImageUrl
 );
 
 public record UpdateRestaurantRequest(
-    [Required(ErrorMessage = "Name is required."),
-     MaxLength(100, ErrorMessage = "Name cannot exceed 100 characters.")] string Name,
-    [Required(ErrorMessage = "Description is required."),
-     MaxLength(500, ErrorMessage = "Description cannot exceed 500 characters.")] string Description,
-    [MaxLength(500, ErrorMessage = "Image URL cannot exceed 500 characters.")] string? ImageUrl
+    [Required(ErrorMessage = NameRequired), MaxLength(100, ErrorMessage = NameTooLong)] string Name,
+    [Required(ErrorMessage = DescriptionRequired), MaxLength(500, ErrorMessage = DescriptionTooLong)] string Description,
+    [MaxLength(500, ErrorMessage = ImageUrlTooLong)] string? ImageUrl
 );
 
 public record RestaurantResponse(int Id, string Name, string Description, string ImageUrl, int OwnerId);

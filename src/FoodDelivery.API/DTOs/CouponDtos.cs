@@ -1,11 +1,11 @@
 using System.ComponentModel.DataAnnotations;
+using static FoodDelivery.API.Constants.ValidationMessages;
 
 namespace FoodDelivery.API.DTOs;
 
 public record CreateCouponRequest(
-    [Required(ErrorMessage = "Code is required."),
-     MaxLength(10, ErrorMessage = "Code cannot exceed 10 characters.")] string Code,
-    [Range(1, 100, ErrorMessage = "Discount must be between 1% and 100%.")] decimal DiscountValue,
+    [Required(ErrorMessage = CodeRequired), MaxLength(10, ErrorMessage = CodeTooLong)] string Code,
+    [Range(1, 100, ErrorMessage = DiscountInvalid)] decimal DiscountValue,
     DateTime ExpiresAt
 );
 

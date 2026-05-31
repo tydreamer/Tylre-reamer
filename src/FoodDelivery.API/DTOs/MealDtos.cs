@@ -1,21 +1,20 @@
 using System.ComponentModel.DataAnnotations;
+using static FoodDelivery.API.Constants.ValidationMessages;
 
 namespace FoodDelivery.API.DTOs;
 
 public record CreateMealRequest(
-    [Required(ErrorMessage = "Name is required."),
-     MaxLength(100, ErrorMessage = "Name cannot exceed 100 characters.")] string Name,
-    [MaxLength(500, ErrorMessage = "Description cannot exceed 500 characters.")] string? Description,
-    [MaxLength(500, ErrorMessage = "Image URL cannot exceed 500 characters.")] string? ImageUrl,
-    [Range(0.01, 100_000, ErrorMessage = "Price must be greater than 0.")] decimal Price
+    [Required(ErrorMessage = NameRequired), MaxLength(100, ErrorMessage = NameTooLong)] string Name,
+    [MaxLength(500, ErrorMessage = DescriptionTooLong)] string? Description,
+    [MaxLength(500, ErrorMessage = ImageUrlTooLong)] string? ImageUrl,
+    [Range(0.01, 100_000, ErrorMessage = PriceInvalid)] decimal Price
 );
 
 public record UpdateMealRequest(
-    [Required(ErrorMessage = "Name is required."),
-     MaxLength(100, ErrorMessage = "Name cannot exceed 100 characters.")] string Name,
-    [MaxLength(500, ErrorMessage = "Description cannot exceed 500 characters.")] string? Description,
-    [MaxLength(500, ErrorMessage = "Image URL cannot exceed 500 characters.")] string? ImageUrl,
-    [Range(0.01, 100_000, ErrorMessage = "Price must be greater than 0.")] decimal Price,
+    [Required(ErrorMessage = NameRequired), MaxLength(100, ErrorMessage = NameTooLong)] string Name,
+    [MaxLength(500, ErrorMessage = DescriptionTooLong)] string? Description,
+    [MaxLength(500, ErrorMessage = ImageUrlTooLong)] string? ImageUrl,
+    [Range(0.01, 100_000, ErrorMessage = PriceInvalid)] decimal Price,
     bool IsAvailable
 );
 

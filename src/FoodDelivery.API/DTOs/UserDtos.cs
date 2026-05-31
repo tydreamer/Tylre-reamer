@@ -1,17 +1,13 @@
 using System.ComponentModel.DataAnnotations;
+using static FoodDelivery.API.Constants.ValidationMessages;
 
 namespace FoodDelivery.API.DTOs;
 
 public record CreateUserRequest(
-    [Required(ErrorMessage = "Name is required."),
-     MaxLength(100, ErrorMessage = "Name cannot exceed 100 characters.")] string Name,
-    [Required(ErrorMessage = "Email is required."),
-     EmailAddress(ErrorMessage = "Enter a valid email address."),
-     MaxLength(255, ErrorMessage = "Email cannot exceed 255 characters.")] string Email,
-    [Required(ErrorMessage = "Password is required."),
-     MinLength(6, ErrorMessage = "Password must be at least 6 characters."),
-     MaxLength(100, ErrorMessage = "Password cannot exceed 100 characters.")] string Password,
-    [Required(ErrorMessage = "Role is required.")] string Role
+    [Required(ErrorMessage = NameRequired), MaxLength(100, ErrorMessage = NameTooLong)] string Name,
+    [Required(ErrorMessage = EmailRequired), EmailAddress(ErrorMessage = EmailInvalid), MaxLength(255, ErrorMessage = EmailTooLong)] string Email,
+    [Required(ErrorMessage = PasswordRequired), MinLength(6, ErrorMessage = PasswordTooShort), MaxLength(100, ErrorMessage = PasswordTooLong)] string Password,
+    [Required(ErrorMessage = RoleRequired)] string Role
 );
 
 public record UserResponse(int Id, string Name, string Email, string Role, bool IsBlocked);

@@ -176,12 +176,12 @@ else
 
     private class CouponFormModel
     {
-        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Code is required.")]
-        [System.ComponentModel.DataAnnotations.MaxLength(10, ErrorMessage = "Code cannot exceed 10 characters.")]
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = ValidationMessages.CodeRequired)]
+        [System.ComponentModel.DataAnnotations.MaxLength(10, ErrorMessage = ValidationMessages.CodeTooLong)]
         public string Code { get; set; } = "";
 
-        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Discount is required.")]
-        [System.ComponentModel.DataAnnotations.Range(1, 100, ErrorMessage = "Discount must be between 1% and 100%.")]
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = ValidationMessages.DiscountRequired)]
+        [System.ComponentModel.DataAnnotations.Range(1, 100, ErrorMessage = ValidationMessages.DiscountInvalid)]
         public decimal DiscountValue { get; set; }
 
         [System.ComponentModel.DataAnnotations.Required]

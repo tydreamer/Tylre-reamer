@@ -1,22 +1,22 @@
 using System.ComponentModel.DataAnnotations;
+using static FoodDelivery.API.Constants.ValidationMessages;
 
 namespace FoodDelivery.API.DTOs;
 
 public record OrderItemRequest(
     [Range(1, int.MaxValue, ErrorMessage = "Invalid meal.")] int MealId,
-    [Range(1, 100, ErrorMessage = "Quantity must be between 1 and 100.")] int Quantity
+    [Range(1, 100, ErrorMessage = QuantityInvalid)] int Quantity
 );
 
 public record PlaceOrderRequest(
     [Range(1, int.MaxValue, ErrorMessage = "Invalid restaurant.")] int RestaurantId,
-    [Required(ErrorMessage = "At least one item is required."),
-     MinLength(1, ErrorMessage = "At least one item is required.")] List<OrderItemRequest> Items,
-    [Range(0, 100_000, ErrorMessage = "Tip must be 0 or greater.")] decimal Tip,
-    [MaxLength(10, ErrorMessage = "Coupon code cannot exceed 10 characters.")] string? CouponCode
+    [Required(ErrorMessage = ItemsRequired), MinLength(1, ErrorMessage = ItemsRequired)] List<OrderItemRequest> Items,
+    [Range(0, 100_000, ErrorMessage = TipInvalid)] decimal Tip,
+    [MaxLength(10, ErrorMessage = CodeTooLong)] string? CouponCode
 );
 
 public record UpdateOrderStatusRequest(
-    [Required(ErrorMessage = "Status is required.")] string Status
+    [Required(ErrorMessage = StatusRequired)] string Status
 );
 
 public record OrderStatusNotification(int OrderId, string RestaurantName, string Status);
