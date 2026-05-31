@@ -19,3 +19,13 @@ public record UpdateMealRequest(
 );
 
 public record MealResponse(int Id, string Name, string Description, string ImageUrl, decimal Price, bool IsAvailable, int RestaurantId);
+
+public record MealBrowseResponse(
+    int Id,
+    string Name,
+    string Description,
+    string ImageUrl,
+    decimal Price,
+    bool IsAvailable,
+    int RestaurantId,
+    string RestaurantName);

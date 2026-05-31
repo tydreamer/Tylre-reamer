@@ -5,6 +5,16 @@ namespace FoodDelivery.Web.Services;
 
 public class MealService(HttpClient http)
 {
+    public async Task<List<MealBrowseDto>> GetAllAsync()
+    {
+        return await http.GetFromJsonAsync<List<MealBrowseDto>>("api/meals") ?? [];
+    }
+
+    public async Task<MealBrowseDto?> GetBrowseByIdAsync(int mealId)
+    {
+        return await http.GetFromJsonAsync<MealBrowseDto>($"api/meals/{mealId}");
+    }
+
     public async Task<List<MealDto>> GetByRestaurantAsync(int restaurantId)
     {
         return await http.GetFromJsonAsync<List<MealDto>>($"api/restaurants/{restaurantId}/meals") ?? [];

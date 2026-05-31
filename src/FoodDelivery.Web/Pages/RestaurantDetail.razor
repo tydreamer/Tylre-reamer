@@ -34,28 +34,30 @@ else
             {
                 <div class="col">
                     <div class="card h-100 shadow-sm">
-                        @if (!string.IsNullOrWhiteSpace(meal.ImageUrl))
-                        {
-                            <img src="@meal.ImageUrl" class="card-img-top" alt="@meal.Name"
-                                 style="height: 160px; object-fit: cover;" />
-                        }
-                        <div class="card-body meal-card-body">
-                            <div class="flex-grow-1">
-                                <h5 class="card-title">@meal.Name</h5>
+                        <a href="/meals/@meal.Id" class="text-decoration-none text-dark">
+                            @if (!string.IsNullOrWhiteSpace(meal.ImageUrl))
+                            {
+                                <img src="@meal.ImageUrl" class="card-img-top" alt="@meal.Name"
+                                     style="height: 160px; object-fit: cover;" />
+                            }
+                            <div class="card-body">
+                                <h5 class="card-title mb-1">@meal.Name</h5>
                                 <p class="card-text text-muted mb-2">@meal.Description</p>
-                                @if (!meal.IsAvailable)
-                                {
-                                    <span class="badge bg-secondary">Unavailable</span>
-                                }
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-success fs-6">@meal.Price.ToString("C")</span>
+                                    @if (!meal.IsAvailable)
+                                    {
+                                        <span class="badge bg-secondary">Unavailable</span>
+                                    }
+                                </div>
                             </div>
-                            <div class="meal-card-actions">
-                                <div class="badge bg-success fs-6">@meal.Price.ToString("C")</div>
-                                <button class="btn btn-sm btn-outline-primary"
-                                        disabled="@(!meal.IsAvailable)"
-                                        @onclick="async () => await AddToCart(meal)">
-                                    Add to cart
-                                </button>
-                            </div>
+                        </a>
+                        <div class="card-footer bg-white border-top-0 pt-0">
+                            <button class="btn btn-sm btn-outline-primary w-100"
+                                    disabled="@(!meal.IsAvailable)"
+                                    @onclick="async () => await AddToCart(meal)">
+                                Add to cart
+                            </button>
                         </div>
                     </div>
                 </div>

@@ -259,6 +259,20 @@ code {
     }
 }
 
+/* Meal detail */
+.meal-detail-image {
+    max-height: 360px;
+    object-fit: cover;
+}
+
+.meal-detail-image-placeholder {
+    min-height: 240px;
+}
+
+.meal-detail-cart .btn-group .btn {
+    min-width: 2.75rem;
+}
+
 /* Auth pages (layout shell + cards rendered via @Body) */
 .auth-layout {
     position: relative;

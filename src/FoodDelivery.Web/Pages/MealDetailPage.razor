@@ -1,0 +1,130 @@
+@page "/meals/{Id:int}"
+@inject MealService Meals
+@inject CartService Cart
+@inject NavigationManager Navigation
+
+@if (!loaded)
+{
+    <p><em>Loading...</em></p>
+}
+else if (meal is null)
+{
+    <div class="alert alert-warning">Meal not found.</div>
+    <a href="/meals" class="btn btn-link ps-0">&larr; Back to meals</a>
+}
+else
+{
+    <PageTitle>@meal.Name</PageTitle>
+
+    <div class="mb-4">
+        <a href="/meals" class="btn btn-link ps-0">&larr; Back to meals</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-5 col-lg-4">
+            @if (!string.IsNullOrWhiteSpace(meal.ImageUrl))
+            {
+                <img src="@meal.ImageUrl" class="img-fluid rounded shadow-sm w-100 meal-detail-image" alt="@meal.Name" />
+            }
+            else
+            {
+                <div class="meal-detail-image-placeholder rounded bg-light d-flex align-items-center justify-content-center text-muted">
+                    No image
+                </div>
+            }
+        </div>
+
+        <div class="col-md-7 col-lg-8">
+            <h1 class="mb-2">@meal.Name</h1>
+            <p class="text-muted mb-3">
+                <a href="/restaurants/@meal.RestaurantId" class="text-decoration-none">@meal.RestaurantName</a>
+            </p>
+            <p class="mb-4">@meal.Description</p>
+
+            <div class="badge bg-success fs-5 mb-4">@meal.Price.ToString("C")</div>
+
+            @if (!meal.IsAvailable)
+            {
+                <div class="alert alert-secondary">This meal is currently unavailable.</div>
+            }
+            else
+            {
+                @if (cartMessage is not null)
+                {
+                    <div class="alert alert-warning">@cartMessage</div>
+                }
+
+                <div class="meal-detail-cart d-flex flex-wrap align-items-center gap-3">
+                    <div class="btn-group" role="group" aria-label="Quantity">
+                        <button type="button" class="btn btn-outline-secondary"
+                                disabled="@(quantity <= 1 || busy)"
+                                @onclick="DecreaseQuantity">−</button>
+                        <span class="btn btn-outline-secondary disabled px-3">@quantity</span>
+                        <button type="button" class="btn btn-outline-secondary"
+                                disabled="@busy"
+                                @onclick="IncreaseQuantity">+</button>
+                    </div>
+                    <button type="button" class="btn btn-primary"
+                            disabled="@busy"
+                            @onclick="AddToCartAsync">
+                        @(busy ? "Adding..." : "Add to cart")
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private MealBrowseDto? meal;
+    private bool loaded;
+    private int quantity = 1;
+    private bool busy;
+    private string? cartMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Cart.InitializeAsync();
+        meal = await Meals.GetBrowseByIdAsync(Id);
+        loaded = true;
+    }
+
+    private void IncreaseQuantity() => quantity++;
+
+    private void DecreaseQuantity()
+    {
+        if (quantity > 1)
+            quantity--;
+    }
+
+    private async Task AddToCartAsync()
+    {
+        if (meal is null || !meal.IsAvailable)
+            return;
+
+        cartMessage = null;
+
+        if (!Cart.IsEmpty && Cart.RestaurantId != meal.RestaurantId)
+        {
+            cartMessage = $"Your cart has items from {Cart.RestaurantName}. Clear the cart or finish that order before adding meals from another restaurant.";
+            return;
+        }
+
+        busy = true;
+        var mealDto = new MealDto(
+            meal.Id,
+            meal.Name,
+            meal.Description,
+            meal.ImageUrl,
+            meal.Price,
+            meal.IsAvailable,
+            meal.RestaurantId);
+
+        await Cart.AddAsync(mealDto, meal.RestaurantName, quantity);
+        busy = false;
+        Navigation.NavigateTo("/cart");
+    }
+}
