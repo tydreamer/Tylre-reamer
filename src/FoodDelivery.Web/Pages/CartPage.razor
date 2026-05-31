@@ -15,7 +15,7 @@
         <p class="mb-1">Your order <strong>#@placedOrder.Id</strong> has been placed.</p>
         <p class="mb-0">Total charged: <strong>@placedOrder.TotalPrice.ToString("C")</strong></p>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex flex-column flex-sm-row flex-wrap gap-2">
         <a href="/orders/@placedOrder.Id" class="btn btn-primary">View order</a>
         <a href="/restaurants" class="btn btn-outline-secondary">Back to restaurants</a>
     </div>

@@ -34,24 +34,22 @@ else
             {
                 <div class="col">
                     <div class="card h-100">
-                        <div class="card-body d-flex justify-content-between align-items-start">
-                            <div>
+                        <div class="card-body meal-card-body">
+                            <div class="flex-grow-1">
                                 <h5 class="card-title">@meal.Name</h5>
-                                <p class="card-text text-muted">@meal.Description</p>
+                                <p class="card-text text-muted mb-2">@meal.Description</p>
                                 @if (!meal.IsAvailable)
                                 {
                                     <span class="badge bg-secondary">Unavailable</span>
                                 }
                             </div>
-                            <div class="text-end ms-3">
-                                <div class="badge bg-success fs-6 mb-2">@meal.Price.ToString("C")</div>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-primary"
-                                            disabled="@(!meal.IsAvailable)"
-                                            @onclick="async () => await AddToCart(meal)">
-                                        Add to cart
-                                    </button>
-                                </div>
+                            <div class="meal-card-actions">
+                                <div class="badge bg-success fs-6">@meal.Price.ToString("C")</div>
+                                <button class="btn btn-sm btn-outline-primary"
+                                        disabled="@(!meal.IsAvailable)"
+                                        @onclick="async () => await AddToCart(meal)">
+                                    Add to cart
+                                </button>
                             </div>
                         </div>
                     </div>

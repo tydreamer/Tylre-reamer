@@ -7,13 +7,6 @@
 
 <PageTitle>@(restaurant?.Name ?? "Meals")</PageTitle>
 
-<div class="mb-4">
-    <a href="owner/restaurants" class="btn btn-link ps-0">&larr; Back to my restaurants</a>
-    @if (restaurant is not null)
-    {
-        <h1 class="mb-0">@restaurant.Name — Meals</h1>
-    }
-</div>
 
 @if (error is not null)
 {
@@ -22,11 +15,18 @@
 
 @if (restaurant is null || meals is null)
 {
-    <p><em>Loading...</em></p>
+    <div class="mb-4">
+        <a href="owner/restaurants" class="btn btn-link ps-0">&larr; Back to my restaurants</a>
+        <p class="mb-0"><em>Loading...</em></p>
+    </div>
 }
 else
 {
-    <div class="d-flex justify-content-end mb-3">
+    <div class="page-header mb-4">
+        <div class="page-header-title">
+            <a href="owner/restaurants" class="btn btn-link ps-0">&larr; Back to my restaurants</a>
+            <h1 class="mb-0">@restaurant.Name — Meals</h1>
+        </div>
         <a href="owner/restaurants/@RestaurantId/meals/new" class="btn btn-primary">Add Meal</a>
     </div>
 
