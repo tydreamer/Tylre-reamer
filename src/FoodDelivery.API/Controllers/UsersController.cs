@@ -76,4 +76,17 @@ public class UsersController(AppDbContext db) : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPut("{id}/unblock")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Unblock(int id)
+    {
+        var user = await db.Users.FindAsync(id);
+        if (user is null) return NotFound();
+
+        user.IsBlocked = false;
+        await db.SaveChangesAsync();
+
+        return NoContent();
+    }
 }

@@ -30,4 +30,13 @@ public class UserService(HttpClient http)
 
         return (false, await response.Content.ReadAsStringAsync());
     }
+
+    public async Task<(bool Success, string? Error)> UnblockAsync(int userId)
+    {
+        var response = await http.PutAsync($"api/users/{userId}/unblock", null);
+        if (response.IsSuccessStatusCode)
+            return (true, null);
+
+        return (false, await response.Content.ReadAsStringAsync());
+    }
 }

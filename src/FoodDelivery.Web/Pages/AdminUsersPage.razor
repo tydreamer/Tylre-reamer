@@ -56,6 +56,29 @@
         }
         else
         {
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <small class="text-muted">
+                    Showing @((currentPage - 1) * pageSize + 1)–@(Math.Min(currentPage * pageSize, paged.TotalCount)) of @paged.TotalCount users
+                </small>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => GoToPage(currentPage - 1)">‹</button>
+                        </li>
+                        @for (var p = 1; p <= paged.TotalPages; p++)
+                        {
+                            var pageNum = p;
+                            <li class="page-item @(pageNum == currentPage ? "active" : "")">
+                                <button class="page-link" @onclick="() => GoToPage(pageNum)">@pageNum</button>
+                            </li>
+                        }
+                        <li class="page-item @(currentPage == paged.TotalPages ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => GoToPage(currentPage + 1)">›</button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
             <table class="table align-middle">
                 <thead>
                     <tr>
@@ -84,7 +107,15 @@
                                 }
                             </td>
                             <td class="text-end">
-                                @if (!user.IsBlocked)
+                                @if (user.IsBlocked)
+                                {
+                                    <button class="btn btn-sm btn-outline-success"
+                                            disabled="@busy"
+                                            @onclick="() => Unblock(user.Id)">
+                                        Unblock
+                                    </button>
+                                }
+                                else
                                 {
                                     <button class="btn btn-sm btn-outline-danger"
                                             disabled="@busy"
@@ -97,29 +128,6 @@
                     }
                 </tbody>
             </table>
-
-            <div class="d-flex justify-content-between align-items-center">
-                <small class="text-muted">
-                    Showing @((currentPage - 1) * pageSize + 1)–@(Math.Min(currentPage * pageSize, paged.TotalCount)) of @paged.TotalCount users
-                </small>
-                <nav>
-                    <ul class="pagination pagination-sm mb-0">
-                        <li class="page-item @(currentPage == 1 ? "disabled" : "")">
-                            <button class="page-link" @onclick="() => GoToPage(currentPage - 1)">‹</button>
-                        </li>
-                        @for (var p = 1; p <= paged.TotalPages; p++)
-                        {
-                            var pageNum = p;
-                            <li class="page-item @(pageNum == currentPage ? "active" : "")">
-                                <button class="page-link" @onclick="() => GoToPage(pageNum)">@pageNum</button>
-                            </li>
-                        }
-                        <li class="page-item @(currentPage == paged.TotalPages ? "disabled" : "")">
-                            <button class="page-link" @onclick="() => GoToPage(currentPage + 1)">›</button>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
         }
     </div>
 </div>
@@ -174,13 +182,23 @@
     {
         busy = true;
         error = null;
-
         var (success, err) = await Users.BlockAsync(userId);
         if (success)
             await LoadPageAsync();
         else
             error = err;
+        busy = false;
+    }
 
+    private async Task Unblock(int userId)
+    {
+        busy = true;
+        error = null;
+        var (success, err) = await Users.UnblockAsync(userId);
+        if (success)
+            await LoadPageAsync();
+        else
+            error = err;
         busy = false;
     }
 
