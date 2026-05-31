@@ -1,8 +1,10 @@
 @page "/sign-up"
 @layout AuthLayout
 @attribute [AllowAnonymous]
+@using System.ComponentModel.DataAnnotations
 @inject AuthService Auth
 @inject NavigationManager Navigation
+@implements IDisposable
 
 <PageTitle>Sign Up</PageTitle>
 
@@ -10,8 +12,7 @@
     <div class="card-body p-4">
         <h3 class="text-center mb-4">Sign Up</h3>
 
-        <EditForm Model="model" OnValidSubmit="HandleSignUp">
-            <DataAnnotationsValidator />
+        <EditForm EditContext="editContext" OnValidSubmit="HandleSignUp">
             <div class="mb-3">
                 <label class="form-label">Name</label>
                 <InputText class="form-control" @bind-Value="model.Name" />
@@ -25,7 +26,6 @@
             <div class="mb-3">
                 <label class="form-label">Password</label>
                 <InputText class="form-control" @bind-Value="model.Password" @bind-Value:after="OnPasswordChanged" type="password" autocomplete="new-password" />
-                <FirstValidationMessage For="() => model.Password" />
                 @if (!string.IsNullOrEmpty(model.Password))
                 {
                     <div class="password-strength mt-2" aria-live="polite">
@@ -86,6 +86,8 @@
     private Task<AuthenticationState>? AuthStateTask { get; set; }
 
     private readonly SignUpModel model = new();
+    private EditContext editContext = null!;
+    private ValidationMessageStore validationMessages = null!;
     private PasswordStrengthResult passwordStrength = PasswordStrengthResult.Evaluate("");
     private string? error;
     private bool loading;
@@ -136,6 +138,11 @@
 
     protected override async Task OnInitializedAsync()
     {
+        editContext = new EditContext(model);
+        validationMessages = new ValidationMessageStore(editContext);
+        editContext.OnValidationRequested += OnValidationRequested;
+        editContext.OnFieldChanged += OnFieldChanged;
+
         if (AuthStateTask is not null)
         {
             var state = await AuthStateTask;
@@ -144,10 +151,61 @@
         }
     }
 
-    private void OnPasswordChanged() => passwordStrength = PasswordStrengthResult.Evaluate(model.Password);
+    private void OnPasswordChanged()
+    {
+        passwordStrength = PasswordStrengthResult.Evaluate(model.Password);
+        validationMessages.Clear(FieldIdentifier.Create(() => model.Password));
+        editContext.NotifyValidationStateChanged();
+    }
+
+    private void OnValidationRequested(object? sender, ValidationRequestedEventArgs e) => ValidateForm();
+
+    private void OnFieldChanged(object? sender, FieldChangedEventArgs e)
+    {
+        if (e.FieldIdentifier.FieldName == nameof(SignUpModel.Password))
+            return;
+
+        ValidateForm();
+    }
+
+    private void ValidateForm()
+    {
+        validationMessages.Clear();
+        ValidateProperty(nameof(SignUpModel.Name));
+        ValidateProperty(nameof(SignUpModel.Email));
+        ValidateProperty(nameof(SignUpModel.ConfirmPassword));
+        editContext.NotifyValidationStateChanged();
+    }
+
+    private void ValidateProperty(string propertyName)
+    {
+        var property = typeof(SignUpModel).GetProperty(propertyName);
+        if (property is null)
+            return;
+
+        var field = new FieldIdentifier(model, propertyName);
+        var results = new List<ValidationResult>();
+        var context = new ValidationContext(model) { MemberName = propertyName };
+        Validator.TryValidateProperty(property.GetValue(model), context, results);
+
+        foreach (var result in results)
+            validationMessages.Add(field, result.ErrorMessage!);
+    }
+
+    public void Dispose()
+    {
+        if (editContext is null)
+            return;
+
+        editContext.OnValidationRequested -= OnValidationRequested;
+        editContext.OnFieldChanged -= OnFieldChanged;
+    }
 
     private async Task HandleSignUp()
     {
+        if (!passwordStrength.IsAcceptable)
+            return;
+
         loading = true;
         error = null;
         error = await Auth.RegisterAsync(model.Name, model.Email, model.Password, model.Role);
@@ -159,22 +217,19 @@
 
     private class SignUpModel
     {
-        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = ValidationMessages.NameRequired)]
-        [System.ComponentModel.DataAnnotations.MaxLength(100, ErrorMessage = ValidationMessages.NameTooLong)]
+        [Required(ErrorMessage = ValidationMessages.NameRequired)]
+        [MaxLength(100, ErrorMessage = ValidationMessages.NameTooLong)]
         public string Name { get; set; } = "";
 
-        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = ValidationMessages.EmailRequired)]
-        [System.ComponentModel.DataAnnotations.EmailAddress(ErrorMessage = ValidationMessages.EmailInvalid)]
-        [System.ComponentModel.DataAnnotations.MaxLength(255, ErrorMessage = ValidationMessages.EmailTooLong)]
+        [Required(ErrorMessage = ValidationMessages.EmailRequired)]
+        [EmailAddress(ErrorMessage = ValidationMessages.EmailInvalid)]
+        [MaxLength(255, ErrorMessage = ValidationMessages.EmailTooLong)]
         public string Email { get; set; } = "";
 
-        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = ValidationMessages.PasswordRequired)]
-        [System.ComponentModel.DataAnnotations.MaxLength(100, ErrorMessage = ValidationMessages.PasswordTooLong)]
-        [StrongPassword]
         public string Password { get; set; } = "";
 
-        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = ValidationMessages.PasswordConfirmRequired)]
-        [System.ComponentModel.DataAnnotations.Compare(nameof(Password), ErrorMessage = ValidationMessages.PasswordConfirmMismatch)]
+        [Required(ErrorMessage = ValidationMessages.PasswordConfirmRequired)]
+        [Compare(nameof(Password), ErrorMessage = ValidationMessages.PasswordConfirmMismatch)]
         public string ConfirmPassword { get; set; } = "";
 
         public string Role { get; set; } = "Customer";
