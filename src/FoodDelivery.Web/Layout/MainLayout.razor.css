@@ -6,6 +6,7 @@
 
 main {
     flex: 1;
+    min-width: 0;
 }
 
 .sidebar {
@@ -15,42 +16,53 @@ main {
 .top-row {
     background-color: #f7f7f7;
     border-bottom: 1px solid #d6d5d5;
-    justify-content: flex-end;
-    height: 3.5rem;
     display: flex;
     align-items: center;
+    justify-content: flex-end;
+    min-height: 3.5rem;
+    height: auto;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
 }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        white-space: nowrap;
-        margin-left: 1.5rem;
-        text-decoration: none;
-    }
+.top-row-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 100%;
+}
 
-    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
-        text-decoration: underline;
-    }
+.top-row-user {
+    max-width: 14rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
-    .top-row ::deep .btn {
-        margin-left: 0.5rem;
-    }
+.top-row ::deep a,
+.top-row ::deep .btn-link {
+    text-decoration: none;
+}
 
-    .top-row ::deep .btn:hover {
-        text-decoration: none;
-    }
+.top-row ::deep a:hover,
+.top-row ::deep .btn-link:hover {
+    text-decoration: underline;
+}
 
-    .top-row ::deep a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+.top-row ::deep .btn:hover {
+    text-decoration: none;
+}
 
 @media (max-width: 640.98px) {
     .top-row {
-        justify-content: space-between;
+        justify-content: stretch;
     }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        margin-left: 0;
+    .top-row-actions {
+        justify-content: flex-end;
     }
 }
 
@@ -70,12 +82,6 @@ main {
         position: sticky;
         top: 0;
         z-index: 1;
-    }
-
-    .top-row.auth ::deep a:first-child {
-        flex: 1;
-        text-align: right;
-        width: 0;
     }
 
     .top-row, article {

@@ -7,12 +7,12 @@
     </div>
 </div>
 
-<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+<div class="@NavMenuCssClass nav-scrollable">
     <nav class="nav flex-column">
         <AuthorizeView Roles="Customer,Owner">
             <Authorized>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="restaurants">
+                    <NavLink class="nav-link" href="restaurants" @onclick="CloseNavMenu">
                         <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Restaurants
                     </NavLink>
                 </div>
@@ -21,7 +21,7 @@
         <AuthorizeView Roles="Customer">
             <Authorized>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="orders">
+                    <NavLink class="nav-link" href="orders" @onclick="CloseNavMenu">
                         <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> My Orders
                     </NavLink>
                 </div>
@@ -30,12 +30,12 @@
         <AuthorizeView Roles="Owner">
             <Authorized>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="owner/restaurants">
+                    <NavLink class="nav-link" href="owner/restaurants" @onclick="CloseNavMenu">
                         <span class="bi bi-shop-nav-menu" aria-hidden="true"></span> My Restaurants
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="owner/orders">
+                    <NavLink class="nav-link" href="owner/orders" @onclick="CloseNavMenu">
                         <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Incoming Orders
                     </NavLink>
                 </div>
@@ -44,7 +44,7 @@
         <AuthorizeView Roles="Admin">
             <Authorized>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="admin/users">
+                    <NavLink class="nav-link" href="admin/users" @onclick="CloseNavMenu">
                         <span class="bi bi-people-fill-nav-menu" aria-hidden="true"></span> Users
                     </NavLink>
                 </div>
@@ -58,8 +58,7 @@
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
+    private void ToggleNavMenu() => collapseNavMenu = !collapseNavMenu;
+
+    private void CloseNavMenu() => collapseNavMenu = true;
 }
