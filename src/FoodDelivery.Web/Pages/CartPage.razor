@@ -31,7 +31,32 @@ else
 
     <div class="row g-4">
         <div class="col-md-7">
-            <div class="table-responsive">
+            <div class="d-md-none vstack gap-3 mb-3 mb-md-0">
+                @foreach (var item in Cart.Items)
+                {
+                    <div class="card cart-item-card shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <h6 class="card-title mb-1">@item.Meal.Name</h6>
+                                    <div class="text-muted small">@item.Meal.Price.ToString("C") each</div>
+                                </div>
+                                <div class="cart-item-total">@item.LineTotal.ToString("C")</div>
+                            </div>
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                <div class="btn-group btn-group-sm" role="group" aria-label="Quantity">
+                                    <button class="btn btn-outline-secondary" @onclick="() => ChangeQuantity(item.Meal.Id, item.Quantity - 1)">−</button>
+                                    <span class="btn btn-outline-secondary disabled">@item.Quantity</span>
+                                    <button class="btn btn-outline-secondary" @onclick="() => ChangeQuantity(item.Meal.Id, item.Quantity + 1)">+</button>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveItem(item.Meal.Id)">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="table-responsive d-none d-md-block">
                 <table class="table align-middle mb-0">
                     <thead>
                         <tr>
