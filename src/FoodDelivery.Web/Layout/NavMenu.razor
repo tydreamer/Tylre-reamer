@@ -1,56 +1,89 @@
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Food Delivery</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-</div>
+@implements IDisposable
+@inject AuthService Auth
+@inject CartService Cart
+@inject NavigationManager Navigation
 
-<div class="@NavMenuCssClass nav-scrollable">
-    <nav class="nav flex-column">
-        <AuthorizeView Roles="Customer,Owner">
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="restaurants" @onclick="CloseNavMenu">
-                        <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Restaurants
-                    </NavLink>
-                </div>
-            </Authorized>
-        </AuthorizeView>
-        <AuthorizeView Roles="Customer">
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="orders" @onclick="CloseNavMenu">
-                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> My Orders
-                    </NavLink>
-                </div>
-            </Authorized>
-        </AuthorizeView>
-        <AuthorizeView Roles="Owner">
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="owner/restaurants" @onclick="CloseNavMenu">
-                        <span class="bi bi-shop-nav-menu" aria-hidden="true"></span> My Restaurants
-                    </NavLink>
-                </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="owner/orders" @onclick="CloseNavMenu">
-                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Incoming Orders
-                    </NavLink>
-                </div>
-            </Authorized>
-        </AuthorizeView>
-        <AuthorizeView Roles="Admin">
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="admin/users" @onclick="CloseNavMenu">
-                        <span class="bi bi-people-fill-nav-menu" aria-hidden="true"></span> Users
-                    </NavLink>
-                </div>
-            </Authorized>
-        </AuthorizeView>
-    </nav>
+<div class="nav-menu">
+    <div class="nav-menu-header top-row ps-3 navbar navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="">Food Delivery</a>
+            <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+    </div>
+
+    <div class="@NavMenuCssClass nav-menu-body">
+        <nav class="nav flex-column nav-menu-primary">
+            <AuthorizeView Roles="Customer,Owner">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="restaurants" @onclick="CloseNavMenu">
+                            <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Restaurants
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+            <AuthorizeView Roles="Customer">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="orders" @onclick="CloseNavMenu">
+                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> My Orders
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link nav-link-with-badge" href="cart" @onclick="CloseNavMenu">
+                            <span class="bi bi-cart-nav-menu" aria-hidden="true"></span> Cart
+                            @if (Cart.TotalQuantity > 0)
+                            {
+                                <span class="nav-link-badge">@Cart.TotalQuantity</span>
+                            }
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+            <AuthorizeView Roles="Owner">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="owner/restaurants" @onclick="CloseNavMenu">
+                            <span class="bi bi-shop-nav-menu" aria-hidden="true"></span> My Restaurants
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="owner/orders" @onclick="CloseNavMenu">
+                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Incoming Orders
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+            <AuthorizeView Roles="Admin">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="admin/users" @onclick="CloseNavMenu">
+                            <span class="bi bi-people-fill-nav-menu" aria-hidden="true"></span> Users
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+        </nav>
+
+        <div class="nav-menu-footer px-3 pb-3">
+            <AuthorizeView>
+                <Authorized>
+                    <p class="nav-menu-user mb-2" title="@context.User.FindFirst("name")?.Value">
+                        @context.User.FindFirst("name")?.Value
+                    </p>
+                    <button type="button" class="btn btn-outline-light btn-sm w-100" @onclick="SignOut">
+                        Sign out
+                    </button>
+                </Authorized>
+                <NotAuthorized>
+                    <a class="btn btn-outline-light btn-sm w-100 mb-2" href="sign-in" @onclick="CloseNavMenu">Sign in</a>
+                    <a class="btn btn-light btn-sm w-100" href="sign-up" @onclick="CloseNavMenu">Sign up</a>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+    </div>
 </div>
 
 @code {
@@ -58,7 +91,32 @@
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
+    protected override void OnInitialized()
+    {
+        Cart.OnChange += StateHasChanged;
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        await Cart.RefreshFromStorageAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
     private void ToggleNavMenu() => collapseNavMenu = !collapseNavMenu;
 
     private void CloseNavMenu() => collapseNavMenu = true;
+
+    private async Task SignOut()
+    {
+        CloseNavMenu();
+        await Auth.LogoutAsync();
+        Navigation.NavigateTo("/sign-in");
+    }
+
+    public void Dispose()
+    {
+        Cart.OnChange -= StateHasChanged;
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
 }
