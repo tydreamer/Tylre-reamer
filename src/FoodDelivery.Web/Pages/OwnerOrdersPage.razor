@@ -18,10 +18,6 @@ else if (paged.TotalCount == 0)
 }
 else
 {
-    <PaginationBar CurrentPage="currentPage" TotalPages="paged.TotalPages"
-                   TotalCount="paged.TotalCount" PageSize="pageSize"
-                   OnPageChanged="GoToPage" OnPageSizeChanged="ChangePageSize" />
-
     <div class="table-responsive">
         <table class="table align-middle mb-0">
             <thead>
@@ -53,6 +49,10 @@ else
             </tbody>
         </table>
     </div>
+
+    <PaginationBar CurrentPage="currentPage" TotalPages="paged.TotalPages"
+                   TotalCount="paged.TotalCount" PageSize="pageSize"
+                   OnPageChanged="GoToPage" OnPageSizeChanged="ChangePageSize" />
 }
 
 @code {

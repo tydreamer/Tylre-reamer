@@ -1,64 +1,76 @@
-<div class="pagination-bar d-flex flex-column flex-sm-row flex-wrap gap-2 justify-content-between align-items-stretch align-items-sm-center mb-2">
-    <div class="d-flex flex-wrap align-items-center gap-2">
-        <small class="text-muted">Rows per page:</small>
-        <select class="form-select form-select-sm" style="width: auto;" value="@PageSize"
-                @onchange="e => OnPageSizeChanged.InvokeAsync(int.Parse(e.Value!.ToString()!))">
-            @foreach (var size in PageSizeOptions)
+@if (TotalPages > 0 || TotalCount > 0)
+{
+    <footer class="pagination-bar-footer" aria-label="Table pagination">
+        <div class="pagination-bar-pages">
+            @if (TotalPages > 0)
             {
-                <option value="@size">@size</option>
-            }
-        </select>
-        <small class="text-muted text-nowrap">
-            @((CurrentPage - 1) * PageSize + 1)–@(Math.Min(CurrentPage * PageSize, TotalCount)) of @TotalCount
-        </small>
-    </div>
+                <div class="d-flex d-sm-none align-items-center justify-content-center gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                            disabled="@(CurrentPage == 1)"
+                            @onclick="() => OnPageChanged.InvokeAsync(CurrentPage - 1)">
+                        Previous
+                    </button>
+                    <span class="small text-muted text-nowrap">Page @CurrentPage of @TotalPages</span>
+                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                            disabled="@(CurrentPage == TotalPages)"
+                            @onclick="() => OnPageChanged.InvokeAsync(CurrentPage + 1)">
+                        Next
+                    </button>
+                </div>
 
-    @if (TotalPages > 0)
-    {
-        <div class="d-flex d-sm-none align-items-center justify-content-between gap-2">
-            <button type="button" class="btn btn-sm btn-outline-secondary"
-                    disabled="@(CurrentPage == 1)"
-                    @onclick="() => OnPageChanged.InvokeAsync(CurrentPage - 1)">
-                Previous
-            </button>
-            <span class="small text-muted text-nowrap">Page @CurrentPage of @TotalPages</span>
-            <button type="button" class="btn btn-sm btn-outline-secondary"
-                    disabled="@(CurrentPage == TotalPages)"
-                    @onclick="() => OnPageChanged.InvokeAsync(CurrentPage + 1)">
-                Next
-            </button>
+                <nav class="d-none d-sm-block pagination-bar-nav" aria-label="Page navigation">
+                    <ul class="pagination pagination-sm mb-0 flex-nowrap justify-content-center">
+                        <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                            <button type="button" class="page-link" aria-label="Previous page"
+                                    @onclick="() => OnPageChanged.InvokeAsync(CurrentPage - 1)">‹</button>
+                        </li>
+                        @foreach (var entry in GetPageEntries())
+                        {
+                            @if (entry is null)
+                            {
+                                <li class="page-item disabled">
+                                    <span class="page-link">…</span>
+                                </li>
+                            }
+                            else
+                            {
+                                var pageNum = entry.Value;
+                                <li class="page-item @(pageNum == CurrentPage ? "active" : "")">
+                                    <button type="button" class="page-link" aria-label="Page @pageNum"
+                                            aria-current="@(pageNum == CurrentPage ? "page" : null)"
+                                            @onclick="() => OnPageChanged.InvokeAsync(pageNum)">@pageNum</button>
+                                </li>
+                            }
+                        }
+                        <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                            <button type="button" class="page-link" aria-label="Next page"
+                                    @onclick="() => OnPageChanged.InvokeAsync(CurrentPage + 1)">›</button>
+                        </li>
+                    </ul>
+                </nav>
+            }
         </div>
 
-        <nav class="d-none d-sm-block pagination-bar-nav">
-            <ul class="pagination pagination-sm mb-0 flex-nowrap">
-                <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
-                    <button type="button" class="page-link" @onclick="() => OnPageChanged.InvokeAsync(CurrentPage - 1)">‹</button>
-                </li>
-                @foreach (var entry in GetPageEntries())
+        <div class="pagination-bar-size">
+            <label class="pagination-bar-size-label text-muted" for="@pageSizeSelectId">Rows per page</label>
+            <select id="@pageSizeSelectId" class="form-select form-select-sm pagination-bar-size-select"
+                    value="@PageSize"
+                    @onchange="e => OnPageSizeChanged.InvokeAsync(int.Parse(e.Value!.ToString()!))">
+                @foreach (var size in PageSizeOptions)
                 {
-                    @if (entry is null)
-                    {
-                        <li class="page-item disabled">
-                            <span class="page-link">…</span>
-                        </li>
-                    }
-                    else
-                    {
-                        var pageNum = entry.Value;
-                        <li class="page-item @(pageNum == CurrentPage ? "active" : "")">
-                            <button type="button" class="page-link" @onclick="() => OnPageChanged.InvokeAsync(pageNum)">@pageNum</button>
-                        </li>
-                    }
+                    <option value="@size">@size</option>
                 }
-                <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
-                    <button type="button" class="page-link" @onclick="() => OnPageChanged.InvokeAsync(CurrentPage + 1)">›</button>
-                </li>
-            </ul>
-        </nav>
-    }
-</div>
+            </select>
+            <span class="text-muted pagination-bar-range text-nowrap">
+                @RangeLabel
+            </span>
+        </div>
+    </footer>
+}
 
 @code {
+    private readonly string pageSizeSelectId = $"page-size-{Guid.NewGuid():N}";
+
     [Parameter, EditorRequired] public int CurrentPage { get; set; }
     [Parameter, EditorRequired] public int TotalPages { get; set; }
     [Parameter, EditorRequired] public int TotalCount { get; set; }
@@ -66,6 +78,10 @@
     [Parameter] public int[] PageSizeOptions { get; set; } = [10, 25, 50];
     [Parameter, EditorRequired] public EventCallback<int> OnPageChanged { get; set; }
     [Parameter, EditorRequired] public EventCallback<int> OnPageSizeChanged { get; set; }
+
+    private string RangeLabel => TotalCount == 0
+        ? "0 of 0"
+        : $"{(CurrentPage - 1) * PageSize + 1}–{Math.Min(CurrentPage * PageSize, TotalCount)} of {TotalCount}";
 
     private IEnumerable<int?> GetPageEntries()
     {
