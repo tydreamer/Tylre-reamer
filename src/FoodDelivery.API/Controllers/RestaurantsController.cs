@@ -16,7 +16,8 @@ public class RestaurantsController(AppDbContext db) : ControllerBase
     public async Task<IActionResult> GetAll(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 12,
-        [FromQuery] int? ownerId = null)
+        [FromQuery] int? ownerId = null,
+        [FromQuery] string? search = null)
     {
         if (page < 1) page = 1;
         if (pageSize < 1 || pageSize > 100) pageSize = 12;
@@ -24,6 +25,14 @@ public class RestaurantsController(AppDbContext db) : ControllerBase
         var query = db.Restaurants.AsQueryable();
         if (ownerId.HasValue)
             query = query.Where(r => r.OwnerId == ownerId.Value);
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = $"%{search.Trim()}%";
+            query = query.Where(r =>
+                EF.Functions.ILike(r.Name, term) ||
+                EF.Functions.ILike(r.Description, term));
+        }
 
         var totalCount = await query.CountAsync();
         var items = await query

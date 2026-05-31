@@ -5,9 +5,13 @@ namespace FoodDelivery.Web.Services;
 
 public class MealService(HttpClient http)
 {
-    public async Task<PagedResult<MealBrowseDto>?> GetPageAsync(int page = 1, int pageSize = 12)
+    public async Task<PagedResult<MealBrowseDto>?> GetPageAsync(int page = 1, int pageSize = 12, string? search = null)
     {
-        return await http.GetFromJsonAsync<PagedResult<MealBrowseDto>>($"api/meals?page={page}&pageSize={pageSize}");
+        var url = $"api/meals?page={page}&pageSize={pageSize}";
+        if (!string.IsNullOrWhiteSpace(search))
+            url += $"&search={Uri.EscapeDataString(search.Trim())}";
+
+        return await http.GetFromJsonAsync<PagedResult<MealBrowseDto>>(url);
     }
 
     public async Task<MealBrowseDto?> GetBrowseByIdAsync(int mealId)

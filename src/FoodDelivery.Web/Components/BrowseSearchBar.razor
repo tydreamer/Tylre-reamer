@@ -1,0 +1,58 @@
+<div class="browse-search mb-4">
+    <label class="visually-hidden" for="@inputId">Search</label>
+    <div class="input-group browse-search-input">
+        <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
+        <input id="@inputId" type="search" class="form-control" placeholder="@Placeholder"
+               value="@SearchTerm" @oninput="OnInputAsync" @onkeydown="OnKeyDown" />
+        @if (!string.IsNullOrWhiteSpace(SearchTerm))
+        {
+            <button type="button" class="btn btn-outline-secondary" @onclick="ClearAsync">Clear</button>
+        }
+    </div>
+</div>
+
+@code {
+    private readonly string inputId = $"browse-search-{Guid.NewGuid():N}";
+    private CancellationTokenSource? debounceCts;
+
+    [Parameter] public string SearchTerm { get; set; } = "";
+    [Parameter] public EventCallback<string> SearchTermChanged { get; set; }
+    [Parameter] public EventCallback OnSearch { get; set; }
+    [Parameter] public string Placeholder { get; set; } = "Search by name or description...";
+
+    private async Task OnInputAsync(ChangeEventArgs e)
+    {
+        SearchTerm = e.Value?.ToString() ?? "";
+        await SearchTermChanged.InvokeAsync(SearchTerm);
+
+        debounceCts?.Cancel();
+        debounceCts = new CancellationTokenSource();
+        var token = debounceCts.Token;
+
+        try
+        {
+            await Task.Delay(350, token);
+            await OnSearch.InvokeAsync();
+        }
+        catch (TaskCanceledException)
+        {
+        }
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            debounceCts?.Cancel();
+            await OnSearch.InvokeAsync();
+        }
+    }
+
+    private async Task ClearAsync()
+    {
+        debounceCts?.Cancel();
+        SearchTerm = "";
+        await SearchTermChanged.InvokeAsync(SearchTerm);
+        await OnSearch.InvokeAsync();
+    }
+}

@@ -10,12 +10,24 @@ namespace FoodDelivery.API.Controllers;
 public class BrowseMealsController(AppDbContext db) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 12)
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 12,
+        [FromQuery] string? search = null)
     {
         if (page < 1) page = 1;
         if (pageSize < 1 || pageSize > 100) pageSize = 12;
 
         var query = db.Meals.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = $"%{search.Trim()}%";
+            query = query.Where(m =>
+                EF.Functions.ILike(m.Name, term) ||
+                EF.Functions.ILike(m.Description, term));
+        }
+
         var totalCount = await query.CountAsync();
         var items = await query
             .OrderBy(m => m.Restaurant.Name)

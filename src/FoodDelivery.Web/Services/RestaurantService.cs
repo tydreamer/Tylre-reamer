@@ -5,11 +5,17 @@ namespace FoodDelivery.Web.Services;
 
 public class RestaurantService(HttpClient http)
 {
-    public async Task<PagedResult<RestaurantDto>?> GetPageAsync(int page = 1, int pageSize = 12, int? ownerId = null)
+    public async Task<PagedResult<RestaurantDto>?> GetPageAsync(
+        int page = 1,
+        int pageSize = 12,
+        int? ownerId = null,
+        string? search = null)
     {
         var url = $"api/restaurants?page={page}&pageSize={pageSize}";
         if (ownerId.HasValue)
             url += $"&ownerId={ownerId.Value}";
+        if (!string.IsNullOrWhiteSpace(search))
+            url += $"&search={Uri.EscapeDataString(search.Trim())}";
 
         return await http.GetFromJsonAsync<PagedResult<RestaurantDto>>(url);
     }
@@ -53,5 +59,5 @@ public class RestaurantService(HttpClient http)
             return (true, null);
 
         return (false, await response.Content.ReadAsStringAsync());
-    }
+    }   
 }

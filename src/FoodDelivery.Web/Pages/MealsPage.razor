@@ -5,13 +5,17 @@
 
 <h1 class="mb-4">Meals</h1>
 
+<BrowseSearchBar @bind-SearchTerm="searchTerm" OnSearch="ApplySearchAsync" />
+
 @if (paged is null)
 {
     <p><em>Loading...</em></p>
 }
 else if (paged.TotalCount == 0)
 {
-    <div class="alert alert-info">No meals available yet.</div>
+    <div class="alert alert-info">
+        @(HasActiveSearch ? "No meals match your search." : "No meals available yet.")
+    </div>
 }
 else
 {
@@ -54,16 +58,25 @@ else
     private PagedResult<MealBrowseDto>? paged;
     private int currentPage = 1;
     private int pageSize = 12;
+    private string searchTerm = "";
     private static readonly int[] BrowsePageSizeOptions = [12, 24, 48];
+
+    private bool HasActiveSearch => !string.IsNullOrWhiteSpace(searchTerm);
 
     protected override async Task OnInitializedAsync()
     {
         await LoadPageAsync();
     }
 
+    private async Task ApplySearchAsync()
+    {
+        currentPage = 1;
+        await LoadPageAsync();
+    }
+
     private async Task LoadPageAsync()
     {
-        paged = await Meals.GetPageAsync(currentPage, pageSize);
+        paged = await Meals.GetPageAsync(currentPage, pageSize, searchTerm);
     }
 
     private async Task GoToPage(int page)
