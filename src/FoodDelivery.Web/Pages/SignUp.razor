@@ -6,7 +6,7 @@
 
 <PageTitle>Sign Up</PageTitle>
 
-<div class="card shadow-sm border-0">
+<div class="card auth-card shadow border-0">
     <div class="card-body p-4">
         <h3 class="text-center mb-4">Sign Up</h3>
 
@@ -63,7 +63,7 @@
         {
             var state = await AuthStateTask;
             if (state.User.Identity?.IsAuthenticated == true)
-                Navigation.NavigateTo("/", replace: true);
+                Navigation.NavigateTo("/restaurants", replace: true);
         }
     }
 

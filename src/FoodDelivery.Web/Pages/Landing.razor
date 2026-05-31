@@ -1,0 +1,36 @@
+@page "/"
+@layout AuthLayout
+@attribute [AllowAnonymous]
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+
+<PageTitle>Food Delivery</PageTitle>
+
+<div class="card auth-card landing-hero shadow border-0">
+    <div class="card-body p-4 p-md-5 text-center">
+        <h1 class="mb-3">Food Delivery</h1>
+        <p class="text-muted mb-4">
+            Order from local restaurants — fast, fresh, and delivered to your door.
+        </p>
+        <div class="d-grid gap-2">
+            <a href="/sign-in" class="btn btn-primary btn-lg">Sign In</a>
+            <a href="/sign-up" class="btn btn-outline-primary btn-lg">Sign Up</a>
+        </div>
+    </div>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthStateProvider.GetAuthenticationStateAsync()).User;
+        if (user.Identity?.IsAuthenticated != true)
+            return;
+
+        if (user.IsInRole("Admin"))
+            Navigation.NavigateTo("/admin/users", replace: true);
+        else if (user.IsInRole("Owner"))
+            Navigation.NavigateTo("/owner/restaurants", replace: true);
+        else
+            Navigation.NavigateTo("/restaurants", replace: true);
+    }
+}
