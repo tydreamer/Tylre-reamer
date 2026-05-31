@@ -29,72 +29,78 @@ else
 {
     <p class="text-muted">Ordering from <strong>@Cart.RestaurantName</strong></p>
 
-    <table class="table align-middle">
-        <thead>
-            <tr>
-                <th>Meal</th>
-                <th class="text-end">Price</th>
-                <th class="text-center" style="width: 160px;">Quantity</th>
-                <th class="text-end">Total</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Cart.Items)
-            {
-                <tr>
-                    <td>@item.Meal.Name</td>
-                    <td class="text-end">@item.Meal.Price.ToString("C")</td>
-                    <td class="text-center">
-                        <div class="btn-group btn-group-sm" role="group">
-                            <button class="btn btn-outline-secondary" @onclick="() => Cart.SetQuantity(item.Meal.Id, item.Quantity - 1)">−</button>
-                            <span class="btn btn-outline-secondary disabled">@item.Quantity</span>
-                            <button class="btn btn-outline-secondary" @onclick="() => Cart.SetQuantity(item.Meal.Id, item.Quantity + 1)">+</button>
-                        </div>
-                    </td>
-                    <td class="text-end">@item.LineTotal.ToString("C")</td>
-                    <td class="text-end">
-                        <button class="btn btn-sm btn-outline-danger" @onclick="() => Cart.Remove(item.Meal.Id)">Remove</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="row g-4">
+        <div class="col-md-7">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Meal</th>
+                        <th class="text-end">Price</th>
+                        <th class="text-center" style="width: 160px;">Quantity</th>
+                        <th class="text-end">Total</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Cart.Items)
+                    {
+                        <tr>
+                            <td>@item.Meal.Name</td>
+                            <td class="text-end">@item.Meal.Price.ToString("C")</td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button class="btn btn-outline-secondary" @onclick="() => Cart.SetQuantity(item.Meal.Id, item.Quantity - 1)">−</button>
+                                    <span class="btn btn-outline-secondary disabled">@item.Quantity</span>
+                                    <button class="btn btn-outline-secondary" @onclick="() => Cart.SetQuantity(item.Meal.Id, item.Quantity + 1)">+</button>
+                                </div>
+                            </td>
+                            <td class="text-end">@item.LineTotal.ToString("C")</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => Cart.Remove(item.Meal.Id)">Remove</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
 
-    <div class="row justify-content-end">
         <div class="col-md-5">
-            <div class="mb-3">
-                <label class="form-label">Coupon code (optional)</label>
-                <input class="form-control" @bind="couponCode" placeholder="e.g. SAVE10" maxlength="10" />
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Tip</label>
-                <input class="form-control" type="number" min="0" step="0.50" @bind="tip" @bind:event="oninput" />
-            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Coupon code (optional)</label>
+                        <input class="form-control" @bind="couponCode" placeholder="e.g. SAVE10" maxlength="10" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tip</label>
+                        <input class="form-control" type="number" min="0" step="0.50" @bind="tip" @bind:event="oninput" />
+                    </div>
 
-            <div class="d-flex justify-content-between">
-                <span>Subtotal</span>
-                <span>@Cart.Subtotal.ToString("C")</span>
-            </div>
-            <div class="d-flex justify-content-between">
-                <span>Tip</span>
-                <span>@tip.ToString("C")</span>
-            </div>
-            <hr />
-            <div class="d-flex justify-content-between fw-bold">
-                <span>Estimated total</span>
-                <span>@((Cart.Subtotal + tip).ToString("C"))</span>
-            </div>
-            <small class="text-muted d-block mb-3">Any coupon discount is applied when the order is placed.</small>
+                    <div class="d-flex justify-content-between">
+                        <span>Subtotal</span>
+                        <span>@Cart.Subtotal.ToString("C")</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Tip</span>
+                        <span>@tip.ToString("C")</span>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>Estimated total</span>
+                        <span>@((Cart.Subtotal + tip).ToString("C"))</span>
+                    </div>
+                    <small class="text-muted d-block mb-3">Any coupon discount is applied when the order is placed.</small>
 
-            @if (error is not null)
-            {
-                <div class="alert alert-danger">@error</div>
-            }
+                    @if (error is not null)
+                    {
+                        <div class="alert alert-danger">@error</div>
+                    }
 
-            <button class="btn btn-success w-100" @onclick="PlaceOrder" disabled="@placing">
-                @(placing ? "Placing order..." : "Place Order")
-            </button>
+                    <button class="btn btn-success w-100" @onclick="PlaceOrder" disabled="@placing">
+                        @(placing ? "Placing order..." : "Place Order")
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 }
