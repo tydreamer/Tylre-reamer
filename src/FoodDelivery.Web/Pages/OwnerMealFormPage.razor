@@ -21,7 +21,7 @@
 {
     <div class="alert alert-danger">@loadError</div>
 }
-else if (restaurant is null || (!IsNew && meal is null))
+else if (restaurant is null || mealTypes is null || (!IsNew && meal is null))
 {
     <p><em>Loading...</em></p>
 }
@@ -40,6 +40,17 @@ else
                     <label class="form-label">Description</label>
                     <InputTextArea class="form-control" rows="3" @bind-Value="formModel.Description" />
                     <FirstValidationMessage For="() => formModel.Description" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Type</label>
+                    <InputSelect class="form-select" @bind-Value="formModel.MealTypeId">
+                        <option value="0">Select meal type</option>
+                        @foreach (var type in mealTypes)
+                        {
+                            <option value="@type.Id">@type.Name</option>
+                        }
+                    </InputSelect>
+                    <FirstValidationMessage For="() => formModel.MealTypeId" />
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Image URL</label>
@@ -77,6 +88,7 @@ else
     private bool IsNew => MealId is null;
     private RestaurantDto? restaurant;
     private MealDto? meal;
+    private List<MealTypeDto>? mealTypes;
     private MealFormModel formModel = new();
     private string? loadError;
     private string? submitError;
@@ -89,6 +101,13 @@ else
         if (ownerId is null)
         {
             loadError = "Unable to determine your account. Please sign in again.";
+            return;
+        }
+
+        mealTypes = await Meals.GetMealTypesAsync();
+        if (mealTypes.Count == 0)
+        {
+            loadError = "Meal types are not available. Please contact support.";
             return;
         }
 
@@ -105,7 +124,8 @@ else
             return;
         }
 
-        if (IsNew) return;
+        if (IsNew)
+            return;
 
         meal = await Meals.GetByIdAsync(RestaurantId, MealId!.Value);
         if (meal is null)
@@ -120,7 +140,8 @@ else
             Description = meal.Description,
             ImageUrl = meal.ImageUrl,
             Price = meal.Price,
-            IsAvailable = meal.IsAvailable
+            IsAvailable = meal.IsAvailable,
+            MealTypeId = meal.MealTypeId
         };
     }
 
@@ -131,7 +152,12 @@ else
 
         if (IsNew)
         {
-            var request = new MealCreateRequest(formModel.Name, formModel.Description, formModel.ImageUrl, formModel.Price);
+            var request = new MealCreateRequest(
+                formModel.Name,
+                formModel.Description,
+                formModel.ImageUrl,
+                formModel.Price,
+                formModel.MealTypeId);
             var (success, _, error) = await Meals.CreateAsync(RestaurantId, request);
             saving = false;
             if (!success)
@@ -144,7 +170,13 @@ else
             return;
         }
 
-        var updateRequest = new MealUpdateRequest(formModel.Name, formModel.Description, formModel.ImageUrl, formModel.Price, formModel.IsAvailable);
+        var updateRequest = new MealUpdateRequest(
+            formModel.Name,
+            formModel.Description,
+            formModel.ImageUrl,
+            formModel.Price,
+            formModel.IsAvailable,
+            formModel.MealTypeId);
         var (updated, updateError) = await Meals.UpdateAsync(RestaurantId, MealId!.Value, updateRequest);
         saving = false;
         if (!updated)
@@ -163,6 +195,10 @@ else
 
         [System.ComponentModel.DataAnnotations.Required]
         public string Description { get; set; } = "";
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = ValidationMessages.MealTypeRequired)]
+        [System.ComponentModel.DataAnnotations.Range(1, int.MaxValue, ErrorMessage = ValidationMessages.MealTypeRequired)]
+        public int MealTypeId { get; set; }
 
         public string ImageUrl { get; set; } = "";
 
