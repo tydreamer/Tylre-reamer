@@ -7,5 +7,7 @@ public record MealDto(
     string ImageUrl,
     decimal Price,
     bool IsAvailable,
-    int RestaurantId
+    int RestaurantId,
+    int MealTypeId,
+    string MealTypeName
 );

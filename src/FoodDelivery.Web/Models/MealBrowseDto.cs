@@ -8,5 +8,7 @@ public record MealBrowseDto(
     decimal Price,
     bool IsAvailable,
     int RestaurantId,
-    string RestaurantName
+    string RestaurantName,
+    int MealTypeId,
+    string MealTypeName
 );

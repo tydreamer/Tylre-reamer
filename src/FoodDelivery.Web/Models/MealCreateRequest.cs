@@ -4,5 +4,6 @@ public record MealCreateRequest(
     string Name,
     string Description,
     string ImageUrl,
-    decimal Price
+    decimal Price,
+    int MealTypeId
 );

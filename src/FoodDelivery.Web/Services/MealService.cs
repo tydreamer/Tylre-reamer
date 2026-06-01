@@ -19,6 +19,11 @@ public class MealService(HttpClient http)
         return await http.GetFromJsonAsync<MealBrowseDto>($"api/meals/{mealId}");
     }
 
+    public async Task<List<MealTypeDto>> GetMealTypesAsync()
+    {
+        return await http.GetFromJsonAsync<List<MealTypeDto>>("api/meal-types") ?? [];
+    }
+
     public async Task<List<MealDto>> GetByRestaurantAsync(int restaurantId)
     {
         return await http.GetFromJsonAsync<List<MealDto>>($"api/restaurants/{restaurantId}/meals") ?? [];

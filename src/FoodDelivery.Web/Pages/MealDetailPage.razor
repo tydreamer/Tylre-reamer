@@ -126,7 +126,9 @@ else
             meal.ImageUrl,
             meal.Price,
             meal.IsAvailable,
-            meal.RestaurantId);
+            meal.RestaurantId,
+            meal.MealTypeId,
+            meal.MealTypeName);
 
         var addedQty = quantity;
         await Cart.AddAsync(mealDto, meal.RestaurantName, addedQty);
