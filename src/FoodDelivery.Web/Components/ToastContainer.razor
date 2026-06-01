@@ -1,0 +1,46 @@
+@inject ToastService Toasts
+@implements IDisposable
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3 app-toast-container">
+    @foreach (var toast in Toasts.Active)
+    {
+        <div class="toast show mb-2" role="alert" aria-live="polite">
+            <div class="toast-header @HeaderClass(toast.Kind)">
+                <strong class="me-auto">@HeaderTitle(toast.Kind)</strong>
+                <button type="button" class="btn-close @CloseButtonClass(toast.Kind)" aria-label="Dismiss"
+                        @onclick="() => Toasts.Dismiss(toast.Id)"></button>
+            </div>
+            <div class="toast-body">@toast.Message</div>
+        </div>
+    }
+</div>
+
+@code {
+    protected override void OnInitialized() =>
+        Toasts.OnChange += HandleToastsChanged;
+
+    private void HandleToastsChanged() =>
+        InvokeAsync(StateHasChanged);
+
+    private static string HeaderTitle(ToastKind kind) => kind switch
+    {
+        ToastKind.Success => "Success",
+        ToastKind.Error => "Error",
+        _ => "Notice"
+    };
+
+    private static string HeaderClass(ToastKind kind) => kind switch
+    {
+        ToastKind.Success => "bg-success text-white",
+        ToastKind.Error => "bg-danger text-white",
+        _ => "bg-primary text-white"
+    };
+
+    private static string CloseButtonClass(ToastKind kind) =>
+        kind is ToastKind.Success or ToastKind.Error or ToastKind.Info
+            ? "btn-close-white"
+            : "";
+
+    public void Dispose() =>
+        Toasts.OnChange -= HandleToastsChanged;
+}

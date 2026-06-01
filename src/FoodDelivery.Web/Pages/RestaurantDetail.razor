@@ -3,6 +3,7 @@
 @inject RestaurantService Restaurants
 @inject MealService Meals
 @inject CartService Cart
+@inject ToastService Toast
 
 @if (restaurant is null)
 {
@@ -17,14 +18,6 @@ else
         <h1>@restaurant.Name</h1>
         <p class="text-muted">@restaurant.Description</p>
     </div>
-
-    @if (cartSuccessMessage is not null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @cartSuccessMessage
-            <button type="button" class="btn-close" aria-label="Dismiss" @onclick="() => cartSuccessMessage = null"></button>
-        </div>
-    }
 
     <h4 class="mb-3">Menu</h4>
 
@@ -109,7 +102,6 @@ else
     private RestaurantDto? restaurant;
     private List<MealDto>? meals;
     private readonly Dictionary<int, int> quantities = new();
-    private string? cartSuccessMessage;
     private int? addingMealId;
     private bool showSwitchRestaurantDialog;
     private MealDto? pendingMeal;
@@ -176,12 +168,12 @@ else
         addingMealId = meal.Id;
         try
         {
-            cartSuccessMessage = null;
             await Cart.AddAsync(meal, restaurant.Name, quantity);
             quantities[meal.Id] = 1;
-            cartSuccessMessage = quantity == 1
+            var message = quantity == 1
                 ? $"Added {meal.Name} to your cart."
                 : $"Added {quantity} × {meal.Name} to your cart.";
+            Toast.ShowSuccess(message);
         }
         finally
         {

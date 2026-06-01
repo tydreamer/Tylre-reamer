@@ -227,6 +227,11 @@ code {
     overflow-wrap: anywhere;
 }
 
+/* App toasts (cart add, etc.) */
+.app-toast-container {
+    z-index: 1080;
+}
+
 /* Meal browse / restaurant cards */
 .meal-browse-card {
     overflow: hidden;

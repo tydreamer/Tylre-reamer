@@ -2,20 +2,13 @@
 @attribute [Authorize(Roles = "Customer")]
 @inject MealService Meals
 @inject CartService Cart
+@inject ToastService Toast
 
 <PageTitle>Meals</PageTitle>
 
 <h1 class="mb-4">Meals</h1>
 
 <BrowseSearchBar @bind-SearchTerm="searchTerm" OnSearch="ApplySearchAsync" />
-
-@if (cartSuccessMessage is not null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @cartSuccessMessage
-        <button type="button" class="btn-close" aria-label="Dismiss" @onclick="() => cartSuccessMessage = null"></button>
-    </div>
-}
 
 @if (paged is null)
 {
@@ -105,7 +98,6 @@ else
     private string searchTerm = "";
     private static readonly int[] BrowsePageSizeOptions = [12, 24, 48];
     private readonly Dictionary<int, int> quantities = new();
-    private string? cartSuccessMessage;
     private int? addingMealId;
     private bool showSwitchRestaurantDialog;
     private MealBrowseDto? pendingMeal;
@@ -170,12 +162,12 @@ else
         addingMealId = meal.Id;
         try
         {
-            cartSuccessMessage = null;
             await Cart.AddAsync(ToMealDto(meal), meal.RestaurantName, quantity);
             quantities[meal.Id] = 1;
-            cartSuccessMessage = quantity == 1
+            var message = quantity == 1
                 ? $"Added {meal.Name} to your cart."
                 : $"Added {quantity} × {meal.Name} to your cart.";
+            Toast.ShowSuccess(message);
         }
         finally
         {

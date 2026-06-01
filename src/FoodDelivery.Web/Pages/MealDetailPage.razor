@@ -2,6 +2,7 @@
 @attribute [Authorize(Roles = "Customer")]
 @inject MealService Meals
 @inject CartService Cart
+@inject ToastService Toast
 @if (!loaded)
 {
     <p><em>Loading...</em></p>
@@ -51,10 +52,6 @@ else
             }
             else
             {
-                @if (cartSuccessMessage is not null)
-                {
-                    <div class="alert alert-success">@cartSuccessMessage</div>
-                }
                 <div class="meal-detail-cart d-flex flex-wrap align-items-center gap-3">
                     <div class="btn-group" role="group" aria-label="Quantity">
                         <button type="button" class="btn btn-outline-secondary"
@@ -92,7 +89,6 @@ else
     private bool loaded;
     private int quantity = 1;
     private bool busy;
-    private string? cartSuccessMessage;
     private bool showSwitchRestaurantDialog;
     private string switchRestaurantDialogMessage = "";
 
@@ -138,7 +134,6 @@ else
         if (meal is null || !meal.IsAvailable)
             return;
 
-        cartSuccessMessage = null;
         busy = true;
         try
         {
@@ -156,9 +151,10 @@ else
             var addedQty = quantity;
             await Cart.AddAsync(mealDto, meal.RestaurantName, addedQty);
             quantity = 1;
-            cartSuccessMessage = addedQty == 1
+            var message = addedQty == 1
                 ? $"Added {meal.Name} to your cart."
                 : $"Added {addedQty} × {meal.Name} to your cart.";
+            Toast.ShowSuccess(message);
         }
         finally
         {
