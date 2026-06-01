@@ -8,6 +8,7 @@ public class User
     public string Name { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
+    public string? GoogleSubjectId { get; set; }
     public UserRole Role { get; set; }
     public bool IsBlocked { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

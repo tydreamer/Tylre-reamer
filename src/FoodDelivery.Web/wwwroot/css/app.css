@@ -324,6 +324,28 @@ code {
     backdrop-filter: blur(6px);
 }
 
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background-color: #dee2e6;
+}
+
+.google-icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex-shrink: 0;
+}
+
 /* Cart line items on small screens */
 .cart-item-card .cart-item-total {
     font-weight: 600;

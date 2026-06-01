@@ -8,6 +8,13 @@ public record LoginResponse(string Token, string Name, string Email, string Role
 
 public class AuthService(HttpClient http, IJSRuntime js, AuthenticationStateProvider authStateProvider)
 {
+    public async Task<string?> CompleteGoogleLoginAsync(string token, string? role)
+    {
+        await js.InvokeVoidAsync("localStorage.setItem", "jwt", token);
+        ((JwtAuthStateProvider)authStateProvider).NotifyUserAuthentication(token);
+        return string.IsNullOrWhiteSpace(role) ? null : role;
+    }
+
     public async Task<string?> LoginAsync(string email, string password)
     {
         var response = await http.PostAsJsonAsync("api/auth/login", new { Email = email, Password = password });

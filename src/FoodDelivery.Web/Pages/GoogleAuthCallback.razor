@@ -1,0 +1,79 @@
+@page "/auth/google-callback"
+@layout AuthLayout
+@attribute [AllowAnonymous]
+@inject AuthService Auth
+@inject NavigationManager Navigation
+
+<PageTitle>Signing in...</PageTitle>
+
+<div class="card auth-card shadow border-0">
+    <div class="card-body p-4 text-center">
+        @if (error is not null)
+        {
+            <div class="alert alert-danger">@error</div>
+            <a href="@errorReturnUrl" class="btn btn-primary">Back</a>
+        }
+        else
+        {
+            <p class="mb-0"><em>Completing sign-in...</em></p>
+        }
+    </div>
+</div>
+
+@code {
+    private string? error;
+    private string errorReturnUrl = "/sign-in";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        var token = query["token"];
+        var errorCode = query["error"];
+        var returnUrl = query["returnUrl"];
+        var registered = query["registered"] == "true";
+
+        if (!string.IsNullOrWhiteSpace(errorCode))
+        {
+            error = MapError(errorCode);
+            errorReturnUrl = errorCode is "email_exists" or "no_account"
+                ? (errorCode == "email_exists" ? "/sign-in" : "/sign-up")
+                : "/sign-in";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            error = "Google sign-in did not complete. Please try again.";
+            return;
+        }
+
+        var role = await Auth.CompleteGoogleLoginAsync(token, query["role"]);
+        if (role is null)
+        {
+            error = "Google sign-in did not complete. Please try again.";
+            return;
+        }
+
+        var destination = string.IsNullOrWhiteSpace(returnUrl) ? LandingPath(role) : returnUrl;
+        if (registered)
+            destination += destination.Contains('?') ? "&registered=true" : "?registered=true";
+
+        Navigation.NavigateTo(destination, replace: true);
+    }
+
+    private static string MapError(string code) => code switch
+    {
+        "no_account" => "No account found for this Google email. Please sign up first.",
+        "email_exists" => "An account with this email already exists. Sign in with your password or use Google on the sign-in page.",
+        "blocked" => "This account has been blocked.",
+        _ => "Google sign-in failed. Please try again."
+    };
+
+    private static string LandingPath(string role) => role switch
+    {
+        "Admin" => "/admin/users",
+        "Owner" => "/owner/restaurants",
+        _ => "/restaurants"
+    };
+}
