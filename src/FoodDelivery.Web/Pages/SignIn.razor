@@ -26,12 +26,12 @@
                 <FirstValidationMessage For="() => model.Email" />
             </div>
             <div class="mb-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <label class="form-label mb-0">Password</label>
-                    <a href="/forgot-password" class="small">Forgot password?</a>
-                </div>
+                <label class="form-label">Password</label>
                 <InputText class="form-control" @bind-Value="model.Password" type="password" />
                 <FirstValidationMessage For="() => model.Password" />
+                <div class="mt-1 text-end">
+                    <a href="/forgot-password" class="small">Forgot password?</a>
+                </div>
             </div>
             @if (error is not null)
             {
