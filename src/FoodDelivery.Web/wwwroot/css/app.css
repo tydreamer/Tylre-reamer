@@ -374,6 +374,27 @@ code {
     padding: 0.25rem 0.5rem;
 }
 
+.cart-discount-text {
+    color: #198754;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+
+.cart-original-price {
+    color: #dc3545;
+    font-style: italic;
+    margin-bottom: 0.5rem;
+}
+
+.cart-original-price .cart-original-price-value {
+    text-decoration: line-through;
+}
+
+.cart-total-price {
+    font-weight: 700;
+    font-size: 1.125rem;
+}
+
 /* Orders list tables — fixed column widths (table-layout: fixed) */
 .orders-list-table {
     table-layout: fixed;

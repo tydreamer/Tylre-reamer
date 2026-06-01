@@ -3,6 +3,7 @@
 @implements IDisposable
 @inject CartService Cart
 @inject OrderService Orders
+@inject CouponService Coupons
 
 <PageTitle>Your Cart</PageTitle>
 
@@ -116,36 +117,53 @@ else
             <div class="card">
                 <div class="card-body">
                     <div class="mb-3">
-                        <label class="form-label">Coupon code (optional)</label>
-                        <input class="form-control" @bind="couponCode" placeholder="e.g. SAVE10" maxlength="10" />
+                        <label class="form-label" for="coupon-code">Enter Coupon Code:</label>
+                        <input id="coupon-code" class="form-control" value="@couponCode"
+                               placeholder="e.g., DISCOUNT10" maxlength="10"
+                               @oninput="OnCouponInput"
+                               @onblur="OnCouponFieldFinishedAsync"
+                               @onkeydown="OnCouponKeyDownAsync" />
+                        @if (validatingCoupon)
+                        {
+                            <small class="text-muted">Checking coupon...</small>
+                        }
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Tip</label>
-                        <input class="form-control" type="number" min="0" step="0.50" @bind="tip" @bind:event="oninput" />
+                        <label class="form-label" for="tip-amount">Tip Amount ($):</label>
+                        <input id="tip-amount" class="form-control" type="number" min="0" step="0.50"
+                               @bind="tip" @bind:event="oninput" placeholder="Enter tip amount" />
                     </div>
 
-                    <div class="d-flex justify-content-between">
-                        <span>Subtotal</span>
-                        <span>@Cart.Subtotal.ToString("C")</span>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <span>Tip</span>
-                        <span>@tip.ToString("C")</span>
-                    </div>
-                    <hr />
-                    <div class="d-flex justify-content-between fw-bold">
-                        <span>Estimated total</span>
-                        <span>@((Cart.Subtotal + tip).ToString("C"))</span>
-                    </div>
-                    <small class="text-muted d-block mb-3">Any coupon discount is applied when the order is placed.</small>
-
-                    @if (error is not null)
+                    @if (couponSuccessMessage is not null)
                     {
-                        <div class="alert alert-danger">@error</div>
+                        <p class="cart-discount-text mb-0">@couponSuccessMessage</p>
                     }
 
-                    <button class="btn btn-success w-100" @onclick="PlaceOrder" disabled="@placing">
-                        @(placing ? "Placing order..." : "Place Order")
+                    @if (couponError is not null)
+                    {
+                        <div class="alert alert-danger py-2 mb-3">@couponError</div>
+                    }
+
+                    @if (HasAppliedCoupon)
+                    {
+                        <p class="cart-original-price mb-0">
+                            Original Price:
+                            <span class="cart-original-price-value">@OriginalTotal.ToString("C")</span>
+                        </p>
+                    }
+
+                    <div class="d-flex justify-content-between align-items-center cart-total-price mb-3">
+                        <span>Total Price:</span>
+                        <span>@FinalTotal.ToString("C")</span>
+                    </div>
+
+                    @if (checkoutError is not null)
+                    {
+                        <div class="alert alert-danger">@checkoutError</div>
+                    }
+
+                    <button type="button" class="btn btn-success w-100" @onclick="CheckoutAsync" disabled="@placing">
+                        @(placing ? "Checking out..." : "Checkout")
                     </button>
                 </div>
             </div>
@@ -164,15 +182,43 @@ else
 @code {
     private decimal tip;
     private string? couponCode;
-    private string? error;
+    private string? appliedCouponCode;
+    private string? couponSuccessMessage;
+    private string? couponError;
+    private decimal couponDiscount;
+    private string? checkoutError;
     private bool placing;
+    private bool validatingCoupon;
     private bool showClearDialog;
     private OrderResponse? placedOrder;
+    private string? lastValidatedCouponInput;
+
+    private decimal Subtotal => Cart.Subtotal;
+    private bool HasAppliedCoupon => !string.IsNullOrWhiteSpace(appliedCouponCode) && couponDiscount > 0;
+    private decimal OriginalTotal => Subtotal + tip;
+    private decimal FinalTotal => Math.Max(0, Subtotal - couponDiscount) + tip;
 
     protected override async Task OnInitializedAsync()
     {
         await Cart.InitializeAsync();
-        Cart.OnChange += StateHasChanged;
+        Cart.OnChange += OnCartChanged;
+    }
+
+    private void OnCartChanged() => _ = HandleCartChangedAsync();
+
+    private async Task HandleCartChangedAsync()
+    {
+        if (Cart.IsEmpty)
+        {
+            ClearCouponState();
+            couponCode = null;
+        }
+        else if (HasAppliedCoupon || !string.IsNullOrWhiteSpace(couponCode))
+        {
+            await ValidateCouponAsync();
+        }
+
+        await InvokeAsync(StateHasChanged);
     }
 
     private Task DecreaseQuantity(int mealId, int quantity)
@@ -193,22 +239,120 @@ else
         await Cart.ClearAsync();
         tip = 0;
         couponCode = null;
-        error = null;
+        lastValidatedCouponInput = null;
+        ClearCouponState();
+        checkoutError = null;
     }
 
-    private async Task PlaceOrder()
+    private void OnCouponInput(ChangeEventArgs e)
+    {
+        couponCode = e.Value?.ToString() ?? "";
+        var trimmed = couponCode.Trim();
+
+        if (string.IsNullOrWhiteSpace(trimmed))
+        {
+            lastValidatedCouponInput = null;
+            ClearCouponState();
+            return;
+        }
+
+        if (!string.Equals(trimmed, appliedCouponCode, StringComparison.OrdinalIgnoreCase))
+        {
+            lastValidatedCouponInput = null;
+            ClearCouponState();
+        }
+    }
+
+    private async Task OnCouponFieldFinishedAsync() => await ValidateCouponIfChangedAsync();
+
+    private async Task OnCouponKeyDownAsync(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            await ValidateCouponIfChangedAsync();
+    }
+
+    private async Task ValidateCouponIfChangedAsync()
+    {
+        var trimmed = couponCode?.Trim() ?? "";
+        if (trimmed == lastValidatedCouponInput)
+            return;
+
+        lastValidatedCouponInput = trimmed;
+
+        if (string.IsNullOrWhiteSpace(trimmed))
+        {
+            ClearCouponState();
+            return;
+        }
+
+        await ValidateCouponAsync();
+    }
+
+    private async Task ValidateCouponAsync()
+    {
+        checkoutError = null;
+        couponError = null;
+        couponSuccessMessage = null;
+        appliedCouponCode = null;
+        couponDiscount = 0;
+
+        if (Cart.RestaurantId is null || string.IsNullOrWhiteSpace(couponCode))
+            return;
+
+        validatingCoupon = true;
+        var validation = await Coupons.ValidateAsync(
+            Cart.RestaurantId.Value,
+            couponCode,
+            Subtotal);
+        validatingCoupon = false;
+
+        if (validation is null)
+        {
+            couponError = "Unable to validate coupon. Please try again.";
+            return;
+        }
+
+        if (!validation.IsValid)
+        {
+            couponError = validation.ErrorMessage ?? "Invalid coupon.";
+            return;
+        }
+
+        appliedCouponCode = couponCode.Trim();
+        couponSuccessMessage = validation.SuccessMessage;
+        couponDiscount = validation.DiscountAmount;
+    }
+
+    private void ClearCouponState()
+    {
+        appliedCouponCode = null;
+        couponSuccessMessage = null;
+        couponError = null;
+        couponDiscount = 0;
+    }
+
+    private async Task CheckoutAsync()
     {
         if (Cart.RestaurantId is null)
             return;
 
+        checkoutError = null;
+
+        if (!string.IsNullOrWhiteSpace(couponCode))
+        {
+            lastValidatedCouponInput = null;
+            await ValidateCouponIfChangedAsync();
+            if (!HasAppliedCoupon)
+                return;
+        }
+
         placing = true;
-        error = null;
 
         var request = new PlaceOrderRequest(
             Cart.RestaurantId.Value,
             Cart.Items.Select(i => new OrderItemRequest(i.Meal.Id, i.Quantity)).ToList(),
             tip,
-            string.IsNullOrWhiteSpace(couponCode) ? null : couponCode);
+            HasAppliedCoupon ? appliedCouponCode : null);
 
         var (success, order, err) = await Orders.PlaceOrderAsync(request);
         placing = false;
@@ -217,15 +361,18 @@ else
         {
             placedOrder = order;
             await Cart.ClearAsync();
+            ClearCouponState();
+            couponCode = null;
+            tip = 0;
         }
         else
         {
-            error = err;
+            checkoutError = err;
         }
     }
 
     public void Dispose()
     {
-        Cart.OnChange -= StateHasChanged;
+        Cart.OnChange -= OnCartChanged;
     }
 }
