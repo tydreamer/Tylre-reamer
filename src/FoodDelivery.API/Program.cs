@@ -2,6 +2,7 @@ using System.Text;
 using FoodDelivery.API.Data;
 using FoodDelivery.API.Hubs;
 using FoodDelivery.API.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +22,11 @@ var googleConfigured = !string.IsNullOrWhiteSpace(googleClientId)
     && !string.IsNullOrWhiteSpace(googleClientSecret)
     && !googleClientId.StartsWith("YOUR_", StringComparison.OrdinalIgnoreCase);
 
-var authBuilder = builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+var authBuilder = builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -53,12 +58,28 @@ var authBuilder = builder.Services.AddAuthentication(JwtBearerDefaults.Authentic
 
 if (googleConfigured)
 {
-    authBuilder.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
-    {
-        options.ClientId = googleClientId!;
-        options.ClientSecret = googleClientSecret!;
-        options.CallbackPath = "/api/auth/google/callback";
-    });
+    var webBaseUrl = builder.Configuration["App:WebBaseUrl"]?.TrimEnd('/') ?? "http://localhost:5196";
+
+    authBuilder
+        .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, cookie =>
+        {
+            cookie.Cookie.HttpOnly = true;
+            cookie.Cookie.SameSite = SameSiteMode.Lax;
+            cookie.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        })
+        .AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
+        {
+            options.ClientId = googleClientId!;
+            options.ClientSecret = googleClientSecret!;
+            options.CallbackPath = "/api/auth/google/callback";
+            options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            options.Events.OnRemoteFailure = context =>
+            {
+                context.Response.Redirect($"{webBaseUrl}/auth/google-callback?error=google_failed");
+                context.HandleResponse();
+                return Task.CompletedTask;
+            };
+        });
 }
 
 var allowedOrigins = builder.Configuration["Cors:AllowedOrigins"]!

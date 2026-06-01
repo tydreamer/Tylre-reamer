@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using FoodDelivery.API.Services;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -37,13 +38,16 @@ public class GoogleAuthController(
         return ChallengeGoogle("signup", role);
     }
 
-    [HttpGet("callback")]
+    /// <summary>
+    /// Finishes Google sign-in after OAuth middleware handles <c>/api/auth/google/callback</c>.
+    /// </summary>
+    [HttpGet("complete")]
     [AllowAnonymous]
-    public async Task<IActionResult> Callback()
+    public async Task<IActionResult> Complete()
     {
         var webBase = config["App:WebBaseUrl"]?.TrimEnd('/') ?? "http://localhost:5196";
 
-        var authResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+        var authResult = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         if (!authResult.Succeeded || authResult.Principal is null)
             return Redirect($"{webBase}/auth/google-callback?error=google_failed");
 
@@ -62,10 +66,12 @@ public class GoogleAuthController(
             return Redirect($"{webBase}/auth/google-callback?error=google_failed");
 
         var (user, errorCode) = await googleAuth.ResolveUserAsync(
-            subjectId, email, name ?? email, flow, signupRole);
+            subjectId, email, name ?? email, flow ?? "signin", signupRole);
 
         if (user is null)
             return Redirect($"{webBase}/auth/google-callback?error={errorCode ?? "google_failed"}");
+
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
         var token = jwtTokens.GenerateToken(user);
         var destination = LandingPath(user.Role.ToString());
@@ -75,7 +81,7 @@ public class GoogleAuthController(
 
     private IActionResult ChallengeGoogle(string flow, string? role)
     {
-        var redirectUrl = Url.Action(nameof(Callback), "GoogleAuth", null, Request.Scheme)!;
+        var redirectUrl = Url.Action(nameof(Complete), "GoogleAuth", null, Request.Scheme)!;
         var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
         properties.Items["flow"] = flow;
         if (role is not null)
