@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using FoodDelivery.API.Data;
 using FoodDelivery.API.DTOs;
+using FoodDelivery.API.Helpers;
 using FoodDelivery.API.Hubs;
 using FoodDelivery.API.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -92,17 +93,16 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
         decimal discount = 0;
 
         Coupon? coupon = null;
-        if (!string.IsNullOrEmpty(req.CouponCode))
+        if (!string.IsNullOrWhiteSpace(req.CouponCode))
         {
-            coupon = await db.Coupons.FirstOrDefaultAsync(c =>
-                c.Code == req.CouponCode && c.RestaurantId == req.RestaurantId &&
-                c.IsActive && c.ExpiresAt > DateTime.UtcNow);
+            var validation = await CouponValidator.ValidateAsync(
+                db, req.RestaurantId, req.CouponCode, subtotal);
 
-            if (coupon is null) return BadRequest("Invalid or expired coupon.");
+            if (validation.Status != CouponValidationStatus.Valid || validation.Coupon is null)
+                return BadRequest(CouponValidator.ErrorMessage(validation.Status));
 
-            discount = coupon.DiscountType == DiscountType.Percentage
-                ? subtotal * coupon.DiscountValue / 100
-                : coupon.DiscountValue;
+            coupon = validation.Coupon;
+            discount = validation.DiscountAmount;
         }
 
         var total = subtotal - discount + req.Tip;
