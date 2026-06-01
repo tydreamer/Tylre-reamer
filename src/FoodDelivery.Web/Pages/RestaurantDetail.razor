@@ -42,7 +42,7 @@ else
             @foreach (var meal in meals)
             {
                 <div class="col">
-                    <div class="card h-100 shadow-sm">
+                    <div class="card h-100 shadow-sm meal-browse-card">
                         <a href="/meals/@meal.Id" class="text-decoration-none text-dark">
                             @if (!string.IsNullOrWhiteSpace(meal.ImageUrl))
                             {
@@ -50,16 +50,16 @@ else
                                      style="height: 160px; object-fit: cover;" />
                             }
                             <div class="card-body pb-2">
-                                <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
-                                    <h5 class="card-title mb-0">@meal.Name</h5>
+                                <div class="meal-card-title-row mb-1">
+                                    <h5 class="card-title mb-0 meal-card-truncate" title="@meal.Name">@meal.Name</h5>
                                     <span class="badge meal-type-badge">@meal.MealTypeName</span>
                                 </div>
-                                <p class="card-text text-muted mb-0">@meal.Description</p>
+                                <p class="card-text text-muted meal-card-line" title="@meal.Description">@meal.Description</p>
                             </div>
                         </a>
                         <div class="card-body pt-0">
                             <div class="meal-card-price-row">
-                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                <div class="meal-card-price-start">
                                     <span class="badge bg-success fs-6">@meal.Price.ToString("C")</span>
                                     @if (!meal.IsAvailable)
                                     {
