@@ -14,6 +14,7 @@ public static class DbSeeder
 
     private sealed record AccountRow(string Name, string Email, string Role);
     private sealed record RestaurantRow(string Name, string Description, string ImageUrl, string OwnerName, string OwnerEmail);
+    /// <summary>Maps <c>meals.csv</c>; <see cref="MealType"/> must match a row in <c>MealTypes</c> (see Data/Seed/README.md).</summary>
     private sealed record MealRow(string RestaurantName, string Name, string Description, decimal Price, string? ImageUrl, string? MealType);
 
     public static async Task SeedAsync(AppDbContext db)
@@ -91,7 +92,6 @@ public static class DbSeeder
             return;
 
         var mealTypeIdsByName = await db.MealTypes.ToDictionaryAsync(t => t.Name, t => t.Id);
-        var defaultMealTypeId = mealTypeIdsByName[MealTypeNames.Lunch];
 
         var meals = ReadCsv<MealRow>("meals.csv")
             .Where(m => restaurantIdsByName.ContainsKey(m.RestaurantName))
@@ -102,7 +102,7 @@ public static class DbSeeder
                 Price = m.Price,
                 ImageUrl = ResolveMealImageUrl(m),
                 RestaurantId = restaurantIdsByName[m.RestaurantName],
-                MealTypeId = ResolveMealTypeId(m, mealTypeIdsByName, defaultMealTypeId)
+                MealTypeId = ResolveMealTypeId(m, mealTypeIdsByName)
             })
             .ToList();
 
@@ -145,45 +145,61 @@ public static class DbSeeder
         return user;
     }
 
-    private static int ResolveMealTypeId(
-        MealRow row,
-        Dictionary<string, int> mealTypeIdsByName,
-        int defaultMealTypeId)
+    private static int ResolveMealTypeId(MealRow row, Dictionary<string, int> mealTypeIdsByName)
     {
-        if (!string.IsNullOrWhiteSpace(row.MealType)
-            && mealTypeIdsByName.TryGetValue(row.MealType.Trim(), out var id))
-            return id;
+        if (!string.IsNullOrWhiteSpace(row.MealType))
+        {
+            var typeName = row.MealType.Trim();
+            if (mealTypeIdsByName.TryGetValue(typeName, out var id))
+                return id;
 
-        return InferMealTypeId(row, mealTypeIdsByName, defaultMealTypeId);
+            throw new InvalidOperationException(
+                $"Unknown MealType '{typeName}' for meal '{row.Name}' at '{row.RestaurantName}'. " +
+                $"Allowed values: {string.Join(", ", MealTypeNames.All)}.");
+        }
+
+        return InferMealTypeId(row, mealTypeIdsByName);
     }
 
-    private static int InferMealTypeId(
-        MealRow row,
-        Dictionary<string, int> mealTypeIdsByName,
-        int defaultMealTypeId)
+    /// <summary>Fallback when <c>meals.csv</c> leaves <c>MealType</c> empty.</summary>
+    private static int InferMealTypeId(MealRow row, Dictionary<string, int> mealTypeIdsByName)
     {
         if (row.RestaurantName.Contains("Breakfast", StringComparison.OrdinalIgnoreCase))
             return mealTypeIdsByName[MealTypeNames.Breakfast];
 
+        if (row.RestaurantName.Contains("Sweet Tooth", StringComparison.OrdinalIgnoreCase))
+            return mealTypeIdsByName[MealTypeNames.Dessert];
+
+        if (row.RestaurantName.Contains("Coffee Corner", StringComparison.OrdinalIgnoreCase))
+            return mealTypeIdsByName[MealTypeNames.Breakfast];
+
         var name = row.Name.ToLowerInvariant();
-        if (name.Contains("cake") || name.Contains("pie") || name.Contains("cookie")
-            || name.Contains("brownie") || name.Contains("tiramisu") || name.Contains("cheesecake")
-            || name.Contains("sundae") || name.Contains("gelato") || name.Contains("baklava")
-            || name.Contains("churro") || name.Contains("mochi") || name.Contains("panna cotta"))
+        if (name.Contains("cake") || name.Contains("pie") || name.Contains("tiramisu")
+            || name.Contains("cheesecake") || name.Contains("gelato") || name.Contains("baklava")
+            || name.Contains("churro") || name.Contains("mochi") || name.Contains("brulee")
+            || name.Contains("cannoli") || name.Contains("crumble") || name.Contains("tart")
+            || name.Contains("milkshake") || name.Contains("sticky rice") || name.Contains("ice cream"))
             return mealTypeIdsByName[MealTypeNames.Dessert];
 
         if (name.Contains("soup") || name.Contains("wings") || name.Contains("nachos")
-            || name.Contains("spring roll") || name.Contains("edamame") || name.Contains("oyster")
-            || name.Contains("bruschetta") || name.Contains("samosa") || name.Contains("calamari")
-            || name.Contains("dip") || name.Contains("salad") && !name.Contains("bowl"))
+            || name.Contains("spring roll") || name.Contains("edamame") || name.Contains("samosa")
+            || name.Contains("chips") || name.Contains("guacamole") || name.Contains("hummus")
+            || name.Contains("gyoza") || name.Contains("dumpling") || name.Contains("mandu")
+            || name.Contains("pretzel") || name.Contains("fries") || name.Contains("miso")
+            || name.Contains("naan") || name.Contains("lassi") || (name.Contains("salad") && !name.Contains("bowl")))
             return mealTypeIdsByName[MealTypeNames.Appetizers];
 
-        if (name.Contains("coffee") || name.Contains("pancake") || name.Contains("omelette")
-            || name.Contains("eggs") || name.Contains("waffle") || name.Contains("burrito")
-            && row.RestaurantName.Contains("Coffee", StringComparison.OrdinalIgnoreCase))
+        if (name.Contains("pancake") || name.Contains("omelette") || name.Contains("eggs benedict")
+            || name.Contains("coffee") || name.Contains("cappuccino") || name.Contains("muffin")
+            || name.Contains("waffle") || name.Contains("breakfast burrito"))
             return mealTypeIdsByName[MealTypeNames.Breakfast];
 
-        return mealTypeIdsByName.GetValueOrDefault(MealTypeNames.Dinner, defaultMealTypeId);
+        if (name.Contains("burger") || name.Contains("sandwich") || name.Contains("wrap")
+            || name.Contains("taco") || name.Contains("burrito") || name.Contains("quesadilla")
+            || name.Contains("banh mi") || name.Contains("grilled cheese") || name.Contains("bowl"))
+            return mealTypeIdsByName[MealTypeNames.Lunch];
+
+        return mealTypeIdsByName[MealTypeNames.Dinner];
     }
 
     private static string ResolveMealImageUrl(MealRow row) =>

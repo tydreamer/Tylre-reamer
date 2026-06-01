@@ -21,13 +21,45 @@ Each restaurant row includes `OwnerName` and `OwnerEmail`. One owner account is 
 
 Example: Bella Napoli → `owner.bella-napoli@example.com` (Marco Rossi).
 
+## Meal types (`MealTypes` table)
+
+Seeded from `MealTypeNames` in `FoodDelivery.API/Constants/MealTypeNames.cs` before meals are loaded:
+
+| Name | Typical use |
+|------|-------------|
+| Breakfast | Morning items (pancakes, coffee, omelettes) |
+| Lunch | Mid-day mains (burgers, bowls, sandwiches, tacos) |
+| Dinner | Evening mains (pasta, curry, grilled plates, sushi rolls) |
+| Appetizers | Starters and sides (soup, wings, dumplings, fries) |
+| Dessert | Sweets (cake, ice cream, pastries) |
+
+`GET /api/meal-types` returns these rows for the owner meal form.
+
 ## Restaurants and meals
 
 | File | Contents |
 |------|----------|
 | `restaurants.csv` | 29 restaurants with image URLs and owner assignment |
-| `meals.csv` | 4 meals per restaurant; `ImageUrl` optional; `MealType` optional (inferred when empty) |
-| `MealTypes` table | Breakfast, Lunch, Dinner, Appetizers, Dessert (seeded from `MealTypeNames` constants) |
+| `meals.csv` | 4 meals per restaurant (see columns below) |
+
+### `meals.csv` columns
+
+| Column | Required | Description |
+|--------|----------|-------------|
+| `RestaurantName` | Yes | Must match a name in `restaurants.csv` |
+| `Name` | Yes | Meal name |
+| `Description` | Yes | Short description |
+| `Price` | Yes | Decimal price (e.g. `12.50`) |
+| `ImageUrl` | No | Leave empty to auto-generate via `MealImageUrlBuilder` on seed |
+| `MealType` | Yes* | One of: `Breakfast`, `Lunch`, `Dinner`, `Appetizers`, `Dessert` |
+
+\*If `MealType` is blank, `DbSeeder` infers a type from the restaurant and meal name (fallback only).
+
+Example row:
+
+```csv
+Bella Napoli,Tiramisu,Espresso-soaked ladyfingers and mascarpone,6.50,,Dessert
+```
 
 ## Fresh seed (empty database)
 
