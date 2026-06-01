@@ -18,7 +18,7 @@ else
             <span class="badge fs-6 @StatusClass(order.Status) align-self-start">@order.Status</span>
         </div>
         <p class="text-muted mb-0">
-            @order.RestaurantName · @order.CustomerName · @order.CreatedAt.ToLocalTime().ToString("f")
+            @order.RestaurantName · @order.CustomerName · Ordered at @order.CreatedAt.ToLocalTime().ToString("f")
         </p>
     </div>
 
