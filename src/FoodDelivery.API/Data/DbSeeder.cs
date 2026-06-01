@@ -9,30 +9,29 @@ namespace FoodDelivery.API.Data;
 
 public static class DbSeeder
 {
-    private sealed record RestaurantRow(string Name, string Description, string ImageUrl);
+    private const string DefaultSeedPassword = "Password123!";
+
+    private sealed record AccountRow(string Name, string Email, string Role);
+    private sealed record RestaurantRow(string Name, string Description, string ImageUrl, string OwnerName, string OwnerEmail);
     private sealed record MealRow(string RestaurantName, string Name, string Description, decimal Price, string? ImageUrl);
 
     public static async Task SeedAsync(AppDbContext db)
     {
-        await SeedAdminAsync(db);
+        await SeedAccountsAsync(db);
         await SeedRestaurantsAsync(db);
         await SeedMealsAsync(db);
         await BackfillMealImagesAsync(db);
     }
 
-    private static async Task SeedAdminAsync(AppDbContext db)
+    private static async Task SeedAccountsAsync(AppDbContext db)
     {
-        if (await db.Users.AnyAsync(u => u.Role == UserRole.Admin))
-            return;
-
-        db.Users.Add(new User
+        foreach (var row in ReadCsv<AccountRow>("users.csv"))
         {
-            Name = "Administrator",
-            Email = "admin@example.com",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Password123!"),
-            Role = UserRole.Admin
-        });
-        await db.SaveChangesAsync();
+            if (!Enum.TryParse<UserRole>(row.Role, ignoreCase: true, out var role))
+                continue;
+
+            await EnsureUserAsync(db, row.Name.Trim(), row.Email.Trim().ToLowerInvariant(), role);
+        }
     }
 
     private static async Task SeedRestaurantsAsync(AppDbContext db)
@@ -40,29 +39,25 @@ public static class DbSeeder
         if (await db.Restaurants.AnyAsync())
             return;
 
-        var owner = await db.Users.FirstOrDefaultAsync(u => u.Email == "owner@example.com");
-        if (owner is null)
-        {
-            owner = new User
-            {
-                Name = "Sample Owner",
-                Email = "owner@example.com",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Password123!"),
-                Role = UserRole.Owner
-            };
-            db.Users.Add(owner);
-            await db.SaveChangesAsync();
-        }
+        var restaurants = new List<Restaurant>();
 
-        var restaurants = ReadCsv<RestaurantRow>("restaurants.csv")
-            .Select(r => new Restaurant
+        foreach (var row in ReadCsv<RestaurantRow>("restaurants.csv"))
+        {
+            var ownerEmail = row.OwnerEmail.Trim().ToLowerInvariant();
+            var owner = await EnsureUserAsync(
+                db,
+                row.OwnerName.Trim(),
+                ownerEmail,
+                UserRole.Owner);
+
+            restaurants.Add(new Restaurant
             {
-                Name = r.Name,
-                Description = r.Description,
-                ImageUrl = r.ImageUrl,
+                Name = row.Name.Trim(),
+                Description = row.Description.Trim(),
+                ImageUrl = row.ImageUrl.Trim(),
                 OwnerId = owner.Id
-            })
-            .ToList();
+            });
+        }
 
         if (restaurants.Count == 0)
             return;
@@ -111,6 +106,26 @@ public static class DbSeeder
             meal.ImageUrl = MealImageUrlBuilder.Build(meal.Name, meal.Id);
 
         await db.SaveChangesAsync();
+    }
+
+    private static async Task<User> EnsureUserAsync(AppDbContext db, string name, string email, UserRole role)
+    {
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+        var existing = await db.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
+        if (existing is not null)
+            return existing;
+
+        var user = new User
+        {
+            Name = name.Trim(),
+            Email = normalizedEmail,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(DefaultSeedPassword),
+            Role = role
+        };
+
+        db.Users.Add(user);
+        await db.SaveChangesAsync();
+        return user;
     }
 
     private static string ResolveMealImageUrl(MealRow row) =>
