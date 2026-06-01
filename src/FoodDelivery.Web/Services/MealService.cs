@@ -55,7 +55,7 @@ public class MealService(HttpClient http)
         return (false, await response.Content.ReadAsStringAsync());
     }
 
-    public async Task<(bool Success, string? Error)> DeleteAsync(int restaurantId, int mealId)
+    public async Task<(bool Success, string? Error)> RemoveAsync(int restaurantId, int mealId)
     {
         var response = await http.DeleteAsync($"api/restaurants/{restaurantId}/meals/{mealId}");
         if (response.IsSuccessStatusCode)

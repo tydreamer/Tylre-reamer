@@ -104,7 +104,7 @@ else
 
         removingId = restaurantId;
         error = null;
-        var (success, removeError) = await Restaurants.DeleteAsync(restaurantId);
+        var (success, removeError) = await Restaurants.RemoveAsync(restaurantId);
         removingId = null;
 
         if (!success)

@@ -3,7 +3,6 @@
 @inject RestaurantService Restaurants
 @inject MealService Meals
 @inject AuthenticationStateProvider AuthStateProvider
-@inject IJSRuntime JS
 
 <PageTitle>@(restaurant?.Name ?? "Meals")</PageTitle>
 
@@ -64,9 +63,9 @@ else
                             <td>@meal.MealTypeName</td>
                             <td class="col-actions text-end text-nowrap">
                                 <a href="owner/restaurants/@RestaurantId/meals/@meal.Id/edit" class="btn btn-sm btn-outline-primary">Edit</a>
-                                <button class="btn btn-sm btn-outline-danger"
+                                <button type="button" class="btn btn-sm btn-outline-danger"
                                         disabled="@(removingId == meal.Id)"
-                                        @onclick="() => RemoveAsync(meal)">
+                                        @onclick="() => RequestRemove(meal)">
                                     @(removingId == meal.Id ? "Removing..." : "Remove")
                                 </button>
                             </td>
@@ -78,6 +77,14 @@ else
     }
 }
 
+<ConfirmDialog @bind-IsVisible="showRemoveDialog"
+               Title="Remove meal"
+               Message="@removeDialogMessage"
+               ConfirmText="Remove"
+               CancelText="Cancel"
+               ConfirmButtonClass="btn-danger"
+               OnConfirmed="RemoveConfirmedAsync" />
+
 @code {
     [Parameter] public int RestaurantId { get; set; }
 
@@ -85,6 +92,9 @@ else
     private List<MealDto>? meals;
     private string? error;
     private int? removingId;
+    private bool showRemoveDialog;
+    private int? pendingRemoveMealId;
+    private string removeDialogMessage = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -112,14 +122,24 @@ else
         meals = await Meals.GetByRestaurantAsync(RestaurantId);
     }
 
-    private async Task RemoveAsync(MealDto meal)
+    private void RequestRemove(MealDto meal)
     {
-        if (!await JS.InvokeAsync<bool>("confirm", $"Remove \"{meal.Name}\"? This cannot be undone."))
+        pendingRemoveMealId = meal.Id;
+        removeDialogMessage = $"Remove \"{meal.Name}\"? This cannot be undone.";
+        showRemoveDialog = true;
+    }
+
+    private async Task RemoveConfirmedAsync()
+    {
+        if (pendingRemoveMealId is null || meals is null)
             return;
 
-        removingId = meal.Id;
+        var mealId = pendingRemoveMealId.Value;
+        pendingRemoveMealId = null;
+
+        removingId = mealId;
         error = null;
-        var (success, removeError) = await Meals.DeleteAsync(RestaurantId, meal.Id);
+        var (success, removeError) = await Meals.RemoveAsync(RestaurantId, mealId);
         removingId = null;
 
         if (!success)
@@ -128,6 +148,8 @@ else
             return;
         }
 
-        meals!.Remove(meal);
+        var meal = meals.FirstOrDefault(m => m.Id == mealId);
+        if (meal is not null)
+            meals.Remove(meal);
     }
 }

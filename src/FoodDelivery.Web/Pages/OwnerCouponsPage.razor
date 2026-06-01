@@ -3,7 +3,6 @@
 @inject RestaurantService Restaurants
 @inject CouponService Coupons
 @inject AuthenticationStateProvider AuthStateProvider
-@inject IJSRuntime JS
 
 <PageTitle>@(restaurant?.Name ?? "Coupons")</PageTitle>
 
@@ -83,9 +82,9 @@ else
                                     <td class="text-nowrap">@coupon.ExpiresAt.ToLocalTime().ToString("d")</td>
                                     <td>@(coupon.IsActive ? "Yes" : "No")</td>
                                     <td class="text-end text-nowrap">
-                                        <button class="btn btn-sm btn-outline-danger"
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
                                                 disabled="@(removingId == coupon.Id)"
-                                                @onclick="() => RemoveAsync(coupon)">
+                                                @onclick="() => RequestRemove(coupon)">
                                             @(removingId == coupon.Id ? "Removing..." : "Remove")
                                         </button>
                                     </td>
@@ -99,6 +98,14 @@ else
     </div>
 }
 
+<ConfirmDialog @bind-IsVisible="showRemoveDialog"
+               Title="Remove coupon"
+               Message="@removeDialogMessage"
+               ConfirmText="Remove"
+               CancelText="Cancel"
+               ConfirmButtonClass="btn-danger"
+               OnConfirmed="RemoveConfirmedAsync" />
+
 @code {
     [Parameter] public int RestaurantId { get; set; }
 
@@ -109,6 +116,9 @@ else
     private string? createError;
     private bool creating;
     private int? removingId;
+    private bool showRemoveDialog;
+    private int? pendingRemoveCouponId;
+    private string removeDialogMessage = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -157,14 +167,24 @@ else
         formModel.DiscountValue = 0;
     }
 
-    private async Task RemoveAsync(CouponDto coupon)
+    private void RequestRemove(CouponDto coupon)
     {
-        if (!await JS.InvokeAsync<bool>("confirm", $"Remove coupon \"{coupon.Code}\"?"))
+        pendingRemoveCouponId = coupon.Id;
+        removeDialogMessage = $"Remove coupon \"{coupon.Code}\"? This cannot be undone.";
+        showRemoveDialog = true;
+    }
+
+    private async Task RemoveConfirmedAsync()
+    {
+        if (pendingRemoveCouponId is null || coupons is null)
             return;
 
-        removingId = coupon.Id;
+        var couponId = pendingRemoveCouponId.Value;
+        pendingRemoveCouponId = null;
+
+        removingId = couponId;
         error = null;
-        var (success, removeError) = await Coupons.DeleteAsync(RestaurantId, coupon.Id);
+        var (success, removeError) = await Coupons.RemoveAsync(RestaurantId, couponId);
         removingId = null;
 
         if (!success)
@@ -173,7 +193,9 @@ else
             return;
         }
 
-        coupons!.Remove(coupon);
+        var coupon = coupons.FirstOrDefault(c => c.Id == couponId);
+        if (coupon is not null)
+            coupons.Remove(coupon);
     }
 
     private class CouponFormModel

@@ -22,7 +22,7 @@ public class CouponService(HttpClient http)
         return (false, null, await response.Content.ReadAsStringAsync());
     }
 
-    public async Task<(bool Success, string? Error)> DeleteAsync(int restaurantId, int couponId)
+    public async Task<(bool Success, string? Error)> RemoveAsync(int restaurantId, int couponId)
     {
         var response = await http.DeleteAsync($"api/restaurants/{restaurantId}/coupons/{couponId}");
         if (response.IsSuccessStatusCode)
