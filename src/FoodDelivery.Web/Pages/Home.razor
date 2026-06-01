@@ -1,4 +1,5 @@
 @page "/restaurants"
+@attribute [Authorize(Roles = "Customer")]
 @inject RestaurantService Restaurants
 
 <PageTitle>Food Delivery</PageTitle>

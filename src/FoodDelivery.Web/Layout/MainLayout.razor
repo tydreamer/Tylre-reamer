@@ -12,9 +12,13 @@
     </main>
 </div>
 
-<AuthorizeView>
+<AuthorizeView Roles="Customer">
     <Authorized>
         <CartInitializer />
+    </Authorized>
+</AuthorizeView>
+<AuthorizeView>
+    <Authorized>
         <NotificationToast />
     </Authorized>
 </AuthorizeView>
