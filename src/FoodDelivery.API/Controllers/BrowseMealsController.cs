@@ -1,5 +1,6 @@
 using FoodDelivery.API.Data;
 using FoodDelivery.API.DTOs;
+using FoodDelivery.API.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,32 +19,30 @@ public class BrowseMealsController(AppDbContext db) : ControllerBase
         if (page < 1) page = 1;
         if (pageSize < 1 || pageSize > 100) pageSize = 12;
 
-        var query = db.Meals.AsQueryable();
+        var query = db.Meals
+            .Include(m => m.Restaurant)
+            .Include(m => m.MealType)
+            .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))
         {
             var term = $"%{search.Trim()}%";
             query = query.Where(m =>
                 EF.Functions.ILike(m.Name, term) ||
-                EF.Functions.ILike(m.Description, term));
+                EF.Functions.ILike(m.Description, term) ||
+                EF.Functions.ILike(m.MealType.Name, term));
         }
 
         var totalCount = await query.CountAsync();
-        var items = await query
+        var meals = await query
             .OrderBy(m => m.Restaurant.Name)
+            .ThenBy(m => m.MealType.Name)
             .ThenBy(m => m.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(m => new MealBrowseResponse(
-                m.Id,
-                m.Name,
-                m.Description,
-                m.ImageUrl,
-                m.Price,
-                m.IsAvailable,
-                m.RestaurantId,
-                m.Restaurant.Name))
             .ToListAsync();
+
+        var items = meals.Select(MealMapper.ToBrowseResponse).ToList();
 
         return Ok(new PagedResult<MealBrowseResponse>(items, totalCount, page, pageSize));
     }
@@ -52,21 +51,13 @@ public class BrowseMealsController(AppDbContext db) : ControllerBase
     public async Task<IActionResult> GetById(int id)
     {
         var meal = await db.Meals
-            .Where(m => m.Id == id)
-            .Select(m => new MealBrowseResponse(
-                m.Id,
-                m.Name,
-                m.Description,
-                m.ImageUrl,
-                m.Price,
-                m.IsAvailable,
-                m.RestaurantId,
-                m.Restaurant.Name))
-            .FirstOrDefaultAsync();
+            .Include(m => m.Restaurant)
+            .Include(m => m.MealType)
+            .FirstOrDefaultAsync(m => m.Id == id);
 
         if (meal is null)
             return NotFound();
 
-        return Ok(meal);
+        return Ok(MealMapper.ToBrowseResponse(meal));
     }
 }

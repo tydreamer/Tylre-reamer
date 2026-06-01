@@ -1,6 +1,8 @@
 using System.Security.Claims;
 using FoodDelivery.API.Data;
 using FoodDelivery.API.DTOs;
+using FoodDelivery.API.Helpers;
+using FoodDelivery.API.Constants;
 using FoodDelivery.API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,17 +19,23 @@ public class MealsController(AppDbContext db) : ControllerBase
     {
         var meals = await db.Meals
             .Where(m => m.RestaurantId == restaurantId)
-            .Select(m => new MealResponse(m.Id, m.Name, m.Description, m.ImageUrl, m.Price, m.IsAvailable, m.RestaurantId))
+            .Include(m => m.MealType)
+            .OrderBy(m => m.MealType.Name)
+            .ThenBy(m => m.Name)
             .ToListAsync();
-        return Ok(meals);
+
+        return Ok(meals.Select(MealMapper.ToResponse));
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int restaurantId, int id)
     {
-        var meal = await db.Meals.FirstOrDefaultAsync(m => m.Id == id && m.RestaurantId == restaurantId);
+        var meal = await db.Meals
+            .Include(m => m.MealType)
+            .FirstOrDefaultAsync(m => m.Id == id && m.RestaurantId == restaurantId);
+
         if (meal is null) return NotFound();
-        return Ok(new MealResponse(meal.Id, meal.Name, meal.Description, meal.ImageUrl, meal.Price, meal.IsAvailable, meal.RestaurantId));
+        return Ok(MealMapper.ToResponse(meal));
     }
 
     [Authorize(Roles = "Owner")]
@@ -39,18 +47,24 @@ public class MealsController(AppDbContext db) : ControllerBase
         if (restaurant is null) return NotFound();
         if (restaurant.OwnerId != ownerId) return Forbid();
 
+        if (!await db.MealTypes.AnyAsync(t => t.Id == req.MealTypeId))
+            return BadRequest(new { error = ValidationMessages.MealTypeInvalid });
+
         var meal = new Meal
         {
             Name = req.Name,
-            Description = req.Description,
+            Description = req.Description ?? string.Empty,
             ImageUrl = req.ImageUrl ?? string.Empty,
             Price = req.Price,
+            MealTypeId = req.MealTypeId,
             RestaurantId = restaurantId
         };
         db.Meals.Add(meal);
         await db.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetById), new { restaurantId, id = meal.Id },
-            new MealResponse(meal.Id, meal.Name, meal.Description, meal.ImageUrl, meal.Price, meal.IsAvailable, meal.RestaurantId));
+
+        await db.Entry(meal).Reference(m => m.MealType).LoadAsync();
+
+        return CreatedAtAction(nameof(GetById), new { restaurantId, id = meal.Id }, MealMapper.ToResponse(meal));
     }
 
     [Authorize(Roles = "Owner")]
@@ -62,14 +76,18 @@ public class MealsController(AppDbContext db) : ControllerBase
         if (restaurant is null) return NotFound();
         if (restaurant.OwnerId != ownerId) return Forbid();
 
+        if (!await db.MealTypes.AnyAsync(t => t.Id == req.MealTypeId))
+            return BadRequest(new { error = ValidationMessages.MealTypeInvalid });
+
         var meal = await db.Meals.FirstOrDefaultAsync(m => m.Id == id && m.RestaurantId == restaurantId);
         if (meal is null) return NotFound();
 
         meal.Name = req.Name;
-        meal.Description = req.Description;
+        meal.Description = req.Description ?? string.Empty;
         meal.ImageUrl = req.ImageUrl ?? string.Empty;
         meal.Price = req.Price;
         meal.IsAvailable = req.IsAvailable;
+        meal.MealTypeId = req.MealTypeId;
         await db.SaveChangesAsync();
         return NoContent();
     }

@@ -7,7 +7,8 @@ public record CreateMealRequest(
     [Required(ErrorMessage = NameRequired), MaxLength(100, ErrorMessage = NameTooLong)] string Name,
     [MaxLength(500, ErrorMessage = DescriptionTooLong)] string? Description,
     [MaxLength(500, ErrorMessage = ImageUrlTooLong)] string? ImageUrl,
-    [Range(0.01, 100_000, ErrorMessage = PriceInvalid)] decimal Price
+    [Range(0.01, 100_000, ErrorMessage = PriceInvalid)] decimal Price,
+    [Required(ErrorMessage = MealTypeRequired)] int MealTypeId
 );
 
 public record UpdateMealRequest(
@@ -15,10 +16,20 @@ public record UpdateMealRequest(
     [MaxLength(500, ErrorMessage = DescriptionTooLong)] string? Description,
     [MaxLength(500, ErrorMessage = ImageUrlTooLong)] string? ImageUrl,
     [Range(0.01, 100_000, ErrorMessage = PriceInvalid)] decimal Price,
-    bool IsAvailable
+    bool IsAvailable,
+    [Required(ErrorMessage = MealTypeRequired)] int MealTypeId
 );
 
-public record MealResponse(int Id, string Name, string Description, string ImageUrl, decimal Price, bool IsAvailable, int RestaurantId);
+public record MealResponse(
+    int Id,
+    string Name,
+    string Description,
+    string ImageUrl,
+    decimal Price,
+    bool IsAvailable,
+    int RestaurantId,
+    int MealTypeId,
+    string MealTypeName);
 
 public record MealBrowseResponse(
     int Id,
@@ -28,4 +39,6 @@ public record MealBrowseResponse(
     decimal Price,
     bool IsAvailable,
     int RestaurantId,
-    string RestaurantName);
+    string RestaurantName,
+    int MealTypeId,
+    string MealTypeName);

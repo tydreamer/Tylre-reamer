@@ -20,6 +20,8 @@ public static class ValidationMessages
     public const string ImageUrlTooLong = "Image URL cannot exceed 500 characters.";
 
     public const string PriceInvalid = "Price must be greater than 0.";
+    public const string MealTypeRequired = "Meal type is required.";
+    public const string MealTypeInvalid = "Invalid meal type.";
 
     public const string CodeRequired = "Code is required.";
     public const string CodeTooLong = "Code cannot exceed 10 characters.";
