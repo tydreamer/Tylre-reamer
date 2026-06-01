@@ -42,7 +42,10 @@ else
                                      style="height: 160px; object-fit: cover;" />
                             }
                             <div class="card-body">
-                                <h5 class="card-title mb-1">@meal.Name</h5>
+                                <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                    <h5 class="card-title mb-0">@meal.Name</h5>
+                                    <span class="badge meal-type-badge">@meal.MealTypeName</span>
+                                </div>
                                 <p class="card-text text-muted mb-2">@meal.Description</p>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="badge bg-success fs-6">@meal.Price.ToString("C")</span>

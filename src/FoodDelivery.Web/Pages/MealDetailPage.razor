@@ -34,7 +34,10 @@ else
         </div>
 
         <div class="col-md-7 col-lg-8">
-            <h1 class="mb-2">@meal.Name</h1>
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                <h1 class="mb-0">@meal.Name</h1>
+                <span class="badge meal-type-badge">@meal.MealTypeName</span>
+            </div>
             <p class="text-muted mb-3">
                 <a href="/restaurants/@meal.RestaurantId" class="text-decoration-none">@meal.RestaurantName</a>
             </p>

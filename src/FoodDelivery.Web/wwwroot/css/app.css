@@ -260,6 +260,16 @@ code {
 }
 
 /* Meal detail */
+.meal-type-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color);
+    background-color: var(--bs-secondary-bg);
+    border: 1px solid var(--bs-border-color);
+}
+
 .meal-detail-image {
     max-height: 360px;
     object-fit: cover;
