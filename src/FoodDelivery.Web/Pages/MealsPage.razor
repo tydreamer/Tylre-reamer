@@ -1,12 +1,21 @@
 @page "/meals"
 @attribute [Authorize(Roles = "Customer")]
 @inject MealService Meals
+@inject CartService Cart
 
 <PageTitle>Meals</PageTitle>
 
 <h1 class="mb-4">Meals</h1>
 
 <BrowseSearchBar @bind-SearchTerm="searchTerm" OnSearch="ApplySearchAsync" />
+
+@if (cartSuccessMessage is not null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @cartSuccessMessage
+        <button type="button" class="btn-close" aria-label="Dismiss" @onclick="() => cartSuccessMessage = null"></button>
+    </div>
+}
 
 @if (paged is null)
 {
@@ -24,30 +33,53 @@ else
         @foreach (var meal in paged.Items)
         {
             <div class="col">
-                <a href="meals/@meal.Id" class="text-decoration-none text-dark">
-                    <div class="card h-100 shadow-sm">
+                <div class="card h-100 shadow-sm">
+                    <a href="meals/@meal.Id" class="text-decoration-none text-dark">
                         @if (!string.IsNullOrWhiteSpace(meal.ImageUrl))
                         {
                             <img src="@meal.ImageUrl" class="card-img-top" alt="@meal.Name"
                                  style="height: 180px; object-fit: cover;" />
                         }
-                        <div class="card-body">
+                        <div class="card-body pb-2">
                             <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
                                 <h5 class="card-title mb-0">@meal.Name</h5>
                                 <span class="badge meal-type-badge">@meal.MealTypeName</span>
                             </div>
                             <p class="text-muted small mb-2">@meal.RestaurantName</p>
-                            <p class="card-text">@meal.Description</p>
-                            <div class="d-flex justify-content-between align-items-center mt-2">
+                            <p class="card-text mb-0">@meal.Description</p>
+                        </div>
+                    </a>
+                    <div class="card-body pt-0">
+                        <div class="meal-card-price-row">
+                            <div class="d-flex flex-wrap align-items-center gap-2">
                                 <span class="badge bg-success fs-6">@meal.Price.ToString("C")</span>
                                 @if (!meal.IsAvailable)
                                 {
                                     <span class="badge bg-secondary">Unavailable</span>
                                 }
                             </div>
+                            @if (meal.IsAvailable)
+                            {
+                                <div class="meal-card-cart">
+                                    <div class="d-inline-flex align-items-center gap-1" role="group" aria-label="Quantity for @meal.Name">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                disabled="@(GetQuantity(meal.Id) <= 1 || addingMealId == meal.Id)"
+                                                @onclick="() => DecreaseQuantity(meal.Id)">−</button>
+                                        <span class="cart-qty-display">@GetQuantity(meal.Id)</span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                disabled="@(addingMealId == meal.Id)"
+                                                @onclick="() => IncreaseQuantity(meal.Id)">+</button>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-primary"
+                                            disabled="@(addingMealId == meal.Id)"
+                                            @onclick="() => RequestAddToCart(meal)">
+                                        @(addingMealId == meal.Id ? "Adding..." : "Add to cart")
+                                    </button>
+                                </div>
+                            }
                         </div>
                     </div>
-                </a>
+                </div>
             </div>
         }
     </div>
@@ -58,19 +90,97 @@ else
                    OnPageChanged="GoToPage" OnPageSizeChanged="ChangePageSize" />
 }
 
+<ConfirmDialog @bind-IsVisible="showSwitchRestaurantDialog"
+               Title="Replace cart items?"
+               Message="@switchRestaurantDialogMessage"
+               ConfirmText="Replace cart"
+               CancelText="Keep current cart"
+               ConfirmButtonClass="btn-danger"
+               OnConfirmed="SwitchRestaurantConfirmedAsync" />
+
 @code {
     private PagedResult<MealBrowseDto>? paged;
     private int currentPage = 1;
     private int pageSize = 12;
     private string searchTerm = "";
     private static readonly int[] BrowsePageSizeOptions = [12, 24, 48];
+    private readonly Dictionary<int, int> quantities = new();
+    private string? cartSuccessMessage;
+    private int? addingMealId;
+    private bool showSwitchRestaurantDialog;
+    private MealBrowseDto? pendingMeal;
+    private int pendingQuantity;
+    private string switchRestaurantDialogMessage = "";
 
     private bool HasActiveSearch => !string.IsNullOrWhiteSpace(searchTerm);
 
     protected override async Task OnInitializedAsync()
     {
+        await Cart.InitializeAsync();
         await LoadPageAsync();
     }
+
+    private int GetQuantity(int mealId) =>
+        quantities.TryGetValue(mealId, out var qty) ? qty : 1;
+
+    private void IncreaseQuantity(int mealId) =>
+        quantities[mealId] = GetQuantity(mealId) + 1;
+
+    private void DecreaseQuantity(int mealId)
+    {
+        if (GetQuantity(mealId) > 1)
+            quantities[mealId] = GetQuantity(mealId) - 1;
+    }
+
+    private void RequestAddToCart(MealBrowseDto meal)
+    {
+        if (!meal.IsAvailable)
+            return;
+
+        var quantity = GetQuantity(meal.Id);
+
+        if (Cart.HasItemsFromDifferentRestaurant(meal.RestaurantId))
+        {
+            pendingMeal = meal;
+            pendingQuantity = quantity;
+            switchRestaurantDialogMessage =
+                $"Your cart has items from {Cart.RestaurantName}. Replace them with meals from {meal.RestaurantName}?";
+            showSwitchRestaurantDialog = true;
+            return;
+        }
+
+        _ = AddToCartAsync(meal, quantity);
+    }
+
+    private async Task SwitchRestaurantConfirmedAsync()
+    {
+        if (pendingMeal is null)
+            return;
+
+        var meal = pendingMeal;
+        var quantity = pendingQuantity;
+        pendingMeal = null;
+
+        await Cart.ClearAsync();
+        await AddToCartAsync(meal, quantity);
+    }
+
+    private async Task AddToCartAsync(MealBrowseDto meal, int quantity)
+    {
+        addingMealId = meal.Id;
+        cartSuccessMessage = null;
+        await Cart.AddAsync(ToMealDto(meal), meal.RestaurantName, quantity);
+        addingMealId = null;
+        quantities[meal.Id] = 1;
+
+        cartSuccessMessage = quantity == 1
+            ? $"Added {meal.Name} to your cart."
+            : $"Added {quantity} × {meal.Name} to your cart.";
+    }
+
+    private static MealDto ToMealDto(MealBrowseDto meal) =>
+        new(meal.Id, meal.Name, meal.Description, meal.ImageUrl, meal.Price,
+            meal.IsAvailable, meal.RestaurantId, meal.MealTypeId, meal.MealTypeName);
 
     private async Task ApplySearchAsync()
     {

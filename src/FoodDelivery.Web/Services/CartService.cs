@@ -33,6 +33,9 @@ public class CartService(IJSRuntime js) : IAsyncDisposable
     public decimal Subtotal => items.Values.Sum(i => i.LineTotal);
     public bool IsEmpty => items.Count == 0;
 
+    public bool HasItemsFromDifferentRestaurant(int restaurantId) =>
+        !IsEmpty && RestaurantId != restaurantId;
+
     public event Action? OnChange;
 
     public async Task InitializeAsync()
@@ -58,8 +61,8 @@ public class CartService(IJSRuntime js) : IAsyncDisposable
         if (quantity <= 0)
             return;
 
-        if (RestaurantId is not null && RestaurantId != meal.RestaurantId)
-            ClearItems();
+        if (HasItemsFromDifferentRestaurant(meal.RestaurantId))
+            return;
 
         RestaurantId = meal.RestaurantId;
         RestaurantName = restaurantName;

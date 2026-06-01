@@ -55,11 +55,6 @@ else
                 {
                     <div class="alert alert-success">@cartSuccessMessage</div>
                 }
-                @if (cartMessage is not null)
-                {
-                    <div class="alert alert-warning">@cartMessage</div>
-                }
-
                 <div class="meal-detail-cart d-flex flex-wrap align-items-center gap-3">
                     <div class="btn-group" role="group" aria-label="Quantity">
                         <button type="button" class="btn btn-outline-secondary"
@@ -72,13 +67,21 @@ else
                     </div>
                     <button type="button" class="btn btn-primary"
                             disabled="@busy"
-                            @onclick="AddToCartAsync">
+                            @onclick="RequestAddToCart">
                         @(busy ? "Adding..." : "Add to cart")
                     </button>
                 </div>
             }
         </div>
     </div>
+
+    <ConfirmDialog @bind-IsVisible="showSwitchRestaurantDialog"
+                   Title="Replace cart items?"
+                   Message="@switchRestaurantDialogMessage"
+                   ConfirmText="Replace cart"
+                   CancelText="Keep current cart"
+                   ConfirmButtonClass="btn-danger"
+                   OnConfirmed="SwitchRestaurantConfirmedAsync" />
 }
 
 @code {
@@ -89,8 +92,9 @@ else
     private bool loaded;
     private int quantity = 1;
     private bool busy;
-    private string? cartMessage;
     private string? cartSuccessMessage;
+    private bool showSwitchRestaurantDialog;
+    private string switchRestaurantDialogMessage = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -107,20 +111,34 @@ else
             quantity--;
     }
 
+    private void RequestAddToCart()
+    {
+        if (meal is null || !meal.IsAvailable)
+            return;
+
+        if (Cart.HasItemsFromDifferentRestaurant(meal.RestaurantId))
+        {
+            switchRestaurantDialogMessage =
+                $"Your cart has items from {Cart.RestaurantName}. Replace them with meals from {meal.RestaurantName}?";
+            showSwitchRestaurantDialog = true;
+            return;
+        }
+
+        _ = AddToCartAsync();
+    }
+
+    private async Task SwitchRestaurantConfirmedAsync()
+    {
+        await Cart.ClearAsync();
+        await AddToCartAsync();
+    }
+
     private async Task AddToCartAsync()
     {
         if (meal is null || !meal.IsAvailable)
             return;
 
-        cartMessage = null;
         cartSuccessMessage = null;
-
-        if (!Cart.IsEmpty && Cart.RestaurantId != meal.RestaurantId)
-        {
-            cartMessage = $"Your cart has items from {Cart.RestaurantName}. Clear the cart or finish that order before adding meals from another restaurant.";
-            return;
-        }
-
         busy = true;
         var mealDto = new MealDto(
             meal.Id,
