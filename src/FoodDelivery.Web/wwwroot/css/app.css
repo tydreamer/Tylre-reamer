@@ -428,3 +428,29 @@ code {
 .users-list-table .col-role { width: 11.5rem; }
 .users-list-table .col-status { width: 6.5rem; }
 .users-list-table .col-actions { width: 6.5rem; }
+
+/* Owner meals list — fixed column widths (table-layout: fixed) */
+.meals-list-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.meals-list-table th,
+.meals-list-table td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.meals-list-table .col-actions,
+.meals-list-table td.col-actions {
+    overflow: visible;
+    text-overflow: clip;
+}
+
+.meals-list-table .col-meal { width: 14rem; }
+.meals-list-table .col-description { width: 38%; }
+.meals-list-table .col-price { width: 6.5rem; }
+.meals-list-table .col-type { width: 8.5rem; }
+.meals-list-table .col-actions { width: 10.5rem; }
