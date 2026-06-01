@@ -84,9 +84,9 @@ else
                                     <td>@(coupon.IsActive ? "Yes" : "No")</td>
                                     <td class="text-end text-nowrap">
                                         <button class="btn btn-sm btn-outline-danger"
-                                                disabled="@(deletingId == coupon.Id)"
-                                                @onclick="() => DeleteAsync(coupon)">
-                                            @(deletingId == coupon.Id ? "Deleting..." : "Delete")
+                                                disabled="@(removingId == coupon.Id)"
+                                                @onclick="() => RemoveAsync(coupon)">
+                                            @(removingId == coupon.Id ? "Removing..." : "Remove")
                                         </button>
                                     </td>
                                 </tr>
@@ -108,7 +108,7 @@ else
     private string? error;
     private string? createError;
     private bool creating;
-    private int? deletingId;
+    private int? removingId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -157,19 +157,19 @@ else
         formModel.DiscountValue = 0;
     }
 
-    private async Task DeleteAsync(CouponDto coupon)
+    private async Task RemoveAsync(CouponDto coupon)
     {
-        if (!await JS.InvokeAsync<bool>("confirm", $"Delete coupon \"{coupon.Code}\"?"))
+        if (!await JS.InvokeAsync<bool>("confirm", $"Remove coupon \"{coupon.Code}\"?"))
             return;
 
-        deletingId = coupon.Id;
+        removingId = coupon.Id;
         error = null;
-        var (success, deleteError) = await Coupons.DeleteAsync(RestaurantId, coupon.Id);
-        deletingId = null;
+        var (success, removeError) = await Coupons.DeleteAsync(RestaurantId, coupon.Id);
+        removingId = null;
 
         if (!success)
         {
-            error = deleteError ?? "Failed to delete coupon.";
+            error = removeError ?? "Failed to remove coupon.";
             return;
         }
 

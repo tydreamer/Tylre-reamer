@@ -45,9 +45,9 @@ else
                             <a href="owner/restaurants/@restaurant.Id/coupons" class="btn btn-sm btn-outline-secondary">Coupons</a>
                             <a href="owner/restaurants/@restaurant.Id/edit" class="btn btn-sm btn-outline-primary">Edit</a>
                             <button type="button" class="btn btn-sm btn-outline-danger"
-                                    disabled="@(deletingId == restaurant.Id)"
-                                    @onclick="() => RequestDelete(restaurant)">
-                                @(deletingId == restaurant.Id ? "Deleting..." : "Delete")
+                                    disabled="@(removingId == restaurant.Id)"
+                                    @onclick="() => RequestRemove(restaurant)">
+                                @(removingId == restaurant.Id ? "Removing..." : "Remove")
                             </button>
                         </td>
                     </tr>
@@ -57,21 +57,21 @@ else
     </div>
 }
 
-<ConfirmDialog @bind-IsVisible="showDeleteDialog"
-               Title="Delete restaurant"
-               Message="@deleteDialogMessage"
-               ConfirmText="Delete"
+<ConfirmDialog @bind-IsVisible="showRemoveDialog"
+               Title="Remove restaurant"
+               Message="@removeDialogMessage"
+               ConfirmText="Remove"
                CancelText="Cancel"
                ConfirmButtonClass="btn-danger"
-               OnConfirmed="DeleteConfirmedAsync" />
+               OnConfirmed="RemoveConfirmedAsync" />
 
 @code {
     private List<RestaurantDto>? restaurants;
     private string? error;
-    private int? deletingId;
-    private bool showDeleteDialog;
-    private int? pendingDeleteRestaurantId;
-    private string deleteDialogMessage = "";
+    private int? removingId;
+    private bool showRemoveDialog;
+    private int? pendingRemoveRestaurantId;
+    private string removeDialogMessage = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -87,29 +87,29 @@ else
         restaurants = await Restaurants.GetByOwnerAsync(ownerId.Value);
     }
 
-    private void RequestDelete(RestaurantDto restaurant)
+    private void RequestRemove(RestaurantDto restaurant)
     {
-        pendingDeleteRestaurantId = restaurant.Id;
-        deleteDialogMessage = $"Delete \"{restaurant.Name}\"? This cannot be undone.";
-        showDeleteDialog = true;
+        pendingRemoveRestaurantId = restaurant.Id;
+        removeDialogMessage = $"Remove \"{restaurant.Name}\"? This cannot be undone.";
+        showRemoveDialog = true;
     }
 
-    private async Task DeleteConfirmedAsync()
+    private async Task RemoveConfirmedAsync()
     {
-        if (pendingDeleteRestaurantId is null || restaurants is null)
+        if (pendingRemoveRestaurantId is null || restaurants is null)
             return;
 
-        var restaurantId = pendingDeleteRestaurantId.Value;
-        pendingDeleteRestaurantId = null;
+        var restaurantId = pendingRemoveRestaurantId.Value;
+        pendingRemoveRestaurantId = null;
 
-        deletingId = restaurantId;
+        removingId = restaurantId;
         error = null;
-        var (success, deleteError) = await Restaurants.DeleteAsync(restaurantId);
-        deletingId = null;
+        var (success, removeError) = await Restaurants.DeleteAsync(restaurantId);
+        removingId = null;
 
         if (!success)
         {
-            error = deleteError ?? "Failed to delete restaurant.";
+            error = removeError ?? "Failed to remove restaurant.";
             return;
         }
 
