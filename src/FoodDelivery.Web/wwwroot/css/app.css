@@ -232,7 +232,7 @@ code {
     z-index: 1080;
 }
 
-/* Meal browse / restaurant cards */
+/* Browse cards (meals, restaurants) */
 .meal-browse-card {
     overflow: hidden;
 }
