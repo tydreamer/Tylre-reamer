@@ -20,6 +20,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasIndex(u => u.Email)
             .IsUnique();
 
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.GoogleSubjectId)
+            .IsUnique();
+
         modelBuilder.Entity<Coupon>()
             .HasIndex(c => c.Code)
             .IsUnique();

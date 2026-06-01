@@ -1,12 +1,9 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using FoodDelivery.API.Data;
 using FoodDelivery.API.DTOs;
 using FoodDelivery.API.Models;
+using FoodDelivery.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace FoodDelivery.API.Controllers;
 
@@ -16,7 +13,8 @@ public class AuthController(
     AppDbContext db,
     IConfiguration config,
     IWebHostEnvironment env,
-    ILogger<AuthController> logger) : ControllerBase
+    ILogger<AuthController> logger,
+    JwtTokenService jwtTokens) : ControllerBase
 {
     private const string ForgotPasswordMessage =
         "If an account exists for this email, you will receive password reset instructions.";
@@ -47,13 +45,21 @@ public class AuthController(
     public async Task<IActionResult> Login(LoginRequest req)
     {
         var user = await db.Users.FirstOrDefaultAsync(u => u.Email == req.Email);
-        if (user is null || !BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash))
+        if (user is null)
             return Unauthorized("Invalid credentials.");
+
+        if (!BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash))
+        {
+            if (user.GoogleSubjectId is not null)
+                return Unauthorized("Invalid credentials. Try signing in with Google.");
+
+            return Unauthorized("Invalid credentials.");
+        }
 
         if (user.IsBlocked)
             return Forbid();
 
-        var token = GenerateToken(user);
+        var token = jwtTokens.GenerateToken(user);
         return Ok(new LoginResponse(token, user.Name, user.Email, user.Role.ToString()));
     }
 
@@ -108,30 +114,5 @@ public class AuthController(
         await db.SaveChangesAsync();
 
         return NoContent();
-    }
-
-    private string GenerateToken(User user)
-    {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        var expires = DateTime.UtcNow.AddMinutes(config.GetValue<int>("Jwt:ExpiresInMinutes"));
-
-        var claims = new[]
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role.ToString()),
-            new Claim("name", user.Name)
-        };
-
-        var token = new JwtSecurityToken(
-            issuer: config["Jwt:Issuer"],
-            audience: config["Jwt:Audience"],
-            claims: claims,
-            expires: expires,
-            signingCredentials: creds
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }

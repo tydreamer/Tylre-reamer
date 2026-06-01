@@ -241,6 +241,9 @@ namespace FoodDelivery.API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("GoogleSubjectId")
+                        .HasColumnType("text");
+
                     b.Property<bool>("IsBlocked")
                         .HasColumnType("boolean");
 
@@ -258,6 +261,9 @@ namespace FoodDelivery.API.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("GoogleSubjectId")
                         .IsUnique();
 
                     b.ToTable("Users");
