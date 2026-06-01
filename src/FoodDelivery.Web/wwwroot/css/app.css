@@ -342,9 +342,41 @@ code {
     padding: 0.25rem 0.5rem;
 }
 
-.order-items-cell {
-    max-width: 14rem;
+/* Orders list tables — fixed column widths (table-layout: fixed) */
+.orders-list-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.orders-list-table th,
+.orders-list-table td {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    vertical-align: middle;
 }
+
+.orders-list-table .col-actions,
+.orders-list-table td.col-actions {
+    overflow: visible;
+    text-overflow: clip;
+}
+
+/* Customer: Id | Restaurant | Items | Order Date | Total | Status | View */
+.orders-list-table--customer .col-id { width: 5rem; }
+.orders-list-table--customer .col-restaurant { width: 11rem; }
+.orders-list-table--customer .col-items { width: 38%; }
+.orders-list-table--customer .col-date { width: 11rem; }
+.orders-list-table--customer .col-total { width: 6.5rem; }
+.orders-list-table--customer .col-status { width: 7.5rem; }
+.orders-list-table--customer .col-actions { width: 4.75rem; }
+
+/* Owner: adds Customer column */
+.orders-list-table--owner .col-id { width: 5rem; }
+.orders-list-table--owner .col-restaurant { width: 9.5rem; }
+.orders-list-table--owner .col-customer { width: 9.5rem; }
+.orders-list-table--owner .col-items { width: 30%; }
+.orders-list-table--owner .col-date { width: 11rem; }
+.orders-list-table--owner .col-total { width: 6.5rem; }
+.orders-list-table--owner .col-status { width: 7.5rem; }
+.orders-list-table--owner .col-actions { width: 4.75rem; }
