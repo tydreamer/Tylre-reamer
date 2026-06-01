@@ -26,7 +26,8 @@ Example: Bella Napoli → `owner.bella-napoli@example.com` (Marco Rossi).
 | File | Contents |
 |------|----------|
 | `restaurants.csv` | 29 restaurants with image URLs and owner assignment |
-| `meals.csv` | 4 meals per restaurant; `ImageUrl` column optional (auto-generated via `MealImageUrlBuilder` when empty) |
+| `meals.csv` | 4 meals per restaurant; `ImageUrl` optional; `MealType` optional (inferred when empty) |
+| `MealTypes` table | Breakfast, Lunch, Dinner, Appetizers, Dessert (seeded from `MealTypeNames` constants) |
 
 ## Fresh seed (empty database)
 
