@@ -111,7 +111,7 @@ else
             quantity--;
     }
 
-    private void RequestAddToCart()
+    private async Task RequestAddToCart()
     {
         if (meal is null || !meal.IsAvailable)
             return;
@@ -124,7 +124,7 @@ else
             return;
         }
 
-        _ = AddToCartAsync();
+        await AddToCartAsync();
     }
 
     private async Task SwitchRestaurantConfirmedAsync()
@@ -140,23 +140,29 @@ else
 
         cartSuccessMessage = null;
         busy = true;
-        var mealDto = new MealDto(
-            meal.Id,
-            meal.Name,
-            meal.Description,
-            meal.ImageUrl,
-            meal.Price,
-            meal.IsAvailable,
-            meal.RestaurantId,
-            meal.MealTypeId,
-            meal.MealTypeName);
+        try
+        {
+            var mealDto = new MealDto(
+                meal.Id,
+                meal.Name,
+                meal.Description,
+                meal.ImageUrl,
+                meal.Price,
+                meal.IsAvailable,
+                meal.RestaurantId,
+                meal.MealTypeId,
+                meal.MealTypeName);
 
-        var addedQty = quantity;
-        await Cart.AddAsync(mealDto, meal.RestaurantName, addedQty);
-        busy = false;
-        quantity = 1;
-        cartSuccessMessage = addedQty == 1
-            ? $"Added {meal.Name} to your cart."
-            : $"Added {addedQty} × {meal.Name} to your cart.";
+            var addedQty = quantity;
+            await Cart.AddAsync(mealDto, meal.RestaurantName, addedQty);
+            quantity = 1;
+            cartSuccessMessage = addedQty == 1
+                ? $"Added {meal.Name} to your cart."
+                : $"Added {addedQty} × {meal.Name} to your cart.";
+        }
+        finally
+        {
+            busy = false;
+        }
     }
 }

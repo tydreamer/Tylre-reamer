@@ -132,7 +132,7 @@ else
             quantities[mealId] = GetQuantity(mealId) - 1;
     }
 
-    private void RequestAddToCart(MealBrowseDto meal)
+    private async Task RequestAddToCart(MealBrowseDto meal)
     {
         if (!meal.IsAvailable)
             return;
@@ -149,7 +149,7 @@ else
             return;
         }
 
-        _ = AddToCartAsync(meal, quantity);
+        await AddToCartAsync(meal, quantity);
     }
 
     private async Task SwitchRestaurantConfirmedAsync()
@@ -168,14 +168,19 @@ else
     private async Task AddToCartAsync(MealBrowseDto meal, int quantity)
     {
         addingMealId = meal.Id;
-        cartSuccessMessage = null;
-        await Cart.AddAsync(ToMealDto(meal), meal.RestaurantName, quantity);
-        addingMealId = null;
-        quantities[meal.Id] = 1;
-
-        cartSuccessMessage = quantity == 1
-            ? $"Added {meal.Name} to your cart."
-            : $"Added {quantity} × {meal.Name} to your cart.";
+        try
+        {
+            cartSuccessMessage = null;
+            await Cart.AddAsync(ToMealDto(meal), meal.RestaurantName, quantity);
+            quantities[meal.Id] = 1;
+            cartSuccessMessage = quantity == 1
+                ? $"Added {meal.Name} to your cart."
+                : $"Added {quantity} × {meal.Name} to your cart.";
+        }
+        finally
+        {
+            addingMealId = null;
+        }
     }
 
     private static MealDto ToMealDto(MealBrowseDto meal) =>
