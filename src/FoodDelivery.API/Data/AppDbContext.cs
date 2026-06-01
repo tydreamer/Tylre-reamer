@@ -7,6 +7,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<Restaurant> Restaurants => Set<Restaurant>();
+    public DbSet<MealType> MealTypes => Set<MealType>();
     public DbSet<Meal> Meals => Set<Meal>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
@@ -47,6 +48,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Meal>()
             .Property(m => m.ImageUrl)
             .HasMaxLength(500);
+
+        modelBuilder.Entity<MealType>()
+            .HasIndex(t => t.Name)
+            .IsUnique();
+
+        modelBuilder.Entity<Meal>()
+            .HasOne(m => m.MealType)
+            .WithMany(t => t.Meals)
+            .HasForeignKey(m => m.MealTypeId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Restaurant>()
             .Property(r => r.ImageUrl)

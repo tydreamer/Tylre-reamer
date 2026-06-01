@@ -12,6 +12,8 @@ public class Meal
     public string ImageUrl { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public bool IsAvailable { get; set; } = true;
+    public int MealTypeId { get; set; }
+    public MealType MealType { get; set; } = null!;
     public int RestaurantId { get; set; }
     public Restaurant Restaurant { get; set; } = null!;
 }
