@@ -10,6 +10,13 @@ public class CouponService(HttpClient http)
         return await http.GetFromJsonAsync<List<CouponDto>>($"api/restaurants/{restaurantId}/coupons") ?? [];
     }
 
+    public async Task<CouponValidationDto?> ValidateAsync(int restaurantId, string code, decimal subtotal)
+    {
+        var url =
+            $"api/restaurants/{restaurantId}/coupon/validate?code={Uri.EscapeDataString(code.Trim())}&subtotal={subtotal}";
+        return await http.GetFromJsonAsync<CouponValidationDto>(url);
+    }
+
     public async Task<(bool Success, CouponDto? Coupon, string? Error)> CreateAsync(int restaurantId, CouponCreateRequest request)
     {
         var response = await http.PostAsJsonAsync($"api/restaurants/{restaurantId}/coupons", request);
