@@ -4,7 +4,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 
-namespace FoodDelivery.Web.Services;
+namespace FoodDelivery.Web.Services.Auth;
 
 public class JwtAuthStateProvider(IJSRuntime js, HttpClient http) : AuthenticationStateProvider
 {

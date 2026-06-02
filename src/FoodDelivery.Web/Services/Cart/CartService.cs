@@ -1,8 +1,7 @@
 using System.Text.Json;
-using FoodDelivery.Web.Models;
 using Microsoft.JSInterop;
 
-namespace FoodDelivery.Web.Services;
+namespace FoodDelivery.Web.Services.Cart;
 
 public class CartItem(MealDto meal, int quantity)
 {

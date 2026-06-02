@@ -1,7 +1,6 @@
 using System.Net.Http.Json;
-using FoodDelivery.Web.Models;
 
-namespace FoodDelivery.Web.Services;
+namespace FoodDelivery.Web.Services.Restaurants;
 
 public class RestaurantService(HttpClient http)
 {

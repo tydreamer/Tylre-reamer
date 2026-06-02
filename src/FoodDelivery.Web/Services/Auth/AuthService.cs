@@ -2,7 +2,7 @@ using System.Net.Http.Json;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 
-namespace FoodDelivery.Web.Services;
+namespace FoodDelivery.Web.Services.Auth;
 
 public record LoginResponse(string Token, string Name, string Email, string Role);
 

@@ -2,7 +2,7 @@ using System.Net;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
-namespace FoodDelivery.Web.Services;
+namespace FoodDelivery.Web.Services.Auth;
 
 public class AuthExpiredHandler(IJSRuntime js, NavigationManager nav) : DelegatingHandler
 {

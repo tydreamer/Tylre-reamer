@@ -1,8 +1,7 @@
-using FoodDelivery.Web.Models;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.JSInterop;
 
-namespace FoodDelivery.Web.Services;
+namespace FoodDelivery.Web.Services.Orders;
 
 public class OrderNotificationService(IJSRuntime js, IConfiguration config) : IAsyncDisposable
 {

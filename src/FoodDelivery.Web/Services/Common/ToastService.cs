@@ -1,4 +1,4 @@
-namespace FoodDelivery.Web.Services;
+namespace FoodDelivery.Web.Services.Common;
 
 public enum ToastKind
 {

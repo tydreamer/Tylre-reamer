@@ -1,6 +1,5 @@
 using Bunit;
 using FluentAssertions;
-using FoodDelivery.Web.Components;
 using Microsoft.AspNetCore.Components;
 
 namespace FoodDelivery.Web.ComponentTests.Components;
