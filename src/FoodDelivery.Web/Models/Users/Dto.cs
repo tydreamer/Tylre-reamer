@@ -1,4 +1,4 @@
-namespace FoodDelivery.Web.Models;
+namespace FoodDelivery.Web.Models.Users;
 
 public record UserDto(int Id, string Name, string Email, string Role, bool IsBlocked);
 

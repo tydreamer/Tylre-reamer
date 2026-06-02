@@ -1,4 +1,4 @@
-namespace FoodDelivery.Web.Models;
+namespace FoodDelivery.Web.Models.Orders;
 
 public record OrderItemRequest(int MealId, int Quantity);
 

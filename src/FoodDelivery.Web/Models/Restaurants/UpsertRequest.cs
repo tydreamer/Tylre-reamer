@@ -1,4 +1,4 @@
-namespace FoodDelivery.Web.Models;
+namespace FoodDelivery.Web.Models.Restaurants;
 
 public record RestaurantUpsertRequest(
     string Name,

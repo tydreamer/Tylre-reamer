@@ -1,4 +1,4 @@
-namespace FoodDelivery.Web.Models;
+namespace FoodDelivery.Web.Models.Meals;
 
 public record MealBrowseDto(
     int Id,

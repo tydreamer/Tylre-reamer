@@ -1,4 +1,4 @@
-namespace FoodDelivery.Web.Models;
+namespace FoodDelivery.Web.Models.Coupons;
 
 public record CouponCreateRequest(
   string Code,
