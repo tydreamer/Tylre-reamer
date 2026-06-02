@@ -17,4 +17,4 @@ global using FoodDelivery.API.Helpers.Restaurants;
 global using FoodDelivery.API.Helpers.Meals;
 global using FoodDelivery.API.Helpers.Orders;
 global using FoodDelivery.API.Helpers.Coupons;
-global using FoodDelivery.API.Services.Auth;
+global using FoodDelivery.API.Services;

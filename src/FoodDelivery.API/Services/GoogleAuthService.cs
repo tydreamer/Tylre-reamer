@@ -3,7 +3,7 @@ using FoodDelivery.API.Data;
 using FoodDelivery.API.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace FoodDelivery.API.Services.Auth;
+namespace FoodDelivery.API.Services;
 
 public class GoogleAuthService(AppDbContext db)
 {

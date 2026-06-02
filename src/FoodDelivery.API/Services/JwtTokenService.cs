@@ -4,7 +4,7 @@ using System.Text;
 using FoodDelivery.API.Models;
 using Microsoft.IdentityModel.Tokens;
 
-namespace FoodDelivery.API.Services.Auth;
+namespace FoodDelivery.API.Services;
 
 public class JwtTokenService(IConfiguration config)
 {
