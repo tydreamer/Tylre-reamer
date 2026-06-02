@@ -87,7 +87,7 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
         if (restaurant is null) return NotFound("Restaurant not found.");
 
         if (await CustomerBlockHelper.IsBlockedFromOwnerAsync(db, restaurant.OwnerId, customerId))
-            return BadRequest(new { error = ValidationMessages.CustomerBlockedFromRestaurant });
+            return BadRequest(ValidationMessages.CustomerBlockedFromRestaurant);
 
         var mealIds = req.Items.Select(i => i.MealId).ToList();
         var meals = await db.Meals
@@ -193,7 +193,7 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
         if (original is null) return NotFound();
 
         if (await CustomerBlockHelper.IsBlockedFromOwnerAsync(db, original.Restaurant.OwnerId, CurrentUserId))
-            return BadRequest(new { error = ValidationMessages.CustomerBlockedFromRestaurant });
+            return BadRequest(ValidationMessages.CustomerBlockedFromRestaurant);
 
         var meals = await db.Meals
             .Where(m => original.Items.Select(i => i.MealId).Contains(m.Id) && m.IsAvailable)

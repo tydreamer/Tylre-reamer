@@ -48,7 +48,7 @@ public class MealsController(AppDbContext db) : ControllerBase
         if (restaurant.OwnerId != ownerId) return Forbid();
 
         if (!await db.MealTypes.AnyAsync(t => t.Id == req.MealTypeId))
-            return BadRequest(new { error = ValidationMessages.MealTypeInvalid });
+            return BadRequest(ValidationMessages.MealTypeInvalid);
 
         var meal = new Meal
         {
@@ -77,7 +77,7 @@ public class MealsController(AppDbContext db) : ControllerBase
         if (restaurant.OwnerId != ownerId) return Forbid();
 
         if (!await db.MealTypes.AnyAsync(t => t.Id == req.MealTypeId))
-            return BadRequest(new { error = ValidationMessages.MealTypeInvalid });
+            return BadRequest(ValidationMessages.MealTypeInvalid);
 
         var meal = await db.Meals.FirstOrDefaultAsync(m => m.Id == id && m.RestaurantId == restaurantId);
         if (meal is null) return NotFound();

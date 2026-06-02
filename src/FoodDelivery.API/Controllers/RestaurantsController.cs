@@ -69,7 +69,7 @@ public class RestaurantsController(AppDbContext db) : ControllerBase
         var ownerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         if (!await db.Cuisines.AnyAsync(c => c.Id == req.CuisineId))
-            return BadRequest(new { error = ValidationMessages.CuisineInvalid });
+            return BadRequest(ValidationMessages.CuisineInvalid);
 
         var restaurant = new Restaurant
         {
@@ -100,7 +100,7 @@ public class RestaurantsController(AppDbContext db) : ControllerBase
         if (restaurant.OwnerId != ownerId) return Forbid();
 
         if (!await db.Cuisines.AnyAsync(c => c.Id == req.CuisineId))
-            return BadRequest(new { error = ValidationMessages.CuisineInvalid });
+            return BadRequest(ValidationMessages.CuisineInvalid);
 
         restaurant.Name = req.Name;
         restaurant.Description = req.Description;
