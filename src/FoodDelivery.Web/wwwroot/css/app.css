@@ -421,9 +421,62 @@ code {
     font-weight: 500;
 }
 
-.cart-remove-btn {
+/* btn-sm outer height: padding-y×2 + font-size×line-height + borders */
+:root {
+    --btn-sm-height: calc(0.25rem * 2 + 0.875rem * 1.5 + 2px);
+}
+
+.table-row-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-wrap: nowrap;
+}
+
+.btn.btn-sm.table-icon-btn,
+a.btn.btn-sm.table-icon-btn {
+    box-sizing: border-box;
+    height: var(--btn-sm-height);
+    min-height: var(--btn-sm-height);
+    max-height: var(--btn-sm-height);
+    padding: 0 0.5rem;
     line-height: 1;
-    padding: 0.25rem 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn.btn-sm.table-icon-btn .bi,
+a.btn.btn-sm.table-icon-btn .bi {
+    font-size: 0.75rem;
+    line-height: 1;
+    margin: 0;
+    vertical-align: 0;
+}
+
+.btn.btn-sm.table-icon-btn .spinner-border-sm {
+    width: 0.75rem;
+    height: 0.75rem;
+    margin: 0;
+}
+
+.cart-remove-btn.btn-sm {
+    box-sizing: border-box;
+    height: var(--btn-sm-height);
+    min-height: var(--btn-sm-height);
+    max-height: var(--btn-sm-height);
+    padding: 0 0.5rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cart-remove-btn.btn-sm .bi {
+    font-size: 0.75rem;
+    line-height: 1;
+    margin: 0;
+    vertical-align: 0;
 }
 
 .cart-discount-text {

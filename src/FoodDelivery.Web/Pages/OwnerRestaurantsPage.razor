@@ -42,15 +42,32 @@ else
                         <td>@restaurant.Name</td>
                         <td><span class="badge meal-type-badge">@restaurant.CuisineName</span></td>
                         <td class="meal-card-line" style="max-width: 16rem;" title="@restaurant.Description">@restaurant.Description</td>
-                        <td class="text-end text-nowrap">
-                            <a href="owner/restaurants/@restaurant.Id/meals" class="btn btn-sm btn-outline-secondary">Meals</a>
-                            <a href="owner/restaurants/@restaurant.Id/coupons" class="btn btn-sm btn-outline-secondary">Coupons</a>
-                            <a href="owner/restaurants/@restaurant.Id/edit" class="btn btn-sm btn-outline-primary">Edit</a>
-                            <button type="button" class="btn btn-sm btn-outline-danger"
-                                    disabled="@(removingId == restaurant.Id)"
-                                    @onclick="() => RequestRemove(restaurant)">
-                                @(removingId == restaurant.Id ? "Removing..." : "Remove")
-                            </button>
+                        <td class="text-end">
+                            <div class="table-row-actions">
+                                <a href="owner/restaurants/@restaurant.Id/meals" class="btn btn-sm btn-outline-secondary">Meals</a>
+                                <a href="owner/restaurants/@restaurant.Id/coupons" class="btn btn-sm btn-outline-secondary">Coupons</a>
+                                <a href="owner/restaurants/@restaurant.Id/edit"
+                                   class="btn btn-sm btn-outline-primary table-icon-btn"
+                                   title="Edit"
+                                   aria-label="@($"Edit {restaurant.Name}")">
+                                    <i class="bi bi-pencil" aria-hidden="true"></i>
+                                </a>
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger table-icon-btn"
+                                        title="Remove"
+                                        aria-label="@($"Remove {restaurant.Name}")"
+                                        disabled="@(removingId == restaurant.Id)"
+                                        @onclick="() => RequestRemove(restaurant)">
+                                    @if (removingId == restaurant.Id)
+                                    {
+                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-trash" aria-hidden="true"></i>
+                                    }
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 }
