@@ -74,14 +74,28 @@ a, .btn-link {
     }
 
 .blazor-load-screen {
-    position: relative;
-    min-height: 100vh;
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
     overflow: hidden;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+}
+
+.blazor-load-screen.is-hiding {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.blazor-load-screen.is-hidden {
+    display: none;
 }
 
 .blazor-load-screen::before {
@@ -157,8 +171,9 @@ a, .btn-link {
 .loading-progress circle:last-child {
     stroke: url(#blazor-progress-gradient);
     stroke-linecap: round;
-    stroke-dasharray: var(--blazor-load-percentage, 0%) 100;
-    transition: stroke-dasharray 0.35s cubic-bezier(0.33, 1, 0.68, 1);
+    /* pathLength=100: ring length is 0–100, not a CSS % of the viewport */
+    stroke-dasharray: 100;
+    stroke-dashoffset: calc(100 - var(--blazor-load-ring, 0));
     filter: drop-shadow(0 0 8px rgba(251, 146, 60, 0.4));
 }
 
@@ -174,7 +189,7 @@ a, .btn-link {
 }
 
 .loading-progress-text::after {
-    content: var(--blazor-load-percentage-text, "Loading");
+    content: var(--blazor-load-display-text, var(--blazor-load-percentage-text, "Loading"));
 }
 
 code {

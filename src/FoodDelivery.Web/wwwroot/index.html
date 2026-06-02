@@ -17,31 +17,115 @@
 </head>
 
 <body>
-    <div id="app">
-        <div class="blazor-load-screen">
-            <div class="load-content">
-                <p class="load-brand-name">Food Delivery</p>
-                <svg class="loading-progress" viewBox="0 0 100 100" aria-hidden="true">
-                    <defs>
-                        <linearGradient id="blazor-progress-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stop-color="#ea580c" />
-                            <stop offset="50%" stop-color="#fb923c" />
-                            <stop offset="100%" stop-color="#fdba74" />
-                        </linearGradient>
-                    </defs>
-                    <circle r="40%" cx="50%" cy="50%" pathLength="100" />
-                    <circle r="40%" cx="50%" cy="50%" pathLength="100" />
-                </svg>
-                <div class="loading-progress-text" aria-live="polite"></div>
-            </div>
+    <div id="app-loader" class="blazor-load-screen" aria-live="polite" aria-busy="true">
+        <div class="load-content">
+            <p class="load-brand-name">Food Delivery</p>
+            <svg class="loading-progress" viewBox="0 0 100 100" aria-hidden="true">
+                <defs>
+                    <linearGradient id="blazor-progress-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#ea580c" />
+                        <stop offset="50%" stop-color="#fb923c" />
+                        <stop offset="100%" stop-color="#fdba74" />
+                    </linearGradient>
+                </defs>
+                <circle r="40%" cx="50%" cy="50%" pathLength="100" />
+                <circle r="40%" cx="50%" cy="50%" pathLength="100" />
+            </svg>
+            <div class="loading-progress-text"></div>
         </div>
     </div>
+
+    <div id="app"></div>
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.
         <a href="." class="reload">Reload</a>
         <span class="dismiss">🗙</span>
     </div>
+    <script>
+        (function () {
+            const root = document.documentElement;
+            const loader = document.getElementById('app-loader');
+            const holdCompleteMs = 450;
+            const fadeOutMs = 500;
+
+            let displayed = 0;
+            let target = 0;
+            let animating = false;
+            let finishStarted = false;
+
+            function readTarget() {
+                const raw = getComputedStyle(root).getPropertyValue('--blazor-load-percentage').trim();
+                const value = parseFloat(raw);
+                return Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 0;
+            }
+
+            function applyVisual() {
+                root.style.setProperty('--blazor-load-ring', displayed.toFixed(2));
+                const label = displayed >= 99.5 ? 100 : Math.round(displayed);
+                root.style.setProperty('--blazor-load-display-text', `"${label}%"`);
+            }
+
+            function dismissLoader() {
+                if (!loader || finishStarted) return;
+                finishStarted = true;
+
+                displayed = 100;
+                applyVisual();
+                loader.classList.add('is-complete');
+                loader.setAttribute('aria-busy', 'false');
+
+                setTimeout(function () {
+                    loader.classList.add('is-hiding');
+                    setTimeout(function () {
+                        loader.classList.add('is-hidden');
+                        loader.setAttribute('aria-hidden', 'true');
+                    }, fadeOutMs);
+                }, holdCompleteMs);
+            }
+
+            function maybeDismiss() {
+                if (finishStarted || target < 100 || displayed < 99.5) return;
+                dismissLoader();
+            }
+
+            function frame() {
+                const delta = target - displayed;
+                if (Math.abs(delta) < 0.25) {
+                    displayed = target;
+                } else {
+                    displayed += delta * 0.14;
+                }
+
+                applyVisual();
+                maybeDismiss();
+
+                if (Math.abs(target - displayed) > 0.25) {
+                    requestAnimationFrame(frame);
+                } else {
+                    animating = false;
+                    if (target >= 100) {
+                        displayed = 100;
+                        applyVisual();
+                        maybeDismiss();
+                    }
+                }
+            }
+
+            function schedule() {
+                target = readTarget();
+                if (!animating) {
+                    animating = true;
+                    requestAnimationFrame(frame);
+                }
+            }
+
+            const observer = new MutationObserver(schedule);
+            observer.observe(root, { attributes: true, attributeFilter: ['style'] });
+            applyVisual();
+            schedule();
+        })();
+    </script>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
     <script>
         window.cartSync = {
