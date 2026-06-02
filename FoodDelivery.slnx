@@ -6,6 +6,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/FoodDelivery.API.IntegrationTests/FoodDelivery.API.IntegrationTests.csproj" />
     <Project Path="tests/FoodDelivery.API.UnitTests/FoodDelivery.API.UnitTests.csproj" />
+    <Project Path="tests/FoodDelivery.Web.ComponentTests/FoodDelivery.Web.ComponentTests.csproj" />
     <Project Path="tests/FoodDelivery.Web.UnitTests/FoodDelivery.Web.UnitTests.csproj" />
   </Folder>
 </Solution>
