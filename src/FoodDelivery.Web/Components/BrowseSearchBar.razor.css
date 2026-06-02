@@ -1,3 +1,30 @@
 .browse-search-input {
     max-width: 32rem;
 }
+
+.browse-search-input:focus-within .input-group-text,
+.browse-search-input:focus-within .form-control {
+    border-color: var(--bs-primary);
+}
+
+.browse-search-input .form-control:focus {
+    box-shadow: none;
+    outline: none;
+    border-color: var(--bs-primary);
+}
+
+.browse-search-input .input-group-text {
+    transition: border-color 0.15s ease-in-out;
+}
+
+.browse-search-input .form-control {
+    transition: border-color 0.15s ease-in-out;
+}
+
+.browse-search-input .form-control::-webkit-search-cancel-button {
+    cursor: pointer;
+}
+
+.browse-search-input .form-control::-moz-search-clear-button {
+    cursor: pointer;
+}

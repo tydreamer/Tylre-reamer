@@ -4,10 +4,6 @@
         <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
         <input id="@inputId" type="search" class="form-control" placeholder="@Placeholder"
                value="@SearchTerm" @oninput="OnInputAsync" @onkeydown="OnKeyDown" />
-        @if (!string.IsNullOrWhiteSpace(SearchTerm))
-        {
-            <button type="button" class="btn btn-outline-secondary" @onclick="ClearAsync">Clear</button>
-        }
     </div>
 </div>
 
@@ -46,13 +42,5 @@
             debounceCts?.Cancel();
             await OnSearch.InvokeAsync();
         }
-    }
-
-    private async Task ClearAsync()
-    {
-        debounceCts?.Cancel();
-        SearchTerm = "";
-        await SearchTermChanged.InvokeAsync(SearchTerm);
-        await OnSearch.InvokeAsync();
     }
 }
