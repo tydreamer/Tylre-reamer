@@ -30,6 +30,7 @@ else
             <thead>
                 <tr>
                     <th>Name</th>
+                    <th>Cuisine</th>
                     <th>Description</th>
                     <th></th>
                 </tr>
@@ -39,7 +40,8 @@ else
                 {
                     <tr>
                         <td>@restaurant.Name</td>
-                        <td>@restaurant.Description</td>
+                        <td><span class="badge meal-type-badge">@restaurant.CuisineName</span></td>
+                        <td class="meal-card-line" style="max-width: 16rem;" title="@restaurant.Description">@restaurant.Description</td>
                         <td class="text-end text-nowrap">
                             <a href="owner/restaurants/@restaurant.Id/meals" class="btn btn-sm btn-outline-secondary">Meals</a>
                             <a href="owner/restaurants/@restaurant.Id/coupons" class="btn btn-sm btn-outline-secondary">Coupons</a>

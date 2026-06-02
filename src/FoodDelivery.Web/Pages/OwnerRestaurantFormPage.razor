@@ -16,7 +16,11 @@
 {
     <div class="alert alert-danger">@loadError</div>
 }
-else if (!IsNew && model is null)
+else if (!IsNew && (model is null || cuisines is null))
+{
+    <p><em>Loading...</em></p>
+}
+else if (IsNew && cuisines is null)
 {
     <p><em>Loading...</em></p>
 }
@@ -41,6 +45,28 @@ else
                     <InputText class="form-control" @bind-Value="formModel.ImageUrl" />
                     <FirstValidationMessage For="() => formModel.ImageUrl" />
                 </div>
+                <div class="mb-3">
+                    <label class="form-label">Cuisine</label>
+                    <InputSelect class="form-select" @bind-Value="formModel.CuisineId">
+                        @foreach (var cuisine in cuisines!)
+                        {
+                            <option value="@cuisine.Id">@cuisine.Name</option>
+                        }
+                    </InputSelect>
+                    <FirstValidationMessage For="() => formModel.CuisineId" />
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-6">
+                        <label class="form-label">Latitude</label>
+                        <InputNumber class="form-control" @bind-Value="formModel.Latitude" />
+                        <FirstValidationMessage For="() => formModel.Latitude" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label">Longitude</label>
+                        <InputNumber class="form-control" @bind-Value="formModel.Longitude" />
+                        <FirstValidationMessage For="() => formModel.Longitude" />
+                    </div>
+                </div>
                 @if (submitError is not null)
                 {
                     <div class="alert alert-danger">@submitError</div>
@@ -60,6 +86,7 @@ else
     private bool IsNew => Id is null;
     private RestaurantFormModel formModel = new();
     private RestaurantDto? model;
+    private List<CuisineDto>? cuisines;
     private string? loadError;
     private string? submitError;
     private bool saving;
@@ -67,6 +94,13 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        cuisines = await Restaurants.GetCuisinesAsync();
+        if (cuisines.Count == 0)
+        {
+            loadError = "No cuisines are configured.";
+            return;
+        }
+
         var user = (await AuthStateProvider.GetAuthenticationStateAsync()).User;
         ownerId = user.GetUserId();
         if (ownerId is null)
@@ -75,7 +109,11 @@ else
             return;
         }
 
-        if (IsNew) return;
+        if (IsNew)
+        {
+            formModel.CuisineId = cuisines[0].Id;
+            return;
+        }
 
         model = await Restaurants.GetByIdAsync(Id!.Value);
         if (model is null)
@@ -94,7 +132,10 @@ else
         {
             Name = model.Name,
             Description = model.Description,
-            ImageUrl = model.ImageUrl
+            ImageUrl = model.ImageUrl,
+            CuisineId = model.CuisineId,
+            Latitude = model.Latitude,
+            Longitude = model.Longitude
         };
     }
 
@@ -102,7 +143,13 @@ else
     {
         saving = true;
         submitError = null;
-        var request = new RestaurantUpsertRequest(formModel.Name, formModel.Description, formModel.ImageUrl);
+        var request = new RestaurantUpsertRequest(
+            formModel.Name,
+            formModel.Description,
+            formModel.ImageUrl,
+            formModel.CuisineId,
+            formModel.Latitude,
+            formModel.Longitude);
 
         if (IsNew)
         {
@@ -138,5 +185,14 @@ else
         public string Description { get; set; } = "";
 
         public string ImageUrl { get; set; } = "";
+
+        [System.ComponentModel.DataAnnotations.Range(1, int.MaxValue)]
+        public int CuisineId { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Range(-90, 90)]
+        public double Latitude { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Range(-180, 180)]
+        public double Longitude { get; set; }
     }
 }
