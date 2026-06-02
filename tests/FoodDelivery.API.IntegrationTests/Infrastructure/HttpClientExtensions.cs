@@ -1,7 +1,6 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using FoodDelivery.API.Models;
-using FoodDelivery.API.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FoodDelivery.API.IntegrationTests.Infrastructure;

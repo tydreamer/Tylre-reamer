@@ -1,6 +1,5 @@
 using FluentAssertions;
 using FoodDelivery.API.Data;
-using FoodDelivery.API.Helpers;
 using FoodDelivery.API.Models;
 
 namespace FoodDelivery.API.UnitTests.Helpers;

@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
 using FoodDelivery.API.Constants;
-using FoodDelivery.API.DTOs;
 using FoodDelivery.API.IntegrationTests.Infrastructure;
 using FoodDelivery.API.Models;
 

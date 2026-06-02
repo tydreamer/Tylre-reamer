@@ -1,6 +1,5 @@
 using System.Net;
 using FluentAssertions;
-using FoodDelivery.API.DTOs;
 using FoodDelivery.API.IntegrationTests.Infrastructure;
 
 namespace FoodDelivery.API.IntegrationTests.Coupons;
