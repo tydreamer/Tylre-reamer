@@ -19,7 +19,7 @@ public class OrdersApiTests(CustomWebApplicationFactory factory)
             IntegrationTestIds.RestaurantId,
             [new OrderItemRequest(IntegrationTestIds.AvailableMealId, 2)],
             Tip: 2m,
-            CouponCode: null));
+            CouponCode: null));  
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var order = await response.ReadJsonAsync<OrderResponse>();
