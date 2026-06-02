@@ -61,8 +61,8 @@ else
                         }
                         <td title="@itemsDisplay.Full">@itemsDisplay.Display</td>
                         <td class="text-nowrap">@order.CreatedAt.ToLocalTime().ToString("g")</td>
-                        <td class="text-end text-nowrap">@order.TotalPrice.ToString("C")</td>
-                        <td><span class="badge @StatusClass(order.Status)">@order.Status</span></td>
+                        <td class="col-total text-end text-nowrap">@order.TotalPrice.ToString("C")</td>
+                        <td class="col-status"><span class="badge @StatusClass(order.Status)">@order.Status</span></td>
                         <td class="col-actions text-end">
                             <a href="owner/orders/@order.Id" class="btn btn-sm btn-outline-primary">View</a>
                         </td>

@@ -389,7 +389,7 @@ code {
 .auth-divider {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 2rem;
     color: #6c757d;
     font-size: 0.875rem;
 }
@@ -571,23 +571,31 @@ a.btn.btn-sm.table-icon-btn .bi {
     text-overflow: clip;
 }
 
+.orders-list-table .col-total {
+    padding-right: 1.25rem;
+}
+
+.orders-list-table .col-status {
+    padding-left: 0.75rem;
+}
+
 /* Customer: Id | Restaurant | Items | Order Date | Total | Status | View */
 .orders-list-table--customer .col-id { width: 5rem; }
 .orders-list-table--customer .col-restaurant { width: 11rem; }
-.orders-list-table--customer .col-items { width: 38%; }
+.orders-list-table--customer .col-items { width: 36%; }
 .orders-list-table--customer .col-date { width: 11rem; }
-.orders-list-table--customer .col-total { width: 6.5rem; }
-.orders-list-table--customer .col-status { width: 7.5rem; }
+.orders-list-table--customer .col-total { width: 7rem; }
+.orders-list-table--customer .col-status { width: 8.5rem; }
 .orders-list-table--customer .col-actions { width: 4.75rem; }
 
 /* Owner: adds Customer column */
 .orders-list-table--owner .col-id { width: 5rem; }
 .orders-list-table--owner .col-restaurant { width: 9.5rem; }
 .orders-list-table--owner .col-customer { width: 9.5rem; }
-.orders-list-table--owner .col-items { width: 30%; }
+.orders-list-table--owner .col-items { width: 28%; }
 .orders-list-table--owner .col-date { width: 11rem; }
-.orders-list-table--owner .col-total { width: 6.5rem; }
-.orders-list-table--owner .col-status { width: 7.5rem; }
+.orders-list-table--owner .col-total { width: 7rem; }
+.orders-list-table--owner .col-status { width: 8.5rem; }
 .orders-list-table--owner .col-actions { width: 4.75rem; }
 
 /* Admin users list — fixed column widths (table-layout: fixed) */
