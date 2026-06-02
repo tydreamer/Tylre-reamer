@@ -447,6 +447,57 @@ code {
     font-size: 1.125rem;
 }
 
+/* Sortable table column headers */
+.sortable-th {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font: inherit;
+    font-weight: 600;
+    color: inherit;
+    text-decoration: none;
+    padding: 0;
+    margin: 0;
+    vertical-align: inherit;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    outline: none;
+    cursor: pointer;
+}
+
+.sortable-th:hover {
+    color: var(--bs-primary);
+}
+
+.sortable-th:focus,
+.sortable-th:active,
+.sortable-th:focus-visible {
+    color: var(--bs-primary);
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    outline: none;
+}
+
+.sortable-th--active {
+    color: var(--bs-primary);
+}
+
+.sortable-th-icon {
+    font-size: 0.65rem;
+    line-height: 1;
+}
+
+.orders-list-table th .sortable-th {
+    max-width: 100%;
+}
+
+.orders-list-table th.text-end .sortable-th {
+    width: 100%;
+    justify-content: flex-end;
+}
+
 /* Orders list tables — fixed column widths (table-layout: fixed) */
 .orders-list-table {
     table-layout: fixed;

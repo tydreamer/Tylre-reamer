@@ -18,9 +18,17 @@ public class OrderService(HttpClient http)
         return (false, null, error);
     }
 
-    public async Task<PagedResult<OrderResponse>?> GetMyOrdersAsync(int page = 1, int pageSize = 10)
+    public async Task<PagedResult<OrderResponse>?> GetMyOrdersAsync(
+        int page = 1,
+        int pageSize = 10,
+        string? sortBy = null,
+        bool sortDesc = true)
     {
-        return await http.GetFromJsonAsync<PagedResult<OrderResponse>>($"api/orders?page={page}&pageSize={pageSize}");
+        var url = $"api/orders?page={page}&pageSize={pageSize}&sortDesc={sortDesc.ToString().ToLowerInvariant()}";
+        if (!string.IsNullOrWhiteSpace(sortBy))
+            url += $"&sortBy={Uri.EscapeDataString(sortBy)}";
+
+        return await http.GetFromJsonAsync<PagedResult<OrderResponse>>(url);
     }
 
     public async Task<OrderResponse?> GetByIdAsync(int id)

@@ -21,7 +21,11 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
     protected string CurrentUserRole => User.FindFirstValue(ClaimTypes.Role)!;
 
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] bool sortDesc = true)
     {
         if (page < 1) page = 1;
         if (pageSize < 1 || pageSize > 100) pageSize = 10;
@@ -40,7 +44,7 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
             ? query.Where(o => o.Restaurant.OwnerId == userId)
             : query.Where(o => o.CustomerId == userId);
 
-        query = query.OrderByDescending(o => o.CreatedAt);
+        query = OrderQuerySort.Apply(query, sortBy, sortDesc);
 
         var totalCount = await query.CountAsync();
         var items = await query

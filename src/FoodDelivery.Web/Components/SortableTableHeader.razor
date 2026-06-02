@@ -1,0 +1,28 @@
+<th class="@Class">
+    <button type="button"
+            class="sortable-th @(IsActive ? "sortable-th--active" : "")"
+            @onclick="ToggleSort">
+        @Label
+        @if (IsActive)
+        {
+            <span class="sortable-th-icon" aria-hidden="true">@(SortDesc ? "▼" : "▲")</span>
+        }
+    </button>
+</th>
+
+@code {
+    [Parameter] public string ColumnKey { get; set; } = "";
+    [Parameter] public string Label { get; set; } = "";
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? CurrentSortBy { get; set; }
+    [Parameter] public bool SortDesc { get; set; }
+    [Parameter] public EventCallback<(string SortBy, bool SortDesc)> OnSortChanged { get; set; }
+
+    private bool IsActive => string.Equals(CurrentSortBy, ColumnKey, StringComparison.OrdinalIgnoreCase);
+
+    private async Task ToggleSort()
+    {
+        var nextDesc = IsActive ? !SortDesc : ColumnKey is "date" or "id" or "total";
+        await OnSortChanged.InvokeAsync((ColumnKey, nextDesc));
+    }
+}

@@ -32,14 +32,21 @@ else
             </colgroup>
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Restaurant</th>
-                    <th>Customer</th>
-                    <th>Items</th>
-                    <th>Order Date</th>
-                    <th class="text-end">Total</th>
-                    <th>Status</th>
-                    <th></th>
+                    <SortableTableHeader ColumnKey="id" Label="ID" Class="col-id"
+                                         CurrentSortBy="@sortBy" SortDesc="@sortDesc" OnSortChanged="ChangeSortAsync" />
+                    <SortableTableHeader ColumnKey="restaurant" Label="Restaurant" Class="col-restaurant"
+                                         CurrentSortBy="@sortBy" SortDesc="@sortDesc" OnSortChanged="ChangeSortAsync" />
+                    <SortableTableHeader ColumnKey="customer" Label="Customer" Class="col-customer"
+                                         CurrentSortBy="@sortBy" SortDesc="@sortDesc" OnSortChanged="ChangeSortAsync" />
+                    <SortableTableHeader ColumnKey="items" Label="Items" Class="col-items"
+                                         CurrentSortBy="@sortBy" SortDesc="@sortDesc" OnSortChanged="ChangeSortAsync" />
+                    <SortableTableHeader ColumnKey="date" Label="Order Date" Class="col-date"
+                                         CurrentSortBy="@sortBy" SortDesc="@sortDesc" OnSortChanged="ChangeSortAsync" />
+                    <SortableTableHeader ColumnKey="total" Label="Total" Class="col-total text-end"
+                                         CurrentSortBy="@sortBy" SortDesc="@sortDesc" OnSortChanged="ChangeSortAsync" />
+                    <SortableTableHeader ColumnKey="status" Label="Status" Class="col-status"
+                                         CurrentSortBy="@sortBy" SortDesc="@sortDesc" OnSortChanged="ChangeSortAsync" />
+                    <th class="col-actions"></th>
                 </tr>
             </thead>
             <tbody>
@@ -74,6 +81,8 @@ else
     private PagedResult<OrderResponse>? paged;
     private int currentPage = 1;
     private int pageSize = 10;
+    private string sortBy = "date";
+    private bool sortDesc = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -83,7 +92,15 @@ else
 
     private async Task LoadPageAsync()
     {
-        paged = await Orders.GetMyOrdersAsync(currentPage, pageSize);
+        paged = await Orders.GetMyOrdersAsync(currentPage, pageSize, sortBy, sortDesc);
+    }
+
+    private async Task ChangeSortAsync((string SortBy, bool SortDesc) sort)
+    {
+        sortBy = sort.SortBy;
+        sortDesc = sort.SortDesc;
+        currentPage = 1;
+        await LoadPageAsync();
     }
 
     private async Task GoToPage(int page)
@@ -107,7 +124,7 @@ else
 
     private async Task RefreshAsync()
     {
-        paged = await Orders.GetMyOrdersAsync(currentPage, pageSize);
+        paged = await Orders.GetMyOrdersAsync(currentPage, pageSize, sortBy, sortDesc);
         await InvokeAsync(StateHasChanged);
     }
 
