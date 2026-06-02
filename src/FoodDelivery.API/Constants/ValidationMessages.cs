@@ -22,6 +22,9 @@ public static class ValidationMessages
     public const string PriceInvalid = "Price must be greater than 0.";
     public const string MealTypeRequired = "Meal type is required.";
     public const string MealTypeInvalid = "Invalid meal type.";
+    public const string CuisineInvalid = "Invalid cuisine.";
+    public const string LatitudeInvalid = "Latitude must be between -90 and 90.";
+    public const string LongitudeInvalid = "Longitude must be between -180 and 180.";
 
     public const string CodeRequired = "Code is required.";
     public const string CodeTooLong = "Code cannot exceed 10 characters.";

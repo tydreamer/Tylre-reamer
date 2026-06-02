@@ -1,6 +1,8 @@
 using System.Security.Claims;
 using FoodDelivery.API.Data;
 using FoodDelivery.API.DTOs;
+using FoodDelivery.API.Helpers;
+using FoodDelivery.API.Constants;
 using FoodDelivery.API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +24,10 @@ public class RestaurantsController(AppDbContext db) : ControllerBase
         if (page < 1) page = 1;
         if (pageSize < 1 || pageSize > 100) pageSize = 12;
 
-        var query = db.Restaurants.AsQueryable();
+        var query = db.Restaurants
+            .Include(r => r.Cuisine)
+            .AsQueryable();
+
         if (ownerId.HasValue)
             query = query.Where(r => r.OwnerId == ownerId.Value);
 
@@ -31,7 +36,8 @@ public class RestaurantsController(AppDbContext db) : ControllerBase
             var term = $"%{search.Trim()}%";
             query = query.Where(r =>
                 EF.Functions.ILike(r.Name, term) ||
-                EF.Functions.ILike(r.Description, term));
+                EF.Functions.ILike(r.Description, term) ||
+                EF.Functions.ILike(r.Cuisine.Name, term));
         }
 
         var totalCount = await query.CountAsync();
@@ -39,18 +45,21 @@ public class RestaurantsController(AppDbContext db) : ControllerBase
             .OrderBy(r => r.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Select(r => new RestaurantResponse(r.Id, r.Name, r.Description, r.ImageUrl, r.OwnerId))
             .ToListAsync();
 
-        return Ok(new PagedResult<RestaurantResponse>(items, totalCount, page, pageSize));
+        var responses = items.Select(RestaurantMapper.ToResponse).ToList();
+        return Ok(new PagedResult<RestaurantResponse>(responses, totalCount, page, pageSize));
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var restaurant = await db.Restaurants.FindAsync(id);
+        var restaurant = await db.Restaurants
+            .Include(r => r.Cuisine)
+            .FirstOrDefaultAsync(r => r.Id == id);
+
         if (restaurant is null) return NotFound();
-        return Ok(new RestaurantResponse(restaurant.Id, restaurant.Name, restaurant.Description, restaurant.ImageUrl, restaurant.OwnerId));
+        return Ok(RestaurantMapper.ToResponse(restaurant));
     }
 
     [Authorize(Roles = "Owner")]
@@ -58,17 +67,27 @@ public class RestaurantsController(AppDbContext db) : ControllerBase
     public async Task<IActionResult> Create(CreateRestaurantRequest req)
     {
         var ownerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        if (!await db.Cuisines.AnyAsync(c => c.Id == req.CuisineId))
+            return BadRequest(new { error = ValidationMessages.CuisineInvalid });
+
         var restaurant = new Restaurant
         {
             Name = req.Name,
             Description = req.Description,
-            ImageUrl = req.ImageUrl,
+            ImageUrl = req.ImageUrl ?? string.Empty,
+            CuisineId = req.CuisineId,
+            Latitude = req.Latitude,
+            Longitude = req.Longitude,
             OwnerId = ownerId
         };
         db.Restaurants.Add(restaurant);
         await db.SaveChangesAsync();
+
+        await db.Entry(restaurant).Reference(r => r.Cuisine).LoadAsync();
+
         return CreatedAtAction(nameof(GetById), new { id = restaurant.Id },
-            new RestaurantResponse(restaurant.Id, restaurant.Name, restaurant.Description, restaurant.ImageUrl, restaurant.OwnerId));
+            RestaurantMapper.ToResponse(restaurant));
     }
 
     [Authorize(Roles = "Owner")]
@@ -80,9 +99,15 @@ public class RestaurantsController(AppDbContext db) : ControllerBase
         if (restaurant is null) return NotFound();
         if (restaurant.OwnerId != ownerId) return Forbid();
 
+        if (!await db.Cuisines.AnyAsync(c => c.Id == req.CuisineId))
+            return BadRequest(new { error = ValidationMessages.CuisineInvalid });
+
         restaurant.Name = req.Name;
         restaurant.Description = req.Description;
-        restaurant.ImageUrl = req.ImageUrl;
+        restaurant.ImageUrl = req.ImageUrl ?? string.Empty;
+        restaurant.CuisineId = req.CuisineId;
+        restaurant.Latitude = req.Latitude;
+        restaurant.Longitude = req.Longitude;
         await db.SaveChangesAsync();
         return NoContent();
     }
