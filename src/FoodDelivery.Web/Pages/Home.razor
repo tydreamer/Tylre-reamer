@@ -32,7 +32,10 @@ else
                                  style="height: 180px; object-fit: cover;" />
                         }
                         <div class="card-body">
-                            <h5 class="card-title mb-0 meal-card-truncate" title="@restaurant.Name">@restaurant.Name</h5>
+                            <div class="meal-card-title-row mb-1">
+                                <h5 class="card-title mb-0 meal-card-truncate" title="@restaurant.Name">@restaurant.Name</h5>
+                                <span class="badge meal-type-badge">@restaurant.CuisineName</span>
+                            </div>
                             <p class="card-text meal-card-line" title="@restaurant.Description">@restaurant.Description</p>
                         </div>
                     </div>
