@@ -12,7 +12,7 @@ public record PlaceOrderRequest(
     [Range(1, int.MaxValue, ErrorMessage = "Invalid restaurant.")] int RestaurantId,
     [Required(ErrorMessage = ItemsRequired), MinLength(1, ErrorMessage = ItemsRequired)] List<OrderItemRequest> Items,
     [Range(0, 100_000, ErrorMessage = TipInvalid)] decimal Tip,
-    [MaxLength(10, ErrorMessage = CodeTooLong)] string? CouponCode
+    string? CouponCode
 );
 
 public record UpdateOrderStatusRequest(

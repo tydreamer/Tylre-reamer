@@ -4,7 +4,7 @@ using static FoodDelivery.API.Constants.ValidationMessages;
 namespace FoodDelivery.API.DTOs;
 
 public record CreateCouponRequest(
-    [Required(ErrorMessage = CodeRequired), MaxLength(10, ErrorMessage = CodeTooLong)] string Code,
+    [Required(ErrorMessage = CodeRequired)] string Code,
     [Range(1, 100, ErrorMessage = DiscountInvalid)] decimal DiscountValue,
     DateTime ExpiresAt
 );

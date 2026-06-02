@@ -17,7 +17,6 @@ public static class ValidationMessages
     public const string PasswordConfirmMismatch = "Passwords do not match.";
 
     public const string CodeRequired = "Code is required.";
-    public const string CodeTooLong = "Code cannot exceed 10 characters.";
     public const string DiscountRequired = "Discount is required.";
     public const string DiscountInvalid = "Discount must be between 1% and 100%.";
     public const string MealTypeRequired = "Meal type is required.";

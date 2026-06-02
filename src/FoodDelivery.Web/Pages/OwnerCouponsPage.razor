@@ -77,7 +77,9 @@ else
                             @foreach (var coupon in coupons)
                             {
                                 <tr>
-                                    <td>@coupon.Code</td>
+                                    <td class="coupon-code-cell" title="@coupon.Code">
+                                        @DisplayTextHelper.TruncateWithEllipsis(coupon.Code)
+                                    </td>
                                     <td>@coupon.DiscountValue.ToString("0.##")%</td>
                                     <td class="text-nowrap">@coupon.ExpiresAt.ToLocalTime().ToString("d")</td>
                                     <td>@(coupon.IsActive ? "Yes" : "No")</td>
@@ -201,7 +203,6 @@ else
     private class CouponFormModel
     {
         [System.ComponentModel.DataAnnotations.Required(ErrorMessage = ValidationMessages.CodeRequired)]
-        [System.ComponentModel.DataAnnotations.MaxLength(10, ErrorMessage = ValidationMessages.CodeTooLong)]
         public string Code { get; set; } = "";
 
         [System.ComponentModel.DataAnnotations.Required(ErrorMessage = ValidationMessages.DiscountRequired)]

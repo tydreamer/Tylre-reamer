@@ -27,7 +27,6 @@ public static class ValidationMessages
     public const string LongitudeInvalid = "Longitude must be between -180 and 180.";
 
     public const string CodeRequired = "Code is required.";
-    public const string CodeTooLong = "Code cannot exceed 10 characters.";
     public const string DiscountInvalid = "Discount must be between 1% and 100%.";
 
     public const string StatusRequired = "Status is required.";

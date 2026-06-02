@@ -13,6 +13,11 @@
         </div>
     </div>
 
+    @if (!collapseNavMenu)
+    {
+        <div class="nav-menu-backdrop" @onclick="CloseNavMenu"></div>
+    }
+
     <div class="@NavMenuCssClass nav-menu-body">
         <nav class="nav flex-column nav-menu-primary">
             <AuthorizeView Roles="Customer">

@@ -17,6 +17,14 @@ main {
     background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
 }
 
+@media (max-width: 991.98px) {
+    .sidebar {
+        position: sticky;
+        top: 0;
+        z-index: 1030;
+    }
+}
+
 @media (min-width: 992px) {
     .page {
         flex-direction: row;
