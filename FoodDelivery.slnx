@@ -4,6 +4,7 @@
     <Project Path="src/FoodDelivery.Web/FoodDelivery.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/FoodDelivery.API.IntegrationTests/FoodDelivery.API.IntegrationTests.csproj" />
     <Project Path="tests/FoodDelivery.API.UnitTests/FoodDelivery.API.UnitTests.csproj" />
     <Project Path="tests/FoodDelivery.Web.UnitTests/FoodDelivery.Web.UnitTests.csproj" />
   </Folder>

@@ -11,7 +11,12 @@ using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    if (builder.Environment.IsEnvironment("Testing"))
+        options.UseInMemoryDatabase("IntegrationTests");
+    else
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
 
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<GoogleAuthService>();
@@ -126,3 +131,5 @@ app.MapControllers();
 app.MapHub<OrderHub>("/hubs/orders");
 
 app.Run();
+
+public partial class Program;
