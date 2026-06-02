@@ -77,7 +77,15 @@ else
                         @action.Label
                     </button>
                 }
-                @if (!customerBlocked)
+                @if (order.CustomerBlockedFromOwner)
+                {
+                    <button class="btn btn-outline-success"
+                            disabled="@busy"
+                            @onclick="() => showUnblockDialog = true">
+                        Unblock customer
+                    </button>
+                }
+                else
                 {
                     <button class="btn btn-outline-danger"
                             disabled="@busy"
@@ -122,11 +130,19 @@ else
 
     <ConfirmDialog @bind-IsVisible="showBlockDialog"
                    Title="Block customer"
-                   Message="@($"Block {order.CustomerName}? They will not be able to sign in.")"
+                   Message="@($"Block {order.CustomerName} from ordering at your restaurants? They can still sign in and order elsewhere.")"
                    ConfirmText="Block customer"
                    CancelText="Cancel"
                    ConfirmButtonClass="btn-danger"
                    OnConfirmed="BlockCustomerConfirmedAsync" />
+
+    <ConfirmDialog @bind-IsVisible="showUnblockDialog"
+                   Title="Unblock customer"
+                   Message="@($"Allow {order.CustomerName} to place orders at your restaurants again?")"
+                   ConfirmText="Unblock customer"
+                   CancelText="Cancel"
+                   ConfirmButtonClass="btn-success"
+                   OnConfirmed="UnblockCustomerConfirmedAsync" />
 }
 
 @code {
@@ -135,10 +151,10 @@ else
     private OrderResponse? order;
     private string? error;
     private string? blockSuccess;
-    private bool customerBlocked;
     private bool busy;
     private bool showCancelDialog;
     private bool showBlockDialog;
+    private bool showUnblockDialog;
 
     protected override async Task OnInitializedAsync()
     {
@@ -186,8 +202,28 @@ else
             return;
         }
 
-        customerBlocked = true;
-        blockSuccess = $"{order.CustomerName} has been blocked.";
+        order = order with { CustomerBlockedFromOwner = true };
+        blockSuccess = $"{order.CustomerName} can no longer order from your restaurants.";
+    }
+
+    private async Task UnblockCustomerConfirmedAsync()
+    {
+        if (order is null) return;
+
+        busy = true;
+        error = null;
+        blockSuccess = null;
+        var (success, err) = await Users.UnblockAsync(order.CustomerId);
+        busy = false;
+
+        if (!success)
+        {
+            error = err ?? "Failed to unblock customer.";
+            return;
+        }
+
+        order = order with { CustomerBlockedFromOwner = false };
+        blockSuccess = $"{order.CustomerName} can order from your restaurants again.";
     }
 
     private static IEnumerable<(string Status, string Label, string ButtonClass)> GetActions(string status) =>

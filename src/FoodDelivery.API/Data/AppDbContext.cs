@@ -6,6 +6,7 @@ namespace FoodDelivery.API.Data;
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public DbSet<User> Users => Set<User>();
+    public DbSet<OwnerCustomerBlock> OwnerCustomerBlocks => Set<OwnerCustomerBlock>();
     public DbSet<Cuisine> Cuisines => Set<Cuisine>();
     public DbSet<Restaurant> Restaurants => Set<Restaurant>();
     public DbSet<MealType> MealTypes => Set<MealType>();
@@ -21,6 +22,22 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
             .IsUnique();
+
+        modelBuilder.Entity<OwnerCustomerBlock>()
+            .HasIndex(b => new { b.OwnerId, b.CustomerId })
+            .IsUnique();
+
+        modelBuilder.Entity<OwnerCustomerBlock>()
+            .HasOne(b => b.Owner)
+            .WithMany()
+            .HasForeignKey(b => b.OwnerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<OwnerCustomerBlock>()
+            .HasOne(b => b.Customer)
+            .WithMany()
+            .HasForeignKey(b => b.CustomerId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<User>()
             .HasIndex(u => u.GoogleSubjectId)

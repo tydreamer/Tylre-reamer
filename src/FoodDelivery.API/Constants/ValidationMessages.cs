@@ -31,6 +31,9 @@ public static class ValidationMessages
     public const string DiscountInvalid = "Discount must be between 1% and 100%.";
 
     public const string StatusRequired = "Status is required.";
+    public const string CustomerBlockedFromRestaurant =
+        "You cannot place orders from this restaurant.";
+
     public const string ItemsRequired = "At least one item is required.";
     public const string QuantityInvalid = "Quantity must be between 1 and 100.";
     public const string TipInvalid = "Tip must be 0 or greater.";

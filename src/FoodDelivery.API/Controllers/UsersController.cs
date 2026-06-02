@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using FoodDelivery.API.Data;
 using FoodDelivery.API.DTOs;
+using FoodDelivery.API.Helpers;
 using FoodDelivery.API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -68,25 +69,61 @@ public class UsersController(AppDbContext db) : ControllerBase
             return BadRequest("Admins cannot be blocked.");
 
         var currentRole = User.FindFirstValue(ClaimTypes.Role);
-        if (currentRole == "Owner" && user.Role != UserRole.Customer)
-            return BadRequest("Owners can only block customers.");
+        var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        if (currentRole == "Owner")
+        {
+            if (user.Role != UserRole.Customer)
+                return BadRequest("Owners can only block customers.");
+
+            if (!await CustomerBlockHelper.HasOrderedFromOwnerAsync(db, currentUserId, id))
+                return BadRequest("You can only block customers who have ordered from your restaurants.");
+
+            if (await CustomerBlockHelper.IsBlockedFromOwnerAsync(db, currentUserId, id))
+                return NoContent();
+
+            db.OwnerCustomerBlocks.Add(new OwnerCustomerBlock
+            {
+                OwnerId = currentUserId,
+                CustomerId = id
+            });
+            await db.SaveChangesAsync();
+            return NoContent();
+        }
 
         user.IsBlocked = true;
         await db.SaveChangesAsync();
-
         return NoContent();
     }
 
     [HttpPut("{id}/unblock")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Owner,Admin")]
     public async Task<IActionResult> Unblock(int id)
     {
         var user = await db.Users.FindAsync(id);
         if (user is null) return NotFound();
 
+        var currentRole = User.FindFirstValue(ClaimTypes.Role);
+        var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        if (currentRole == "Owner")
+        {
+            if (user.Role != UserRole.Customer)
+                return BadRequest("Owners can only unblock customers.");
+
+            var block = await db.OwnerCustomerBlocks
+                .FirstOrDefaultAsync(b => b.OwnerId == currentUserId && b.CustomerId == id);
+
+            if (block is null)
+                return NotFound("This customer is not blocked from your restaurants.");
+
+            db.OwnerCustomerBlocks.Remove(block);
+            await db.SaveChangesAsync();
+            return NoContent();
+        }
+
         user.IsBlocked = false;
         await db.SaveChangesAsync();
-
         return NoContent();
     }
 }

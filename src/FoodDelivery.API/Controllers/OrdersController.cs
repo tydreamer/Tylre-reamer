@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using FoodDelivery.API.Constants;
 using FoodDelivery.API.Data;
 using FoodDelivery.API.DTOs;
 using FoodDelivery.API.Helpers;
@@ -47,9 +48,11 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
             .Take(pageSize)
             .ToListAsync();
 
-        return Ok(new PagedResult<OrderResponse>(
-            items.Select(MapToResponse).ToList(),
-            totalCount, page, pageSize));
+        var responses = new List<OrderResponse>();
+        foreach (var item in items)
+            responses.Add(await MapToResponseAsync(item));
+
+        return Ok(new PagedResult<OrderResponse>(responses, totalCount, page, pageSize));
     }
 
     [HttpGet("{id}")]
@@ -65,7 +68,7 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
         if (order is null) return NotFound();
         if (!CanAccessOrder(order)) return Forbid();
 
-        return Ok(MapToResponse(order));
+        return Ok(await MapToResponseAsync(order));
     }
 
     [HttpPost]
@@ -78,8 +81,13 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
         if (customer is null || customer.IsBlocked)
             return Forbid();
 
-        var restaurant = await db.Restaurants.FindAsync(req.RestaurantId);
+        var restaurant = await db.Restaurants
+            .AsNoTracking()
+            .FirstOrDefaultAsync(r => r.Id == req.RestaurantId);
         if (restaurant is null) return NotFound("Restaurant not found.");
+
+        if (await CustomerBlockHelper.IsBlockedFromOwnerAsync(db, restaurant.OwnerId, customerId))
+            return BadRequest(new { error = ValidationMessages.CustomerBlockedFromRestaurant });
 
         var mealIds = req.Items.Select(i => i.MealId).ToList();
         var meals = await db.Meals
@@ -137,7 +145,7 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
         await hub.Clients.Group($"user-{restaurant.OwnerId}")
             .SendAsync("OrderStatusChanged", notification);
 
-        return CreatedAtAction(nameof(GetById), new { id = order.Id }, MapToResponse(created));
+        return CreatedAtAction(nameof(GetById), new { id = order.Id }, await MapToResponseAsync(created));
     }
 
     [HttpPut("{id}/status")]
@@ -173,11 +181,19 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
     [Authorize(Roles = "Customer")]
     public async Task<IActionResult> Duplicate(int id)
     {
+        var customer = await db.Users.FindAsync(CurrentUserId);
+        if (customer is null || customer.IsBlocked)
+            return Forbid();
+
         var original = await db.Orders
             .Include(o => o.Items)
+            .Include(o => o.Restaurant)
             .FirstOrDefaultAsync(o => o.Id == id && o.CustomerId == CurrentUserId);
 
         if (original is null) return NotFound();
+
+        if (await CustomerBlockHelper.IsBlockedFromOwnerAsync(db, original.Restaurant.OwnerId, CurrentUserId))
+            return BadRequest(new { error = ValidationMessages.CustomerBlockedFromRestaurant });
 
         var meals = await db.Meals
             .Where(m => original.Items.Select(i => i.MealId).Contains(m.Id) && m.IsAvailable)
@@ -226,17 +242,28 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
         };
     }
 
-    protected static OrderResponse MapToResponse(Order o) => new(
-        o.Id,
-        o.CustomerId,
-        o.Customer.Name,
-        o.RestaurantId,
-        o.Restaurant.Name,
-        o.Status.ToString(),
-        o.Tip,
-        o.TotalPrice,
-        o.CreatedAt,
-        o.Items.Select(i => new OrderItemResponse(i.MealId, i.Meal.Name, i.Quantity, i.UnitPrice)).ToList(),
-        o.StatusHistory.OrderBy(h => h.ChangedAt).Select(h => new OrderStatusHistoryResponse(h.Status.ToString(), h.ChangedAt)).ToList()
-    );
+    protected async Task<OrderResponse> MapToResponseAsync(Order o)
+    {
+        var blockedFromOwner = false;
+        if (CurrentUserRole == "Owner")
+        {
+            blockedFromOwner = await CustomerBlockHelper.IsBlockedFromOwnerAsync(
+                db, CurrentUserId, o.CustomerId);
+        }
+
+        return new OrderResponse(
+            o.Id,
+            o.CustomerId,
+            o.Customer.Name,
+            o.RestaurantId,
+            o.Restaurant.Name,
+            o.Status.ToString(),
+            o.Tip,
+            o.TotalPrice,
+            o.CreatedAt,
+            o.Items.Select(i => new OrderItemResponse(i.MealId, i.Meal.Name, i.Quantity, i.UnitPrice)).ToList(),
+            o.StatusHistory.OrderBy(h => h.ChangedAt)
+                .Select(h => new OrderStatusHistoryResponse(h.Status.ToString(), h.ChangedAt)).ToList(),
+            blockedFromOwner);
+    }
 }
