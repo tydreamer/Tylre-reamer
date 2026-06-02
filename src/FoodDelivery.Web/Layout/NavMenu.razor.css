@@ -5,7 +5,7 @@
 .nav-menu {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: auto;
 }
 
 .nav-menu-header.top-row {
@@ -33,8 +33,15 @@
 }
 
 .nav-menu-body {
-    display: flex;
     flex-direction: column;
+}
+
+.nav-menu-body.collapse:not(.show) {
+    display: none;
+}
+
+.nav-menu-body.collapse.show {
+    display: flex;
 }
 
 .nav-menu-primary {
@@ -104,12 +111,16 @@
 }
 
 @media (min-width: 992px) {
+    .nav-menu {
+        height: 100%;
+    }
+
     .navbar-toggler {
         display: none;
     }
 
     .nav-menu-body.collapse {
-        display: flex;
+        display: flex !important;
     }
 
     .nav-menu-body {
