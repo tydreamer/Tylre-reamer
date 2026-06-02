@@ -6,6 +6,7 @@ namespace FoodDelivery.API.Data;
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public DbSet<User> Users => Set<User>();
+    public DbSet<Cuisine> Cuisines => Set<Cuisine>();
     public DbSet<Restaurant> Restaurants => Set<Restaurant>();
     public DbSet<MealType> MealTypes => Set<MealType>();
     public DbSet<Meal> Meals => Set<Meal>();
@@ -59,9 +60,19 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasForeignKey(m => m.MealTypeId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        modelBuilder.Entity<Cuisine>()
+            .HasIndex(c => c.Name)
+            .IsUnique();
+
         modelBuilder.Entity<Restaurant>()
             .Property(r => r.ImageUrl)
             .HasMaxLength(500);
+
+        modelBuilder.Entity<Restaurant>()
+            .HasOne(r => r.Cuisine)
+            .WithMany(c => c.Restaurants)
+            .HasForeignKey(r => r.CuisineId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Coupon>()
             .Property(c => c.DiscountValue)

@@ -21,6 +21,18 @@ Each restaurant row includes `OwnerName` and `OwnerEmail`. One owner account is 
 
 Example: Bella Napoli → `owner.bella-napoli@example.com` (Marco Rossi).
 
+## Cuisines (`Cuisines` table)
+
+Seeded from `CuisineNames` in `FoodDelivery.API/Constants/CuisineNames.cs` before restaurants are loaded:
+
+| Name |
+|------|
+| Italian |
+| French |
+| Chinese |
+| Japanese |
+| Mexican |
+
 ## Meal types (`MealTypes` table)
 
 Seeded from `MealTypeNames` in `FoodDelivery.API/Constants/MealTypeNames.cs` before meals are loaded:
@@ -39,8 +51,21 @@ Seeded from `MealTypeNames` in `FoodDelivery.API/Constants/MealTypeNames.cs` bef
 
 | File | Contents |
 |------|----------|
-| `restaurants.csv` | 29 restaurants with image URLs and owner assignment |
+| `restaurants.csv` | 29 restaurants with image URLs, owner assignment, cuisine, and coordinates |
 | `meals.csv` | 4 meals per restaurant (see columns below) |
+
+### `restaurants.csv` columns
+
+| Column | Required | Description |
+|--------|----------|-------------|
+| `Name` | Yes | Restaurant name |
+| `Description` | Yes | Short description |
+| `ImageUrl` | Yes | Card image URL |
+| `OwnerName` | Yes | Owner display name (account created if missing) |
+| `OwnerEmail` | Yes | Owner login email |
+| `Cuisine` | Yes | One of: `Italian`, `French`, `Chinese`, `Japanese`, `Mexican` |
+| `Latitude` | Yes | Decimal degrees (e.g. `40.7128`) |
+| `Longitude` | Yes | Decimal degrees (e.g. `-74.0060`) |
 
 ### `meals.csv` columns
 

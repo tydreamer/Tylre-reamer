@@ -10,6 +10,10 @@ public class Restaurant
 
     [MaxLength(500)]
     public string ImageUrl { get; set; } = string.Empty;
+    public int CuisineId { get; set; }
+    public Cuisine Cuisine { get; set; } = null!;
+    public double Latitude { get; set; }
+    public double Longitude { get; set; }
     public int OwnerId { get; set; }
     public User Owner { get; set; } = null!;
     public ICollection<Meal> Meals { get; set; } = [];

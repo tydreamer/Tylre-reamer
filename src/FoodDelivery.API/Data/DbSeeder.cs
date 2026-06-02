@@ -13,13 +13,22 @@ public static class DbSeeder
     private const string DefaultSeedPassword = "Password123!";
 
     private sealed record AccountRow(string Name, string Email, string Role);
-    private sealed record RestaurantRow(string Name, string Description, string ImageUrl, string OwnerName, string OwnerEmail);
+    private sealed record RestaurantRow(
+        string Name,
+        string Description,
+        string ImageUrl,
+        string OwnerName,
+        string OwnerEmail,
+        string Cuisine,
+        double Latitude,
+        double Longitude);
     /// <summary>Maps <c>meals.csv</c>; <see cref="MealType"/> must match a row in <c>MealTypes</c> (see Data/Seed/README.md).</summary>
     private sealed record MealRow(string RestaurantName, string Name, string Description, decimal Price, string? ImageUrl, string? MealType);
 
     public static async Task SeedAsync(AppDbContext db)
     {
         await SeedMealTypesAsync(db);
+        await SeedCuisinesAsync(db);
         await SeedAccountsAsync(db);
         await SeedRestaurantsAsync(db);
         await SeedMealsAsync(db);
@@ -33,6 +42,17 @@ public static class DbSeeder
 
         foreach (var name in MealTypeNames.All)
             db.MealTypes.Add(new MealType { Name = name });
+
+        await db.SaveChangesAsync();
+    }
+
+    private static async Task SeedCuisinesAsync(AppDbContext db)
+    {
+        if (await db.Cuisines.AnyAsync())
+            return;
+
+        foreach (var name in CuisineNames.All)
+            db.Cuisines.Add(new Cuisine { Name = name });
 
         await db.SaveChangesAsync();
     }
@@ -53,6 +73,7 @@ public static class DbSeeder
         if (await db.Restaurants.AnyAsync())
             return;
 
+        var cuisineIdsByName = await db.Cuisines.ToDictionaryAsync(c => c.Name, c => c.Id);
         var restaurants = new List<Restaurant>();
 
         foreach (var row in ReadCsv<RestaurantRow>("restaurants.csv"))
@@ -64,11 +85,22 @@ public static class DbSeeder
                 ownerEmail,
                 UserRole.Owner);
 
+            var cuisineName = row.Cuisine.Trim();
+            if (!cuisineIdsByName.TryGetValue(cuisineName, out var cuisineId))
+            {
+                throw new InvalidOperationException(
+                    $"Unknown Cuisine '{cuisineName}' for restaurant '{row.Name}'. " +
+                    $"Expected one of: {string.Join(", ", CuisineNames.All)}.");
+            }
+
             restaurants.Add(new Restaurant
             {
                 Name = row.Name.Trim(),
                 Description = row.Description.Trim(),
                 ImageUrl = row.ImageUrl.Trim(),
+                CuisineId = cuisineId,
+                Latitude = row.Latitude,
+                Longitude = row.Longitude,
                 OwnerId = owner.Id
             });
         }
