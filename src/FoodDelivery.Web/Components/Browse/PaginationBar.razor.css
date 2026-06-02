@@ -1,6 +1,6 @@
 .pagination-bar-footer {
-    --pagination-accent: #6d28d9;
-    --pagination-accent-dark: #1e1b4b;
+    --pagination-accent: #000;
+    --pagination-accent-dark: #000;
 
     display: flex;
     flex-direction: column;
@@ -8,6 +8,7 @@
     gap: 1rem;
     margin-top: 1.25rem;
     padding-top: 1rem;
+    padding-bottom: 1.25rem;
     border-top: 1px solid var(--bs-border-color, #dee2e6);
 }
 
@@ -53,7 +54,7 @@
 }
 
 .pagination-nav-btn:hover:not(:disabled) {
-    background-color: rgba(109, 40, 217, 0.08);
+    background-color: rgba(0, 0, 0, 0.06);
 }
 
 .pagination-nav-btn:disabled {
@@ -132,15 +133,19 @@
 .pagination-bar-size-label {
     font-size: 0.875rem;
     margin: 0;
+    color: #000;
 }
 
 .pagination-bar-size-select {
     width: auto;
     min-width: 4.5rem;
+    color: #000;
+    border-color: #000;
 }
 
 .pagination-bar-range {
     font-size: 0.875rem;
+    color: #000;
 }
 
 @media (min-width: 768px) {
