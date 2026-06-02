@@ -5,4 +5,5 @@ global using FoodDelivery.API.DTOs.Meals;
 global using FoodDelivery.API.DTOs.Orders;
 global using FoodDelivery.API.DTOs.Coupons;
 global using FoodDelivery.API.DTOs.Common;
+global using FoodDelivery.API.DTOs.Cuisines;
 global using FoodDelivery.API.Services.Auth;

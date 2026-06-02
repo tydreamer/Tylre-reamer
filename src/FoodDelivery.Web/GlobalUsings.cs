@@ -17,3 +17,5 @@ global using FoodDelivery.Web.Components.Browse;
 global using FoodDelivery.Web.Components.Dialogs;
 global using FoodDelivery.Web.Components.Tables;
 global using FoodDelivery.Web.Components.Feedback;
+global using FoodDelivery.Web.Components.Admin;
+global using FoodDelivery.Web.Components.Cart;

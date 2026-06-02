@@ -40,133 +40,35 @@ else
             <div class="d-md-none vstack gap-3 mb-3 mb-md-0">
                 @foreach (var item in Cart.Items)
                 {
-                    <div class="card cart-item-card shadow-sm">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
-                                <div class="flex-grow-1 overflow-hidden">
-                                    <h6 class="card-title mb-1">@item.Meal.Name</h6>
-                                    <div class="text-muted small">@item.Meal.Price.ToString("C") each</div>
-                                </div>
-                                <div class="cart-item-total">@item.LineTotal.ToString("C")</div>
-                            </div>
-                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-                                <div class="d-inline-flex align-items-center gap-1" role="group" aria-label="Quantity">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary"
-                                            disabled="@(item.Quantity <= 1)"
-                                            @onclick="() => DecreaseQuantity(item.Meal.Id, item.Quantity)">−</button>
-                                    <span class="cart-qty-display">@item.Quantity</span>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary"
-                                            @onclick="() => IncreaseQuantity(item.Meal.Id, item.Quantity)">+</button>
-                                </div>
-                                <button type="button" class="btn btn-sm btn-outline-danger cart-remove-btn"
-                                        title="Remove"
-                                        aria-label="@($"Remove {item.Meal.Name} from cart")"
-                                        @onclick="() => RemoveItem(item.Meal.Id)">
-                                    <i class="bi bi-trash" aria-hidden="true"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    <CartItemCard Item="item"
+                                  OnDecrease="@(() => DecreaseQuantity(item.Meal.Id, item.Quantity))"
+                                  OnIncrease="@(() => IncreaseQuantity(item.Meal.Id, item.Quantity))"
+                                  OnRemove="@(() => RemoveItem(item.Meal.Id))" />
                 }
             </div>
 
-            <div class="table-responsive d-none d-md-block">
-                <table class="table align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th>Meal</th>
-                            <th class="text-end">Price</th>
-                            <th class="text-center text-nowrap">Quantity</th>
-                            <th class="text-end">Total</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Cart.Items)
-                        {
-                            <tr>
-                                <td>@item.Meal.Name</td>
-                                <td class="text-end text-nowrap">@item.Meal.Price.ToString("C")</td>
-                                <td class="text-center">
-                                    <div class="d-inline-flex align-items-center justify-content-center gap-1" role="group" aria-label="Quantity">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary"
-                                                disabled="@(item.Quantity <= 1)"
-                                                @onclick="() => DecreaseQuantity(item.Meal.Id, item.Quantity)">−</button>
-                                        <span class="cart-qty-display">@item.Quantity</span>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary"
-                                                @onclick="() => IncreaseQuantity(item.Meal.Id, item.Quantity)">+</button>
-                                    </div>
-                                </td>
-                                <td class="text-end text-nowrap">@item.LineTotal.ToString("C")</td>
-                                <td class="text-end text-nowrap">
-                                    <button type="button" class="btn btn-sm btn-outline-danger cart-remove-btn"
-                                            title="Remove"
-                                            aria-label="@($"Remove {item.Meal.Name} from cart")"
-                                            @onclick="() => RemoveItem(item.Meal.Id)">
-                                        <i class="bi bi-trash" aria-hidden="true"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+            <CartItemsTable Items="Cart.Items"
+                            OnDecrease="DecreaseQuantityById"
+                            OnIncrease="IncreaseQuantityById"
+                            OnRemove="RemoveItem" />
         </div>
 
         <div class="col-md-5">
-            <div class="card">
-                <div class="card-body">
-                    <div class="mb-3">
-                        <label class="form-label" for="coupon-code">Enter Coupon Code:</label>
-                        <input id="coupon-code" class="form-control" value="@couponCode"
-                               placeholder="e.g., DISCOUNT10"
-                               @oninput="OnCouponInput"
-                               @onblur="OnCouponFieldFinishedAsync"
-                               @onkeydown="OnCouponKeyDownAsync" />
-                        @if (validatingCoupon)
-                        {
-                            <small class="text-muted">Checking coupon...</small>
-                        }
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label" for="tip-amount">Tip Amount ($):</label>
-                        <input id="tip-amount" class="form-control" type="number" min="0" step="0.50"
-                               @bind="tip" @bind:event="oninput" placeholder="Enter tip amount" />
-                    </div>
-
-                    @if (couponSuccessMessage is not null)
-                    {
-                        <p class="cart-discount-text mb-0">@couponSuccessMessage</p>
-                    }
-
-                    @if (couponError is not null)
-                    {
-                        <div class="alert alert-danger py-2 mb-3">@couponError</div>
-                    }
-
-                    @if (HasAppliedCoupon)
-                    {
-                        <p class="cart-original-price mb-0">
-                            Original Price:
-                            <span class="cart-original-price-value">@OriginalTotal.ToString("C")</span>
-                        </p>
-                    }
-
-                    <div class="d-flex justify-content-between align-items-center cart-total-price mb-3">
-                        <span>Total Price:</span>
-                        <span>@FinalTotal.ToString("C")</span>
-                    </div>
-
-                    @if (checkoutError is not null)
-                    {
-                        <div class="alert alert-danger">@checkoutError</div>
-                    }
-
-                    <button type="button" class="btn btn-success w-100" @onclick="CheckoutAsync" disabled="@placing">
-                        @(placing ? "Checking out..." : "Checkout")
-                    </button>
-                </div>
-            </div>
+            <CartCheckoutPanel CouponCode="couponCode"
+                               OnCouponInput="OnCouponInput"
+                               OnCouponFieldFinished="OnCouponFieldFinishedAsync"
+                               OnCouponKeyDown="OnCouponKeyDownAsync"
+                               ValidatingCoupon="validatingCoupon"
+                               Tip="tip"
+                               OnTipInput="OnTipInput"
+                               CouponSuccessMessage="couponSuccessMessage"
+                               CouponError="couponError"
+                               HasAppliedCoupon="HasAppliedCoupon"
+                               OriginalTotal="OriginalTotal"
+                               FinalTotal="FinalTotal"
+                               CheckoutError="checkoutError"
+                               Placing="placing"
+                               OnCheckout="CheckoutAsync" />
         </div>
     </div>
 
@@ -221,6 +123,18 @@ else
         await InvokeAsync(StateHasChanged);
     }
 
+    private Task DecreaseQuantityById(int mealId)
+    {
+        var item = Cart.Items.FirstOrDefault(i => i.Meal.Id == mealId);
+        return item is null ? Task.CompletedTask : DecreaseQuantity(mealId, item.Quantity);
+    }
+
+    private Task IncreaseQuantityById(int mealId)
+    {
+        var item = Cart.Items.FirstOrDefault(i => i.Meal.Id == mealId);
+        return item is null ? Task.CompletedTask : IncreaseQuantity(mealId, item.Quantity);
+    }
+
     private Task DecreaseQuantity(int mealId, int quantity)
     {
         if (quantity <= 1)
@@ -233,6 +147,9 @@ else
         Cart.SetQuantityAsync(mealId, quantity + 1);
 
     private async Task RemoveItem(int mealId) => await Cart.RemoveAsync(mealId);
+
+    private void OnTipInput(ChangeEventArgs e) =>
+        tip = decimal.TryParse(e.Value?.ToString(), out var value) ? Math.Max(0, value) : 0;
 
     private async Task ClearCartConfirmedAsync()
     {

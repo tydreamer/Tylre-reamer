@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace FoodDelivery.API.Controllers.Common;
+namespace FoodDelivery.API.Controllers.Cuisines;
 
 [ApiController]
 [Route("api/cuisines")]

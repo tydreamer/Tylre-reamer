@@ -1,0 +1,75 @@
+<div class="card">
+    <div class="card-body">
+        <div class="mb-3">
+            <label class="form-label" for="coupon-code">Enter Coupon Code:</label>
+            <input id="coupon-code" class="form-control" value="@CouponCode"
+                   placeholder="e.g., DISCOUNT10"
+                   @oninput="OnCouponInput"
+                   @onblur="OnCouponFieldFinished"
+                   @onkeydown="OnCouponKeyDown" />
+            @if (ValidatingCoupon)
+            {
+                <small class="text-muted">Checking coupon...</small>
+            }
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="tip-amount">Tip Amount ($):</label>
+            <input id="tip-amount" class="form-control" type="number" min="0" step="0.50"
+                   value="@Tip"
+                   @oninput="OnTipInput"
+                   placeholder="Enter tip amount" />
+        </div>
+
+        @if (CouponSuccessMessage is not null)
+        {
+            <p class="cart-discount-text mb-0">@CouponSuccessMessage</p>
+        }
+
+        @if (CouponError is not null)
+        {
+            <div class="alert alert-danger py-2 mb-3">@CouponError</div>
+        }
+
+        @if (HasAppliedCoupon)
+        {
+            <p class="cart-original-price mb-0">
+                Original Price:
+                <span class="cart-original-price-value">@OriginalTotal.ToString("C")</span>
+            </p>
+        }
+
+        <div class="d-flex justify-content-between align-items-center cart-total-price mb-3">
+            <span>Total Price:</span>
+            <span>@FinalTotal.ToString("C")</span>
+        </div>
+
+        @if (CheckoutError is not null)
+        {
+            <div class="alert alert-danger">@CheckoutError</div>
+        }
+
+        <button type="button" class="btn btn-success w-100" @onclick="OnCheckout" disabled="@Placing">
+            @(Placing ? "Checking out..." : "Checkout")
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? CouponCode { get; set; }
+    [Parameter] public EventCallback<ChangeEventArgs> OnCouponInput { get; set; }
+    [Parameter] public EventCallback OnCouponFieldFinished { get; set; }
+    [Parameter] public EventCallback<KeyboardEventArgs> OnCouponKeyDown { get; set; }
+    [Parameter] public bool ValidatingCoupon { get; set; }
+
+    [Parameter] public decimal Tip { get; set; }
+    [Parameter] public EventCallback<ChangeEventArgs> OnTipInput { get; set; }
+
+    [Parameter] public string? CouponSuccessMessage { get; set; }
+    [Parameter] public string? CouponError { get; set; }
+    [Parameter] public bool HasAppliedCoupon { get; set; }
+    [Parameter] public decimal OriginalTotal { get; set; }
+    [Parameter] public decimal FinalTotal { get; set; }
+    [Parameter] public string? CheckoutError { get; set; }
+    [Parameter] public bool Placing { get; set; }
+    [Parameter, EditorRequired] public EventCallback OnCheckout { get; set; }
+}

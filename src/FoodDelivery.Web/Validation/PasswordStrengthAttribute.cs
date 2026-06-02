@@ -4,7 +4,7 @@ using FoodDelivery.Web.Constants;
 namespace FoodDelivery.Web.Validation;
 
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-public sealed class StrongPasswordAttribute : ValidationAttribute
+public sealed class PasswordStrengthAttribute : ValidationAttribute
 {
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {

@@ -1,0 +1,121 @@
+@page "/admin/users"
+@attribute [Authorize(Roles = "Admin")]
+@inject UserService Users
+@inject ToastService Toast
+
+<PageTitle>Create & Block Users</PageTitle>
+
+<h1 class="mb-4">Create &amp; Block Users</h1>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <CreateUserForm @key="createFormKey" Error="error" Busy="busy" OnCreate="CreateUserAsync" />
+    </div>
+
+    <div class="col-md-8">
+        <UsersTable Paged="paged" Busy="busy"
+                    CurrentPage="currentPage" PageSize="pageSize"
+                    OnPageChanged="GoToPage" OnPageSizeChanged="ChangePageSize"
+                    OnRequestBlock="RequestBlock" OnUnblock="UnblockAsync" />
+    </div>
+</div>
+
+<ConfirmDialog @bind-IsVisible="showBlockDialog"
+               Title="Block user"
+               Message="@blockDialogMessage"
+               ConfirmText="Block user"
+               CancelText="Cancel"
+               ConfirmButtonClass="btn-danger"
+               OnConfirmed="BlockConfirmedAsync" />
+
+@code {
+    private PagedResult<UserDto>? paged;
+    private string? error;
+    private bool busy;
+    private int currentPage = 1;
+    private int pageSize = 10;
+    private int createFormKey;
+    private bool showBlockDialog;
+    private int? pendingBlockUserId;
+    private string blockDialogMessage = "";
+
+    protected override async Task OnInitializedAsync() => await LoadPageAsync();
+
+    private async Task LoadPageAsync() => paged = await Users.GetPageAsync(currentPage, pageSize);
+
+    private async Task GoToPage(int page)
+    {
+        if (paged is null || page < 1 || page > paged.TotalPages) return;
+        currentPage = page;
+        await LoadPageAsync();
+    }
+
+    private async Task ChangePageSize(int size)
+    {
+        pageSize = size;
+        currentPage = 1;
+        await LoadPageAsync();
+    }
+
+    private async Task CreateUserAsync(CreateUserRequest request)
+    {
+        busy = true;
+        error = null;
+
+        var (success, _, err) = await Users.CreateAsync(request);
+
+        if (success)
+        {
+            createFormKey++;
+            await LoadPageAsync();
+            Toast.ShowSuccess($"User \"{request.Name}\" was created successfully.");
+        }
+        else
+        {
+            error = err;
+        }
+
+        busy = false;
+    }
+
+    private void RequestBlock(UserDto user)
+    {
+        pendingBlockUserId = user.Id;
+        blockDialogMessage = $"Block {user.Name}? They will not be able to sign in to the app.";
+        showBlockDialog = true;
+    }
+
+    private async Task BlockConfirmedAsync()
+    {
+        if (pendingBlockUserId is null)
+            return;
+
+        await BlockAsync(pendingBlockUserId.Value);
+        pendingBlockUserId = null;
+        blockDialogMessage = "";
+    }
+
+    private async Task BlockAsync(int userId)
+    {
+        busy = true;
+        error = null;
+        var (success, err) = await Users.BlockAsync(userId);
+        if (success)
+            await LoadPageAsync();
+        else
+            error = err;
+        busy = false;
+    }
+
+    private async Task UnblockAsync(int userId)
+    {
+        busy = true;
+        error = null;
+        var (success, err) = await Users.UnblockAsync(userId);
+        if (success)
+            await LoadPageAsync();
+        else
+            error = err;
+        busy = false;
+    }
+}

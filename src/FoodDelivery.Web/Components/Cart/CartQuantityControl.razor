@@ -1,0 +1,15 @@
+<div class="d-inline-flex align-items-center gap-1" role="group" aria-label="Quantity">
+    <button type="button" class="btn btn-sm btn-outline-secondary"
+            disabled="@DecreaseDisabled"
+            @onclick="OnDecrease">−</button>
+    <span class="cart-qty-display">@Quantity</span>
+    <button type="button" class="btn btn-sm btn-outline-secondary"
+            @onclick="OnIncrease">+</button>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public int Quantity { get; set; }
+    [Parameter] public bool DecreaseDisabled { get; set; }
+    [Parameter, EditorRequired] public EventCallback OnDecrease { get; set; }
+    [Parameter, EditorRequired] public EventCallback OnIncrease { get; set; }
+}

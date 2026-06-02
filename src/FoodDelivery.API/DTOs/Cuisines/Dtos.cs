@@ -1,3 +1,3 @@
-namespace FoodDelivery.API.DTOs.Common;
+namespace FoodDelivery.API.DTOs.Cuisines;
 
 public record CuisineResponse(int Id, string Name);
