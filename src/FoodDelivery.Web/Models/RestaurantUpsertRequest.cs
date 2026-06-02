@@ -3,5 +3,8 @@ namespace FoodDelivery.Web.Models;
 public record RestaurantUpsertRequest(
     string Name,
     string Description,
-    string ImageUrl
+    string ImageUrl,
+    int CuisineId,
+    double Latitude,
+    double Longitude
 );

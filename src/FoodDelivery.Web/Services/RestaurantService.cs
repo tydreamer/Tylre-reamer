@@ -25,6 +25,11 @@ public class RestaurantService(HttpClient http)
         return await http.GetFromJsonAsync<RestaurantDto>($"api/restaurants/{id}");
     }
 
+    public async Task<List<CuisineDto>> GetCuisinesAsync()
+    {
+        return await http.GetFromJsonAsync<List<CuisineDto>>("api/cuisines") ?? [];
+    }
+
     public async Task<List<RestaurantDto>> GetByOwnerAsync(int ownerId)
     {
         var paged = await GetPageAsync(1, 100, ownerId);

@@ -5,5 +5,9 @@ public record RestaurantDto(
     string Name,
     string Description,
     string ImageUrl,
-    int OwnerId
+    int OwnerId,
+    int CuisineId,
+    string CuisineName,
+    double Latitude,
+    double Longitude
 );
