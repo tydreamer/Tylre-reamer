@@ -128,6 +128,53 @@
     </script>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
     <script>
+        window.foodDelivery = {
+            scrollToTop: function () {
+                var smooth = { block: "start", inline: "nearest", behavior: "smooth" };
+                var pageStart = document.querySelector("main .content h1") || document.querySelector("main .content");
+
+                if (pageStart && pageStart.scrollIntoView) {
+                    pageStart.scrollIntoView(smooth);
+                    return;
+                }
+
+                window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+            },
+            waitForImages: function (root) {
+                if (!root || !root.querySelectorAll) {
+                    return Promise.resolve();
+                }
+
+                var images = root.querySelectorAll("img");
+                if (!images.length) {
+                    return Promise.resolve();
+                }
+
+                var timeoutMs = 12000;
+                var waits = Array.prototype.map.call(images, function (img) {
+                    if (img.complete && img.naturalWidth > 0) {
+                        return Promise.resolve();
+                    }
+
+                    return new Promise(function (resolve) {
+                        var done = false;
+                        var finish = function () {
+                            if (done) return;
+                            done = true;
+                            resolve();
+                        };
+
+                        img.addEventListener("load", finish, { once: true });
+                        img.addEventListener("error", finish, { once: true });
+                        window.setTimeout(finish, timeoutMs);
+                    });
+                });
+
+                return Promise.all(waits);
+            }
+        };
+    </script>
+    <script>
         window.cartSync = {
             register: function (dotNetRef) {
                 window.addEventListener('storage', function (e) {

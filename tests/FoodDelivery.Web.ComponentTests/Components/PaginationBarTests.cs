@@ -59,9 +59,30 @@ public class PaginationBarTests : ComponentTestBase
                 return Task.CompletedTask;
             })));
 
-        cut.Find("select").Change(25);
+        cut.Find("select").Change(50);
 
-        newSize.Should().Be(25);
+        newSize.Should().Be(50);
+    }
+
+    [Theory]
+    [InlineData(2, 10, new[] { "1", "2", "3", "…", "10" })]
+    [InlineData(5, 10, new[] { "1", "…", "5", "…", "10" })]
+    [InlineData(9, 10, new[] { "1", "…", "8", "9", "10" })]
+    public void Renders_PageButtons_AccordingToRules(int currentPage, int totalPages, string[] expectedLabels)
+    {
+        var cut = Render<PaginationBar>(ps => ps
+            .Add(p => p.CurrentPage, currentPage)
+            .Add(p => p.TotalPages, totalPages)
+            .Add(p => p.TotalCount, totalPages * 10)
+            .Add(p => p.PageSize, 10)
+            .Add(p => p.OnPageChanged, EventCallback.Factory.Create<int>(this, _ => Task.CompletedTask))
+            .Add(p => p.OnPageSizeChanged, EventCallback.Factory.Create<int>(this, _ => Task.CompletedTask)));
+
+        var labels = cut.Find(".pagination-nav-pages")
+            .Children
+            .Select(child => child.TextContent.Trim())
+            .ToArray();
+        labels.Should().Equal(expectedLabels);
     }
 
     [Fact]

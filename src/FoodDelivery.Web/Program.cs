@@ -25,5 +25,6 @@ builder.Services.AddScoped<CouponService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<OrderNotificationService>();
 builder.Services.AddScoped<ToastService>();
+builder.Services.AddScoped<PaginatedPageLoadService>();
 
 await builder.Build().RunAsync();

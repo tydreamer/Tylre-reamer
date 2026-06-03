@@ -8,6 +8,7 @@ else if (Paged.TotalCount == 0)
 }
 else
 {
+    <PaginatedPageContent>
     <div class="table-responsive">
         <table class="table align-middle mb-0 users-list-table">
             <colgroup>
@@ -66,6 +67,7 @@ else
             </tbody>
         </table>
     </div>
+    </PaginatedPageContent>
 
     <PaginationBar CurrentPage="CurrentPage" TotalPages="Paged.TotalPages"
                    TotalCount="Paged.TotalCount" PageSize="PageSize"

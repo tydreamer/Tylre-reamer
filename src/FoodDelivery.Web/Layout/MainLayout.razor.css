@@ -1,4 +1,5 @@
 .page {
+    --layout-sidebar-width: 0px;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -27,11 +28,12 @@ main {
 
 @media (min-width: 992px) {
     .page {
+        --layout-sidebar-width: 250px;
         flex-direction: row;
     }
 
     .sidebar {
-        width: 250px;
+        width: var(--layout-sidebar-width);
         height: 100vh;
         position: sticky;
         top: 0;

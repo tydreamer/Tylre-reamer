@@ -1,6 +1,7 @@
 @page "/restaurants"
 @attribute [Authorize(Roles = "Customer")]
 @inject RestaurantService Restaurants
+@inject PaginatedPageLoadService PageLoad
 
 <PageTitle>Food Delivery</PageTitle>
 
@@ -20,6 +21,7 @@ else if (paged.TotalCount == 0)
 }
 else
 {
+    <PaginatedPageContent>
     <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
         @foreach (var restaurant in paged.Items)
         {
@@ -43,6 +45,7 @@ else
             </div>
         }
     </div>
+    </PaginatedPageContent>
 
     <PaginationBar CurrentPage="currentPage" TotalPages="paged.TotalPages"
                    TotalCount="paged.TotalCount" PageSize="pageSize"
@@ -78,14 +81,22 @@ else
     private async Task GoToPage(int page)
     {
         if (paged is null || page < 1 || page > paged.TotalPages) return;
-        currentPage = page;
-        await LoadPageAsync();
+        await PageLoad.NavigateAsync(async () =>
+        {
+            currentPage = page;
+            await LoadPageAsync();
+        });
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task ChangePageSize(int size)
     {
-        pageSize = size;
-        currentPage = 1;
-        await LoadPageAsync();
+        await PageLoad.NavigateAsync(async () =>
+        {
+            pageSize = size;
+            currentPage = 1;
+            await LoadPageAsync();
+        });
+        await InvokeAsync(StateHasChanged);
     }
 }

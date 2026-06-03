@@ -1,6 +1,9 @@
 .pagination-bar-footer {
     --pagination-accent: #000;
     --pagination-accent-dark: #000;
+    --pagination-control-size: 2rem;
+    --pagination-font-size: 0.9375rem;
+    --pagination-gap: 0.625rem;
 
     display: flex;
     flex-direction: column;
@@ -28,8 +31,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: clamp(1rem, 4vw, 2.5rem);
+    gap: var(--pagination-gap);
     width: 100%;
+    min-height: var(--pagination-control-size);
 }
 
 .pagination-nav-btn {
@@ -37,10 +41,10 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    width: 2.75rem;
-    height: 2.75rem;
+    width: var(--pagination-control-size);
+    height: var(--pagination-control-size);
     padding: 0;
-    border: 1.5px solid var(--pagination-accent);
+    border: 1px solid var(--pagination-accent);
     border-radius: 50%;
     background: transparent;
     color: var(--pagination-accent);
@@ -49,8 +53,9 @@
 }
 
 .pagination-nav-btn .bi {
-    font-size: 1.125rem;
-    font-weight: 700;
+    font-size: var(--pagination-font-size);
+    font-weight: 600;
+    line-height: 1;
 }
 
 .pagination-nav-btn:hover:not(:disabled) {
@@ -67,8 +72,9 @@
     align-items: center;
     justify-content: center;
     flex-wrap: nowrap;
-    gap: clamp(0.75rem, 3vw, 1.75rem);
+    gap: 0.5rem;
     min-width: 0;
+    min-height: var(--pagination-control-size);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
@@ -80,15 +86,19 @@
 
 .pagination-page-btn {
     position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+    height: var(--pagination-control-size);
+    min-width: var(--pagination-control-size);
+    padding: 0 0.25rem;
     border: none;
     background: transparent;
     color: var(--pagination-accent);
-    font-size: 1.125rem;
-    font-weight: 700;
-    line-height: 1.2;
-    padding: 0.25rem 0.125rem 0.5rem;
-    min-width: 1.75rem;
+    font-size: var(--pagination-font-size);
+    font-weight: 600;
+    line-height: 1;
 }
 
 .pagination-page-btn:hover:not(.active) {
@@ -104,20 +114,24 @@
     position: absolute;
     left: 50%;
     bottom: 0;
-    width: 1.75rem;
-    height: 3px;
+    width: 0.75rem;
+    height: 2.5px;
     border-radius: 999px;
     background-color: var(--pagination-accent-dark);
     transform: translateX(-50%);
 }
 
 .pagination-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
-    color: var(--pagination-accent);
-    font-size: 1.125rem;
-    font-weight: 700;
-    line-height: 1;
+    height: var(--pagination-control-size);
     padding: 0 0.125rem;
+    color: var(--pagination-accent);
+    font-size: var(--pagination-font-size);
+    font-weight: 600;
+    line-height: 1;
     user-select: none;
 }
 
@@ -128,10 +142,12 @@
     justify-content: center;
     gap: 0.5rem 0.75rem;
     width: 100%;
+    min-height: var(--pagination-control-size);
 }
 
 .pagination-bar-size-label {
-    font-size: 0.875rem;
+    font-size: var(--pagination-font-size);
+    line-height: 1;
     margin: 0;
     color: #000;
 }
@@ -139,12 +155,18 @@
 .pagination-bar-size-select {
     width: auto;
     min-width: 4.5rem;
+    height: var(--pagination-control-size);
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    font-size: var(--pagination-font-size);
+    line-height: 1.25;
     color: #000;
     border-color: #000;
 }
 
 .pagination-bar-range {
-    font-size: 0.875rem;
+    font-size: var(--pagination-font-size);
+    line-height: 1;
     color: #000;
 }
 
@@ -153,8 +175,8 @@
         display: grid;
         grid-template-columns: 1fr minmax(0, auto) 1fr;
         align-items: center;
-        column-gap: 1.5rem;
-        row-gap: 1rem;
+        column-gap: 1rem;
+        row-gap: 0.75rem;
     }
 
     .pagination-bar-pages {

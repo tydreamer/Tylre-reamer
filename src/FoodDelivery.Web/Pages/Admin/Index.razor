@@ -2,6 +2,7 @@
 @attribute [Authorize(Roles = "Admin")]
 @inject UserService Users
 @inject ToastService Toast
+@inject PaginatedPageLoadService PageLoad
 
 <PageTitle>Create & Block Users</PageTitle>
 
@@ -33,7 +34,7 @@
     private string? error;
     private bool busy;
     private int currentPage = 1;
-    private int pageSize = 10;
+    private int pageSize = 20;
     private int createFormKey;
     private bool showBlockDialog;
     private int? pendingBlockUserId;
@@ -46,15 +47,23 @@
     private async Task GoToPage(int page)
     {
         if (paged is null || page < 1 || page > paged.TotalPages) return;
-        currentPage = page;
-        await LoadPageAsync();
+        await PageLoad.NavigateAsync(async () =>
+        {
+            currentPage = page;
+            await LoadPageAsync();
+        });
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task ChangePageSize(int size)
     {
-        pageSize = size;
-        currentPage = 1;
-        await LoadPageAsync();
+        await PageLoad.NavigateAsync(async () =>
+        {
+            pageSize = size;
+            currentPage = 1;
+            await LoadPageAsync();
+        });
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task CreateUserAsync(CreateUserRequest request)

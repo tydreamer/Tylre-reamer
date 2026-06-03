@@ -1,0 +1,24 @@
+.paginated-page-content {
+    position: relative;
+    min-height: 3rem;
+}
+
+.paginated-page-loading-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.78);
+    pointer-events: all;
+}
+
+.paginated-page-loading-spinner {
+    position: fixed;
+    top: 50%;
+    left: var(--layout-sidebar-width, 0px);
+    width: calc(100% - var(--layout-sidebar-width, 0px));
+    display: flex;
+    justify-content: center;
+    transform: translateY(-50%);
+    pointer-events: none;
+    z-index: 11;
+}
