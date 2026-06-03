@@ -1,0 +1,25 @@
+<p class="order-detail-meta mb-0">
+    <span class="order-detail-meta__item order-detail-meta__item--restaurant">
+        <span class="order-detail-meta__label">Restaurant:</span>
+        <span class="order-detail-meta__value order-detail-meta__value--restaurant">@RestaurantName</span>
+    </span>
+    @if (CustomerName is not null)
+    {
+        <span class="order-detail-meta__item order-detail-meta__item--customer">
+            <span class="order-detail-meta__label">Customer:</span>
+            <span class="order-detail-meta__value order-detail-meta__value--customer">@CustomerName</span>
+        </span>
+    }
+    <span class="order-detail-meta__item order-detail-meta__item--date">
+        <span class="order-detail-meta__label">Ordered at:</span>
+        <time class="order-detail-meta__value order-detail-meta__value--date" datetime="@CreatedAt.ToString("o")">
+            @CreatedAt.ToLocalTime().ToString("f")
+        </time>
+    </span>
+</p>
+
+@code {
+    [Parameter, EditorRequired] public string RestaurantName { get; set; } = default!;
+    [Parameter] public string? CustomerName { get; set; }
+    [Parameter] public DateTime CreatedAt { get; set; }
+}

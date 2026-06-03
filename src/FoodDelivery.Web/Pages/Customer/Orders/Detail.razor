@@ -21,7 +21,8 @@ else
             <h1 class="mb-0">Order #@order.Id</h1>
             <span class="badge fs-6 @StatusClass(order.Status) align-self-start">@order.Status</span>
         </div>
-        <p class="text-muted mb-0">@order.RestaurantName · Ordered at @order.CreatedAt.ToLocalTime().ToString("f")</p>
+        <OrderDetailMeta RestaurantName="@order.RestaurantName"
+                         CreatedAt="@order.CreatedAt" />
     </div>
 
     <div class="row">
