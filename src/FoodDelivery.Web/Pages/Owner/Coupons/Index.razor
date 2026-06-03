@@ -209,7 +209,7 @@ else
         [System.ComponentModel.DataAnnotations.Range(1, 100, ErrorMessage = ValidationMessages.DiscountInvalid)]
         public decimal DiscountValue { get; set; }
 
-        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = ValidationMessages.ExpiresAtRequired)]
         public DateTime ExpiresAt { get; set; }
     }
 }

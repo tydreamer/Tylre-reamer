@@ -48,6 +48,7 @@ else
                 <div class="mb-3">
                     <label class="form-label">Cuisine</label>
                     <InputSelect class="form-select" @bind-Value="formModel.CuisineId">
+                        <option value="0">Select cuisine</option>
                         @foreach (var cuisine in cuisines!)
                         {
                             <option value="@cuisine.Id">@cuisine.Name</option>
@@ -110,10 +111,7 @@ else
         }
 
         if (IsNew)
-        {
-            formModel.CuisineId = cuisines[0].Id;
             return;
-        }
 
         model = await Restaurants.GetByIdAsync(Id!.Value);
         if (model is null)
@@ -178,21 +176,24 @@ else
 
     private class RestaurantFormModel
     {
-        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = ValidationMessages.NameRequired)]
+        [System.ComponentModel.DataAnnotations.MaxLength(100, ErrorMessage = ValidationMessages.NameTooLong)]
         public string Name { get; set; } = "";
 
-        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = ValidationMessages.DescriptionRequired)]
+        [System.ComponentModel.DataAnnotations.MaxLength(500, ErrorMessage = ValidationMessages.DescriptionTooLong)]
         public string Description { get; set; } = "";
 
+        [System.ComponentModel.DataAnnotations.MaxLength(500, ErrorMessage = ValidationMessages.ImageUrlTooLong)]
         public string ImageUrl { get; set; } = "";
 
-        [System.ComponentModel.DataAnnotations.Range(1, int.MaxValue)]
+        [System.ComponentModel.DataAnnotations.Range(1, int.MaxValue, ErrorMessage = ValidationMessages.CuisineRequired)]
         public int CuisineId { get; set; }
 
-        [System.ComponentModel.DataAnnotations.Range(-90, 90)]
+        [System.ComponentModel.DataAnnotations.Range(-90, 90, ErrorMessage = ValidationMessages.LatitudeInvalid)]
         public double Latitude { get; set; }
 
-        [System.ComponentModel.DataAnnotations.Range(-180, 180)]
+        [System.ComponentModel.DataAnnotations.Range(-180, 180, ErrorMessage = ValidationMessages.LongitudeInvalid)]
         public double Longitude { get; set; }
     }
 }

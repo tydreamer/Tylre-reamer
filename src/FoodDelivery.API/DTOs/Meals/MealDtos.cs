@@ -8,7 +8,7 @@ public record CreateMealRequest(
     [MaxLength(500, ErrorMessage = DescriptionTooLong)] string? Description,
     [MaxLength(500, ErrorMessage = ImageUrlTooLong)] string? ImageUrl,
     [Range(0.01, 100_000, ErrorMessage = PriceInvalid)] decimal Price,
-    [Required(ErrorMessage = MealTypeRequired)] int MealTypeId
+    [Range(1, int.MaxValue, ErrorMessage = MealTypeRequired)] int MealTypeId
 );
 
 public record UpdateMealRequest(
@@ -16,7 +16,7 @@ public record UpdateMealRequest(
     [MaxLength(500, ErrorMessage = DescriptionTooLong)] string? Description,
     [MaxLength(500, ErrorMessage = ImageUrlTooLong)] string? ImageUrl,
     [Range(0.01, 100_000, ErrorMessage = PriceInvalid)] decimal Price,
-    [Required(ErrorMessage = MealTypeRequired)] int MealTypeId
+    [Range(1, int.MaxValue, ErrorMessage = MealTypeRequired)] int MealTypeId
 );
 
 public record MealResponse(
