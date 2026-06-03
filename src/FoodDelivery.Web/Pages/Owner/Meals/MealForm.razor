@@ -3,6 +3,7 @@
 @attribute [Authorize(Roles = "Owner")]
 @inject RestaurantService Restaurants
 @inject MealService Meals
+@inject ImageUploadService ImageUpload
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Navigation
 
@@ -53,8 +54,12 @@ else
                     <FirstValidationMessage For="() => formModel.MealTypeId" />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Image URL</label>
-                    <InputText class="form-control" @bind-Value="formModel.ImageUrl" />
+                    <OwnerImageUpload Label="Image"
+                                      ExistingImageUrl="@formModel.ImageUrl"
+                                      Selection="imageSelection"
+                                      SelectionChanged="OnImageSelectionChanged"
+                                      PreviewAlt="@(string.IsNullOrWhiteSpace(formModel.Name) ? "Meal image" : formModel.Name)"
+                                      Disabled="@saving" />
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Price</label>
@@ -86,6 +91,7 @@ else
     private string? loadError;
     private string? submitError;
     private bool saving;
+    private ImageUploadSelection imageSelection = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -137,6 +143,12 @@ else
         };
     }
 
+    private Task OnImageSelectionChanged(ImageUploadSelection selection)
+    {
+        imageSelection = selection;
+        return Task.CompletedTask;
+    }
+
     private async Task HandleSubmit()
     {
         saving = true;
@@ -147,25 +159,46 @@ else
             var request = new MealCreateRequest(
                 formModel.Name,
                 formModel.Description,
-                formModel.ImageUrl,
+                "",
                 formModel.Price,
                 formModel.MealTypeId);
-            var (success, _, error) = await Meals.CreateAsync(RestaurantId, request);
-            saving = false;
+            var (success, created, error) = await Meals.CreateAsync(RestaurantId, request);
             if (!success)
             {
+                saving = false;
                 submitError = error ?? "Failed to create meal.";
                 return;
             }
 
+            if (created is not null && imageSelection.HasPendingUpload && imageSelection.PendingFile is not null)
+            {
+                var (uploaded, _, uploadError) = await ImageUpload.UploadMealImageAsync(
+                    RestaurantId, created.Id, imageSelection.PendingFile);
+                if (!uploaded)
+                {
+                    saving = false;
+                    submitError = uploadError ?? "Meal was created but the image could not be uploaded.";
+                    return;
+                }
+            }
+
+            saving = false;
             Navigation.NavigateTo($"owner/restaurants/{RestaurantId}/meals");
+            return;
+        }
+
+        var (imageUrl, imageError) = await ResolveMealImageUrlAsync(MealId!.Value);
+        if (imageError is not null)
+        {
+            saving = false;
+            submitError = imageError;
             return;
         }
 
         var updateRequest = new MealUpdateRequest(
             formModel.Name,
             formModel.Description,
-            formModel.ImageUrl,
+            imageUrl,
             formModel.Price,
             formModel.MealTypeId);
         var (updated, updateError) = await Meals.UpdateAsync(RestaurantId, MealId!.Value, updateRequest);
@@ -177,6 +210,22 @@ else
         }
 
         Navigation.NavigateTo($"owner/restaurants/{RestaurantId}/meals");
+    }
+
+    private async Task<(string ImageUrl, string? Error)> ResolveMealImageUrlAsync(int mealId)
+    {
+        if (imageSelection.ShouldClear)
+            return ("", null);
+
+        if (imageSelection.PendingFile is { } file)
+        {
+            var (uploaded, url, error) = await ImageUpload.UploadMealImageAsync(RestaurantId, mealId, file);
+            return uploaded
+                ? (url ?? "", null)
+                : ("", error ?? "Failed to upload image.");
+        }
+
+        return (formModel.ImageUrl, null);
     }
 
     private class MealFormModel
@@ -192,7 +241,6 @@ else
         [System.ComponentModel.DataAnnotations.Range(1, int.MaxValue, ErrorMessage = ValidationMessages.MealTypeRequired)]
         public int MealTypeId { get; set; }
 
-        [System.ComponentModel.DataAnnotations.MaxLength(500, ErrorMessage = ValidationMessages.ImageUrlTooLong)]
         public string ImageUrl { get; set; } = "";
 
         [System.ComponentModel.DataAnnotations.Range(0.01, 100_000, ErrorMessage = ValidationMessages.PriceInvalid)]

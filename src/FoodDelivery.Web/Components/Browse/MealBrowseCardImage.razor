@@ -1,3 +1,5 @@
+@inject IConfiguration Configuration
+
 <div class="meal-card-thumb">
     @if (ShowPlaceholder)
     {
@@ -8,7 +10,7 @@
     }
     @if (HasImage && !imageLoadFailed)
     {
-        <img src="@ImageUrl"
+        <img src="@ResolvedImageUrl"
              class="meal-card-thumb-img @(imageLoaded ? "is-loaded" : "")"
              alt="@Name"
              @onload="OnImageLoaded"
@@ -29,15 +31,19 @@
     [Parameter] public string? ImageUrl { get; set; }
     [Parameter] public string? RestaurantName { get; set; }
 
-    private bool HasImage => !string.IsNullOrWhiteSpace(ImageUrl);
+    private string ApiBaseUrl => Configuration["ApiBaseUrl"] ?? "";
+
+    private string? ResolvedImageUrl => MediaUrlHelper.Resolve(ImageUrl, ApiBaseUrl);
+
+    private bool HasImage => !string.IsNullOrWhiteSpace(ResolvedImageUrl);
 
     private bool ShowPlaceholder => !HasImage || imageLoadFailed || !imageLoaded;
 
     protected override void OnParametersSet()
     {
-        if (!string.Equals(previousImageUrl, ImageUrl, StringComparison.Ordinal))
+        if (!string.Equals(previousImageUrl, ResolvedImageUrl, StringComparison.Ordinal))
         {
-            previousImageUrl = ImageUrl;
+            previousImageUrl = ResolvedImageUrl;
             imageLoaded = false;
             imageLoadFailed = false;
         }

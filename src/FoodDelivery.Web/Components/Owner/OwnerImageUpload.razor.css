@@ -1,0 +1,14 @@
+.owner-image-upload-preview-img {
+    display: block;
+    max-width: 100%;
+    max-height: 220px;
+    width: auto;
+    object-fit: contain;
+    border-radius: 0.375rem;
+    border: 1px solid var(--bs-border-color);
+    background: var(--bs-secondary-bg);
+}
+
+.owner-image-upload-input {
+    max-width: 20rem;
+}

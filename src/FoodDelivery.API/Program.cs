@@ -1,7 +1,10 @@
 using System.Text;
 using FoodDelivery.API.Data;
 using FoodDelivery.API.Hubs;
+using FoodDelivery.API.Options;
+using FoodDelivery.API.Services.Images;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +22,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<GoogleAuthService>();
+builder.Services.Configure<ImageUploadOptions>(builder.Configuration.GetSection(ImageUploadOptions.SectionName));
+builder.Services.AddSingleton<IImageStorageService, LocalImageStorageService>();
 
 var googleClientId = builder.Configuration["Google:ClientId"];
 var googleClientSecret = builder.Configuration["Google:ClientSecret"];
@@ -123,6 +128,19 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+var uploadOptions = app.Configuration.GetSection(ImageUploadOptions.SectionName).Get<ImageUploadOptions>()
+    ?? new ImageUploadOptions();
+var uploadsRoot = Path.IsPathRooted(uploadOptions.RootPath)
+    ? uploadOptions.RootPath
+    : Path.Combine(app.Environment.ContentRootPath, uploadOptions.RootPath);
+Directory.CreateDirectory(uploadsRoot);
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uploadsRoot),
+    RequestPath = uploadOptions.PublicPathPrefix
+});
+
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();

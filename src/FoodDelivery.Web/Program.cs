@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using FoodDelivery.Web;
+using FoodDelivery.Web.Services.Images;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -26,5 +27,6 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<OrderNotificationService>();
 builder.Services.AddScoped<ToastService>();
 builder.Services.AddScoped<PaginatedPageLoadService>();
+builder.Services.AddScoped<ImageUploadService>();
 
 await builder.Build().RunAsync();

@@ -4,6 +4,7 @@
 @inject MealService Meals
 @inject CartService Cart
 @inject ToastService Toast
+@inject IConfiguration Configuration
 
 @if (restaurant is null)
 {
@@ -45,9 +46,9 @@ else
                     <div class="card h-100 shadow-sm meal-browse-card">
                         <a href="/meals/@meal.Id" class="text-decoration-none text-dark">
                             <div class="meal-card-thumb">
-                                @if (!string.IsNullOrWhiteSpace(meal.ImageUrl))
+                                @if (ResolveMealImage(meal.ImageUrl) is { } mealImageSrc)
                                 {
-                                    <img src="@meal.ImageUrl" class="meal-card-thumb-img" alt="@meal.Name" />
+                                    <img src="@mealImageSrc" class="meal-card-thumb-img" alt="@meal.Name" />
                                 }
                                 <span class="badge meal-restaurant-badge meal-card-truncate" title="@restaurant.Name">@restaurant.Name</span>
                             </div>
@@ -116,6 +117,9 @@ else
         restaurant = await Restaurants.GetByIdAsync(Id);
         meals = await Meals.GetByRestaurantAsync(Id);
     }
+
+    private string? ResolveMealImage(string? imageUrl) =>
+        MediaUrlHelper.Resolve(imageUrl, Configuration["ApiBaseUrl"] ?? "");
 
     private int GetQuantity(int mealId) =>
         quantities.TryGetValue(mealId, out var qty) ? qty : 1;

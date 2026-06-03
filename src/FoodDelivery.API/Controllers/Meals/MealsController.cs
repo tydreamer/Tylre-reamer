@@ -2,6 +2,7 @@ using System.Security.Claims;
 using FoodDelivery.API.Data;
 using FoodDelivery.API.Constants;
 using FoodDelivery.API.Models;
+using FoodDelivery.API.Services.Images;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,7 @@ namespace FoodDelivery.API.Controllers.Meals;
 
 [ApiController]
 [Route("api/restaurants/{restaurantId}/meals")]
-public class MealsController(AppDbContext db) : ControllerBase
+public class MealsController(AppDbContext db, IImageStorageService imageStorage) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAll(int restaurantId)
@@ -80,9 +81,9 @@ public class MealsController(AppDbContext db) : ControllerBase
         var meal = await db.Meals.FirstOrDefaultAsync(m => m.Id == id && m.RestaurantId == restaurantId);
         if (meal is null) return NotFound();
 
+        ApplyImageUrlChange(meal, req.ImageUrl);
         meal.Name = req.Name;
         meal.Description = req.Description ?? string.Empty;
-        meal.ImageUrl = req.ImageUrl ?? string.Empty;
         meal.Price = req.Price;
         meal.MealTypeId = req.MealTypeId;
         await db.SaveChangesAsync();
@@ -101,8 +102,18 @@ public class MealsController(AppDbContext db) : ControllerBase
         var meal = await db.Meals.FirstOrDefaultAsync(m => m.Id == id && m.RestaurantId == restaurantId);
         if (meal is null) return NotFound();
 
+        imageStorage.DeleteIfStored(meal.ImageUrl);
         db.Meals.Remove(meal);
         await db.SaveChangesAsync();
         return NoContent();
+    }
+
+    private void ApplyImageUrlChange(Meal meal, string? newImageUrl)
+    {
+        var next = newImageUrl ?? string.Empty;
+        if (!string.Equals(meal.ImageUrl, next, StringComparison.Ordinal))
+            imageStorage.DeleteIfStored(meal.ImageUrl);
+
+        meal.ImageUrl = next;
     }
 }

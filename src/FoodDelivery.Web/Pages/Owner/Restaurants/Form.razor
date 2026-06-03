@@ -2,6 +2,7 @@
 @page "/owner/restaurants/{Id:int}/edit"
 @attribute [Authorize(Roles = "Owner")]
 @inject RestaurantService Restaurants
+@inject ImageUploadService ImageUpload
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Navigation
 
@@ -41,9 +42,12 @@ else
                     <FirstValidationMessage For="() => formModel.Description" />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Image URL</label>
-                    <InputText class="form-control" @bind-Value="formModel.ImageUrl" />
-                    <FirstValidationMessage For="() => formModel.ImageUrl" />
+                    <OwnerImageUpload Label="Image"
+                                      ExistingImageUrl="@formModel.ImageUrl"
+                                      Selection="imageSelection"
+                                      SelectionChanged="OnImageSelectionChanged"
+                                      PreviewAlt="@(string.IsNullOrWhiteSpace(formModel.Name) ? "Restaurant image" : formModel.Name)"
+                                      Disabled="@saving" />
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Cuisine</label>
@@ -92,6 +96,7 @@ else
     private string? submitError;
     private bool saving;
     private int? ownerId;
+    private ImageUploadSelection imageSelection = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -137,31 +142,67 @@ else
         };
     }
 
+    private Task OnImageSelectionChanged(ImageUploadSelection selection)
+    {
+        imageSelection = selection;
+        return Task.CompletedTask;
+    }
+
     private async Task HandleSubmit()
     {
         saving = true;
         submitError = null;
-        var request = new RestaurantUpsertRequest(
-            formModel.Name,
-            formModel.Description,
-            formModel.ImageUrl,
-            formModel.CuisineId,
-            formModel.Latitude,
-            formModel.Longitude);
 
         if (IsNew)
         {
-            var (success, _, error) = await Restaurants.CreateAsync(request);
-            saving = false;
+            var createRequest = new RestaurantUpsertRequest(
+                formModel.Name,
+                formModel.Description,
+                "",
+                formModel.CuisineId,
+                formModel.Latitude,
+                formModel.Longitude);
+
+            var (success, created, error) = await Restaurants.CreateAsync(createRequest);
             if (!success)
             {
+                saving = false;
                 submitError = error ?? "Failed to create restaurant.";
                 return;
             }
 
+            if (created is not null && imageSelection.HasPendingUpload && imageSelection.PendingFile is not null)
+            {
+                var (uploaded, _, uploadError) = await ImageUpload.UploadRestaurantImageAsync(
+                    created.Id, imageSelection.PendingFile);
+                if (!uploaded)
+                {
+                    saving = false;
+                    submitError = uploadError ?? "Restaurant was created but the image could not be uploaded.";
+                    return;
+                }
+            }
+
+            saving = false;
             Navigation.NavigateTo("owner/restaurants");
             return;
         }
+
+        var (imageUrl, imageError) = await ResolveRestaurantImageUrlAsync(Id!.Value);
+        if (imageError is not null)
+        {
+            saving = false;
+            submitError = imageError;
+            return;
+        }
+
+        var request = new RestaurantUpsertRequest(
+            formModel.Name,
+            formModel.Description,
+            imageUrl,
+            formModel.CuisineId,
+            formModel.Latitude,
+            formModel.Longitude);
 
         var (updated, updateError) = await Restaurants.UpdateAsync(Id!.Value, request);
         saving = false;
@@ -174,6 +215,22 @@ else
         Navigation.NavigateTo("owner/restaurants");
     }
 
+    private async Task<(string ImageUrl, string? Error)> ResolveRestaurantImageUrlAsync(int restaurantId)
+    {
+        if (imageSelection.ShouldClear)
+            return ("", null);
+
+        if (imageSelection.PendingFile is { } file)
+        {
+            var (uploaded, url, error) = await ImageUpload.UploadRestaurantImageAsync(restaurantId, file);
+            return uploaded
+                ? (url ?? "", null)
+                : ("", error ?? "Failed to upload image.");
+        }
+
+        return (formModel.ImageUrl, null);
+    }
+
     private class RestaurantFormModel
     {
         [System.ComponentModel.DataAnnotations.Required(ErrorMessage = ValidationMessages.NameRequired)]
@@ -184,7 +241,6 @@ else
         [System.ComponentModel.DataAnnotations.MaxLength(500, ErrorMessage = ValidationMessages.DescriptionTooLong)]
         public string Description { get; set; } = "";
 
-        [System.ComponentModel.DataAnnotations.MaxLength(500, ErrorMessage = ValidationMessages.ImageUrlTooLong)]
         public string ImageUrl { get; set; } = "";
 
         [System.ComponentModel.DataAnnotations.Range(1, int.MaxValue, ErrorMessage = ValidationMessages.CuisineRequired)]
