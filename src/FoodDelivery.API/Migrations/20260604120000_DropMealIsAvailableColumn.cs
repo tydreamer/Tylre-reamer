@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FoodDelivery.API.Migrations;
 
 /// <inheritdoc />
-public partial class RemoveMealIsAvailable : Migration
+public partial class DropMealIsAvailableColumn : Migration
 {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
