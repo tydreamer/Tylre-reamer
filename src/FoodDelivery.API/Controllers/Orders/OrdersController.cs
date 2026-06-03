@@ -51,9 +51,20 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
             .Take(pageSize)
             .ToListAsync();
 
-        var responses = new List<OrderResponse>();
-        foreach (var item in items)
-            responses.Add(await MapToResponseAsync(item));
+        HashSet<int> blockedCustomerIds = [];
+        if (role == "Owner")
+        {
+            var customerIds = items.Select(o => o.CustomerId).Distinct().ToList();
+            blockedCustomerIds = (await db.OwnerCustomerBlocks
+                .Where(b => b.OwnerId == userId && customerIds.Contains(b.CustomerId))
+                .Select(b => b.CustomerId)
+                .ToListAsync())
+                .ToHashSet();
+        }
+
+        var responses = items
+            .Select(o => MapToResponse(o, blockedCustomerIds.Contains(o.CustomerId)))
+            .ToList();
 
         return Ok(new PagedResult<OrderResponse>(responses, totalCount, page, pageSize));
     }
@@ -72,7 +83,9 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
         if (order is null) return NotFound();
         if (!CanAccessOrder(order)) return Forbid();
 
-        return Ok(await MapToResponseAsync(order));
+        var blocked = CurrentUserRole == "Owner" &&
+            await CustomerBlockHelper.IsBlockedFromOwnerAsync(db, CurrentUserId, order.CustomerId);
+        return Ok(MapToResponse(order, blocked));
     }
 
     [HttpPost]
@@ -150,7 +163,7 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
         await hub.Clients.Group($"user-{restaurant.OwnerId}")
             .SendAsync("OrderStatusChanged", notification);
 
-        return CreatedAtAction(nameof(GetById), new { id = order.Id }, await MapToResponseAsync(created));
+        return CreatedAtAction(nameof(GetById), new { id = order.Id }, MapToResponse(created, false));
     }
 
     [HttpPut("{id}/status")]
@@ -247,17 +260,8 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
         };
     }
 
-    protected async Task<OrderResponse> MapToResponseAsync(Order o)
-    {
-        var blockedFromOwner = false;
-        if (CurrentUserRole == "Owner")
-        {
-            blockedFromOwner = await CustomerBlockHelper.IsBlockedFromOwnerAsync(
-                db, CurrentUserId, o.CustomerId);
-        }
-
-        return new OrderResponse(
-            o.Id,
+    protected OrderResponse MapToResponse(Order o, bool blockedFromOwner) =>
+        new(o.Id,
             o.CustomerId,
             o.Customer.Name,
             o.RestaurantId,
@@ -272,7 +276,6 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
             blockedFromOwner,
             o.Coupon?.Code,
             GetCouponDiscount(o));
-    }
 
     private static decimal? GetCouponDiscount(Order o)
     {
