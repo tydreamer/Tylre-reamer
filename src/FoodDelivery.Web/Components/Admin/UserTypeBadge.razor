@@ -1,0 +1,19 @@
+@switch (Role)
+{
+    case "Customer":
+        <span class="users-list-tag users-list-tag--customer">Regular User</span>
+        break;
+    case "Owner":
+        <span class="users-list-tag users-list-tag--owner">Restaurant Owner</span>
+        break;
+    case "Admin":
+        <span class="users-list-tag users-list-tag--admin">Administrator</span>
+        break;
+    default:
+        <span class="users-list-tag users-list-tag--admin">@Role</span>
+        break;
+}
+
+@code {
+    [Parameter, EditorRequired] public string Role { get; set; } = "";
+}

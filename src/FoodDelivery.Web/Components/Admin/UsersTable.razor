@@ -39,15 +39,17 @@ else
                     <tr>
                         <td title="@user.Name">@user.Name</td>
                         <td title="@user.Email">@user.Email</td>
-                        <td>@(user.Role == "Customer" ? "Regular User" : "Restaurant Owner")</td>
+                        <td class="col-user-type">
+                            <UserTypeBadge Role="@user.Role" />
+                        </td>
                         <td class="col-status text-center">
                             @if (user.IsBlocked)
                             {
-                                <span class="badge bg-danger">Blocked</span>
+                                <span class="users-list-tag users-list-tag--blocked">Blocked</span>
                             }
                             else
                             {
-                                <span class="badge bg-success">Active</span>
+                                <span class="users-list-tag users-list-tag--active">Active</span>
                             }
                         </td>
                         <td class="col-actions text-end text-nowrap">
