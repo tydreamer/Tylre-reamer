@@ -66,7 +66,13 @@ else
                         <td class="col-total text-end text-nowrap">@order.TotalPrice.ToString("C")</td>
                         <td class="col-status"><span class="badge @StatusClass(order.Status)">@order.Status</span></td>
                         <td class="col-actions text-end">
-                            <a href="owner/orders/@order.Id" class="btn btn-sm btn-outline-primary">View</a>
+                            <OwnerOrderRowActions Order="@order"
+                                                  MenuOpen="@(openActionsOrderId == order.Id)"
+                                                  MenuOpenChanged="@(open => SetActionsMenuOpen(order.Id, open))"
+                                                  Disabled="@listBusy"
+                                                  OnWorking="BeginListAction"
+                                                  OnCompleted="EndListAction"
+                                                  OnOrderUpdated="HandleOrderUpdatedAsync" />
                         </td>
                     </tr>
                 }
@@ -86,6 +92,8 @@ else
     private int pageSize = 20;
     private string sortBy = "date";
     private bool sortDesc = true;
+    private bool listBusy;
+    private int? openActionsOrderId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -95,8 +103,12 @@ else
 
     private async Task LoadPageAsync()
     {
+        openActionsOrderId = null;
         paged = await Orders.GetMyOrdersAsync(currentPage, pageSize, sortBy, sortDesc);
     }
+
+    private void SetActionsMenuOpen(int orderId, bool open) =>
+        openActionsOrderId = open ? orderId : null;
 
     private async Task ChangeSortAsync((string SortBy, bool SortDesc) sort)
     {
@@ -136,6 +148,24 @@ else
     private async Task RefreshAsync()
     {
         paged = await Orders.GetMyOrdersAsync(currentPage, pageSize, sortBy, sortDesc);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void BeginListAction() => listBusy = true;
+
+    private void EndListAction() => listBusy = false;
+
+    private async Task HandleOrderUpdatedAsync(OrderResponse updated)
+    {
+        if (paged is null)
+            return;
+
+        var items = paged.Items.ToList();
+        var index = items.FindIndex(o => o.Id == updated.Id);
+        if (index >= 0)
+            items[index] = updated;
+
+        paged = paged with { Items = items };
         await InvokeAsync(StateHasChanged);
     }
 

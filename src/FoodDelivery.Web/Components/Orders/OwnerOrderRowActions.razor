@@ -1,0 +1,171 @@
+@inject OrderService Orders
+@inject UserService Users
+
+<div class="owner-order-row-actions">
+    <a href="owner/orders/@Order.Id" class="btn btn-sm btn-outline-primary">View</a>
+    <div class="dropdown">
+        <button type="button"
+                class="btn btn-sm btn-outline-secondary owner-order-actions-toggle"
+                aria-label="Order actions"
+                aria-expanded="@MenuOpen"
+                disabled="@Disabled"
+                @onclick="ToggleMenuAsync">
+            <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
+        </button>
+        @if (MenuOpen)
+        {
+            <ul class="dropdown-menu dropdown-menu-end show owner-order-actions-menu">
+                @foreach (var action in OwnerOrderActionDefinitions.GetStatusActions(Order.Status))
+                {
+                    <li>
+                        <button type="button" class="dropdown-item"
+                                @onclick="() => OnStatusActionAsync(action.Status)">
+                            @action.Label
+                        </button>
+                    </li>
+                }
+                @if (Order.CustomerBlockedFromOwner)
+                {
+                    <li>
+                        <button type="button" class="dropdown-item"
+                                @onclick="UnblockCustomerAsync">
+                            Unblock customer
+                        </button>
+                    </li>
+                }
+                else
+                {
+                    <li>
+                        <button type="button" class="dropdown-item text-danger"
+                                @onclick="ShowBlockDialog">
+                            Block customer
+                        </button>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+</div>
+
+@if (actionError is not null)
+{
+    <div class="alert alert-danger py-2 mt-2 mb-0">@actionError</div>
+}
+
+<ConfirmDialog @bind-IsVisible="showCancelDialog"
+               Title="Cancel order"
+               Message="Are you sure you want to cancel this order? This cannot be undone."
+               ConfirmText="Cancel order"
+               CancelText="Keep order"
+               ConfirmButtonClass="btn-danger"
+               OnConfirmed="CancelOrderConfirmedAsync" />
+
+<ConfirmDialog @bind-IsVisible="showBlockDialog"
+               Title="Block customer"
+               Message="@($"Block {Order.CustomerName} from ordering at your restaurants? They can still sign in and order elsewhere.")"
+               ConfirmText="Block customer"
+               CancelText="Cancel"
+               ConfirmButtonClass="btn-danger"
+               OnConfirmed="BlockCustomerConfirmedAsync" />
+
+@code {
+    [Parameter, EditorRequired] public OrderResponse Order { get; set; } = default!;
+    [Parameter] public bool MenuOpen { get; set; }
+    [Parameter] public EventCallback<bool> MenuOpenChanged { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public EventCallback OnWorking { get; set; }
+    [Parameter] public EventCallback OnCompleted { get; set; }
+    [Parameter, EditorRequired] public EventCallback<OrderResponse> OnOrderUpdated { get; set; }
+
+    private bool showCancelDialog;
+    private bool showBlockDialog;
+    private string? actionError;
+
+    private Task ToggleMenuAsync() => MenuOpenChanged.InvokeAsync(!MenuOpen);
+
+    private Task CloseMenuAsync() => MenuOpen ? MenuOpenChanged.InvokeAsync(false) : Task.CompletedTask;
+
+    private async Task OnStatusActionAsync(string status)
+    {
+        await CloseMenuAsync();
+        if (status == "Cancelled")
+        {
+            showCancelDialog = true;
+            return;
+        }
+
+        await UpdateStatusAsync(status);
+    }
+
+    private async Task CancelOrderConfirmedAsync()
+    {
+        await CloseMenuAsync();
+        await UpdateStatusAsync("Cancelled");
+    }
+
+    private async Task UpdateStatusAsync(string status)
+    {
+        await SetBusyAsync(true);
+        actionError = null;
+        var (success, err) = await Orders.UpdateStatusAsync(Order.Id, status);
+        if (success)
+        {
+            var updated = await Orders.GetByIdAsync(Order.Id);
+            if (updated is not null)
+                await OnOrderUpdated.InvokeAsync(updated);
+        }
+        else
+        {
+            actionError = err;
+        }
+
+        await SetBusyAsync(false);
+    }
+
+    private async Task ShowBlockDialog()
+    {
+        await CloseMenuAsync();
+        showBlockDialog = true;
+    }
+
+    private async Task BlockCustomerConfirmedAsync()
+    {
+        await SetBusyAsync(true);
+        actionError = null;
+        var (success, err) = await Users.BlockAsync(Order.CustomerId);
+        await SetBusyAsync(false);
+
+        if (!success)
+        {
+            actionError = err ?? "Failed to block customer.";
+            return;
+        }
+
+        await OnOrderUpdated.InvokeAsync(Order with { CustomerBlockedFromOwner = true });
+    }
+
+    private async Task UnblockCustomerAsync()
+    {
+        await CloseMenuAsync();
+        await SetBusyAsync(true);
+        actionError = null;
+        var (success, err) = await Users.UnblockAsync(Order.CustomerId);
+        await SetBusyAsync(false);
+
+        if (!success)
+        {
+            actionError = err ?? "Failed to unblock customer.";
+            return;
+        }
+
+        await OnOrderUpdated.InvokeAsync(Order with { CustomerBlockedFromOwner = false });
+    }
+
+    private async Task SetBusyAsync(bool value)
+    {
+        if (value)
+            await OnWorking.InvokeAsync();
+        else
+            await OnCompleted.InvokeAsync();
+    }
+}

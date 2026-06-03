@@ -1,0 +1,19 @@
+.owner-order-row-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.25rem;
+}
+
+.owner-order-row-actions .dropdown {
+    position: relative;
+}
+
+.owner-order-actions-menu {
+    display: block;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    z-index: 20;
+    margin-top: 0.125rem;
+}
