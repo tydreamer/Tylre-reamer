@@ -699,7 +699,7 @@ a.btn.btn-sm.table-icon-btn .bi {
     white-space: nowrap;
 }
 
-/* Customer browse: search + filters on one row (global — pierces scoped child CSS) */
+/* Customer browse: search + filters toolbar */
 .browse-toolbar-row {
     display: flex;
     flex-direction: row;
@@ -716,6 +716,7 @@ a.btn.btn-sm.table-icon-btn .bi {
 }
 
 .browse-toolbar-row > .browse-search .browse-search-input {
+    flex-wrap: nowrap;
     max-width: none;
     width: 100%;
 }
@@ -723,14 +724,29 @@ a.btn.btn-sm.table-icon-btn .bi {
 .browse-toolbar-row > .browse-multi-filter {
     flex: 0 0 18rem;
     width: 18rem;
+    max-width: 100%;
 }
 
 .browse-toolbar-row .browse-multi-filter.input-group {
     flex-wrap: nowrap;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
     .browse-toolbar-row {
-        flex-wrap: wrap;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .browse-toolbar-row > .browse-search {
+        flex: none;
+        width: 100%;
+    }
+
+    .browse-toolbar-row > .browse-multi-filter {
+        flex: none;
+        width: 100%;
+        max-width: none;
     }
 }

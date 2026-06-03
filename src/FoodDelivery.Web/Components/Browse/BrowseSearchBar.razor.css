@@ -1,5 +1,12 @@
+.browse-search {
+    width: 100%;
+    min-width: 0;
+}
+
 .browse-search-input {
-    max-width: 32rem;
+    flex-wrap: nowrap;
+    width: 100%;
+    max-width: none;
 }
 
 .browse-search-input:focus-within .input-group-text,

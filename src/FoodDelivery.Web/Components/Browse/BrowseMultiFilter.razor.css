@@ -3,6 +3,7 @@
     flex-wrap: nowrap;
     width: 18rem;
     flex: 0 0 18rem;
+    max-width: 100%;
 }
 
 .browse-multi-filter .browse-filter-label {
@@ -83,4 +84,11 @@
 
 .browse-multi-filter-option:hover {
     background: var(--bs-tertiary-bg);
+}
+
+@media (max-width: 767.98px) {
+    .browse-multi-filter {
+        width: 100%;
+        flex: 1 1 100%;
+    }
 }
