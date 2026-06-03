@@ -10,12 +10,12 @@
 
 <div class="row g-4">
     <div class="col-md-4">
-        <CreateUserForm @key="createFormKey" Error="error" Busy="busy" OnCreate="CreateUserAsync" />
+        <CreateUserForm @key="createFormKey" Error="@error" Busy="@busy" OnCreate="CreateUserAsync" />
     </div>
 
     <div class="col-md-8">
-        <UsersTable Paged="paged" Busy="busy"
-                    CurrentPage="currentPage" PageSize="pageSize"
+        <UsersTable Paged="@paged" Busy="@busy"
+                    CurrentPage="@currentPage" PageSize="@pageSize"
                     OnPageChanged="GoToPage" OnPageSizeChanged="ChangePageSize"
                     OnRequestBlock="RequestBlock" OnUnblock="UnblockAsync" />
     </div>

@@ -81,8 +81,8 @@ else
     </div>
     </PaginatedPageContent>
 
-    <PaginationBar CurrentPage="currentPage" TotalPages="paged.TotalPages"
-                   TotalCount="paged.TotalCount" PageSize="pageSize"
+    <PaginationBar CurrentPage="@currentPage" TotalPages="paged.TotalPages"
+                   TotalCount="paged.TotalCount" PageSize="@pageSize"
                    PageSizeOptions="BrowsePageSizeOptions"
                    OnPageChanged="GoToPage" OnPageSizeChanged="ChangePageSize" />
 }

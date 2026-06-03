@@ -40,7 +40,7 @@ else
             <div class="d-md-none vstack gap-3 mb-3 mb-md-0">
                 @foreach (var item in Cart.Items)
                 {
-                    <CartItemCard Item="item"
+                    <CartItemCard Item="@item"
                                   OnDecrease="@(() => DecreaseQuantity(item.Meal.Id, item.Quantity))"
                                   OnIncrease="@(() => IncreaseQuantity(item.Meal.Id, item.Quantity))"
                                   OnRemove="@(() => RemoveItem(item.Meal.Id))" />
@@ -54,20 +54,20 @@ else
         </div>
 
         <div class="col-md-5">
-            <CartCheckoutPanel CouponCode="couponCode"
+            <CartCheckoutPanel CouponCode="@couponCode"
                                OnCouponInput="OnCouponInput"
                                OnCouponFieldFinished="OnCouponFieldFinishedAsync"
                                OnCouponKeyDown="OnCouponKeyDownAsync"
-                               ValidatingCoupon="validatingCoupon"
-                               Tip="tip"
+                               ValidatingCoupon="@validatingCoupon"
+                               Tip="@tip"
                                OnTipInput="OnTipInput"
-                               CouponSuccessMessage="couponSuccessMessage"
-                               CouponError="couponError"
-                               HasAppliedCoupon="HasAppliedCoupon"
-                               OriginalTotal="OriginalTotal"
-                               FinalTotal="FinalTotal"
-                               CheckoutError="checkoutError"
-                               Placing="placing"
+                               CouponSuccessMessage="@couponSuccessMessage"
+                               CouponError="@couponError"
+                               HasAppliedCoupon="@HasAppliedCoupon"
+                               OriginalTotal="@OriginalTotal"
+                               FinalTotal="@FinalTotal"
+                               CheckoutError="@checkoutError"
+                               Placing="@placing"
                                OnCheckout="CheckoutAsync" />
         </div>
     </div>
