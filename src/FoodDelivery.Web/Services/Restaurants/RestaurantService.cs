@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using FoodDelivery.Web.Helpers;
 
 namespace FoodDelivery.Web.Services.Restaurants;
 
@@ -8,15 +9,13 @@ public class RestaurantService(HttpClient http)
         int page = 1,
         int pageSize = 12,
         int? ownerId = null,
-        string? search = null)
+        string? search = null,
+        IEnumerable<int>? cuisineIds = null)
     {
-        var url = $"api/restaurants?page={page}&pageSize={pageSize}";
-        if (ownerId.HasValue)
-            url += $"&ownerId={ownerId.Value}";
-        if (!string.IsNullOrWhiteSpace(search))
-            url += $"&search={Uri.EscapeDataString(search.Trim())}";
+        var url = BrowseQueryHelper.BuildPagedUrl(
+            "api/restaurants", page, pageSize, search, cuisineIds, "cuisineIds", ownerId);
 
-        return await http.GetFromJsonAsync<PagedResult<RestaurantDto>>(url);
+        return await http.GetBrowseJsonAsync<PagedResult<RestaurantDto>>(url);
     }
 
     public async Task<RestaurantDto?> GetByIdAsync(int id)

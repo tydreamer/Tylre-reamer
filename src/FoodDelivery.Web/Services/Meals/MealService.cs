@@ -1,16 +1,20 @@
 using System.Net.Http.Json;
+using FoodDelivery.Web.Helpers;
 
 namespace FoodDelivery.Web.Services.Meals;
 
 public class MealService(HttpClient http)
 {
-    public async Task<PagedResult<MealBrowseDto>?> GetPageAsync(int page = 1, int pageSize = 12, string? search = null)
+    public async Task<PagedResult<MealBrowseDto>?> GetPageAsync(
+        int page = 1,
+        int pageSize = 12,
+        string? search = null,
+        IEnumerable<int>? mealTypeIds = null)
     {
-        var url = $"api/meals?page={page}&pageSize={pageSize}";
-        if (!string.IsNullOrWhiteSpace(search))
-            url += $"&search={Uri.EscapeDataString(search.Trim())}";
+        var url = BrowseQueryHelper.BuildPagedUrl(
+            "api/meals", page, pageSize, search, mealTypeIds, "mealTypeIds");
 
-        return await http.GetFromJsonAsync<PagedResult<MealBrowseDto>>(url);
+        return await http.GetBrowseJsonAsync<PagedResult<MealBrowseDto>>(url);
     }
 
     public async Task<MealBrowseDto?> GetBrowseByIdAsync(int mealId)

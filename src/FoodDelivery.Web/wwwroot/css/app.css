@@ -698,3 +698,39 @@ a.btn.btn-sm.table-icon-btn .bi {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+/* Customer browse: search + filters on one row (global — pierces scoped child CSS) */
+.browse-toolbar-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.browse-toolbar-row > .browse-search {
+    flex: 1 1 0;
+    min-width: 0;
+    margin-bottom: 0;
+}
+
+.browse-toolbar-row > .browse-search .browse-search-input {
+    max-width: none;
+    width: 100%;
+}
+
+.browse-toolbar-row > .browse-multi-filter {
+    flex: 0 0 18rem;
+    width: 18rem;
+}
+
+.browse-toolbar-row .browse-multi-filter.input-group {
+    flex-wrap: nowrap;
+}
+
+@media (max-width: 768px) {
+    .browse-toolbar-row {
+        flex-wrap: wrap;
+    }
+}

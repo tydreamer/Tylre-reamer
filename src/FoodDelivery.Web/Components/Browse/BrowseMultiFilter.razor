@@ -1,0 +1,73 @@
+<div class="input-group browse-multi-filter">
+    <span class="input-group-text browse-filter-label">@Label</span>
+    <button type="button" class="form-control browse-multi-filter-trigger"
+            aria-expanded="@menuOpen" aria-haspopup="listbox" @onclick="ToggleMenu">
+        <span class="browse-multi-filter-summary">@SummaryText</span>
+        @if (SelectedIds.Count > 0)
+        {
+            <span class="browse-multi-filter-icon" role="button" tabindex="-1"
+                  aria-label="@($"Clear {Label}")" title="Clear"
+                  @onclick="ClearAsync" @onclick:stopPropagation="true">
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
+            </span>
+        }
+        else
+        {
+            <i class="bi bi-chevron-down browse-multi-filter-icon" aria-hidden="true"></i>
+        }
+    </button>
+    @if (menuOpen)
+    {
+        <div class="browse-multi-filter-backdrop" @onclick="CloseMenu"></div>
+        <div class="browse-multi-filter-menu shadow" role="listbox" aria-label="@Label">
+            @foreach (var option in Options)
+            {
+                <label class="browse-multi-filter-option" role="option">
+                    <input type="checkbox" class="form-check-input me-2"
+                           checked="@IsSelected(option.Id)"
+                           @onchange="e => ToggleOptionAsync(option.Id, e)" />
+                    <span>@option.Name</span>
+                </label>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private bool menuOpen;
+
+    [Parameter] public string Label { get; set; } = "Filter";
+    [Parameter] public string EmptySummary { get; set; } = "All";
+    [Parameter] public IReadOnlyList<BrowseFilterOption> Options { get; set; } = [];
+    [Parameter] public IReadOnlyCollection<int> SelectedIds { get; set; } = [];
+    [Parameter] public EventCallback<IReadOnlyCollection<int>> SelectedIdsChanged { get; set; }
+
+    private string SummaryText =>
+        SelectedIds.Count == 0 ? EmptySummary : $"{SelectedIds.Count} selected";
+
+    private bool IsSelected(int id) => SelectedIds.Contains(id);
+
+    private void ToggleMenu() => menuOpen = !menuOpen;
+
+    private void CloseMenu() => menuOpen = false;
+
+    private async Task ToggleOptionAsync(int id, ChangeEventArgs e)
+    {
+        var next = SelectedIds.ToHashSet();
+        if (e.Value is bool isChecked && isChecked)
+            next.Add(id);
+        else
+            next.Remove(id);
+
+        await SelectedIdsChanged.InvokeAsync(next);
+    }
+
+    private async Task ClearAsync()
+    {
+        if (SelectedIds.Count == 0)
+            return;
+
+        await SelectedIdsChanged.InvokeAsync([]);
+        CloseMenu();
+    }
+}

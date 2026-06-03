@@ -9,7 +9,17 @@
 
 <h1 class="mb-4">Meals</h1>
 
-<BrowseSearchBar @bind-SearchTerm="searchTerm" OnSearch="ApplySearchAsync" />
+<BrowseToolbar>
+    <BrowseSearchBar @bind-SearchTerm="searchTerm" OnSearch="ApplyFiltersAsync"
+                     Placeholder="Search by name, description, or meal type..." />
+    @if (mealTypeFilterOptions.Count > 0)
+    {
+        <BrowseMultiFilter Label="Meal type" EmptySummary="All types"
+                           Options="mealTypeFilterOptions"
+                           SelectedIds="selectedMealTypeIds"
+                           SelectedIdsChanged="OnMealTypeFilterChangedAsync" />
+    }
+</BrowseToolbar>
 
 @if (paged is null)
 {
@@ -18,7 +28,7 @@
 else if (paged.TotalCount == 0)
 {
     <div class="alert alert-info">
-        @(HasActiveSearch ? "No meals match your search." : "No meals available yet.")
+        @(HasActiveFilters ? "No meals match your search or filters." : "No meals available yet.")
     </div>
 }
 else
@@ -93,6 +103,8 @@ else
     private int currentPage = 1;
     private int pageSize = 12;
     private string searchTerm = "";
+    private HashSet<int> selectedMealTypeIds = [];
+    private IReadOnlyList<BrowseFilterOption> mealTypeFilterOptions = [];
     private static readonly int[] BrowsePageSizeOptions = [12, 24, 48];
     private readonly Dictionary<int, int> quantities = new();
     private int? addingMealId;
@@ -101,11 +113,16 @@ else
     private int pendingQuantity;
     private string switchRestaurantDialogMessage = "";
 
-    private bool HasActiveSearch => !string.IsNullOrWhiteSpace(searchTerm);
+    private bool HasActiveFilters =>
+        !string.IsNullOrWhiteSpace(searchTerm) || selectedMealTypeIds.Count > 0;
 
     protected override async Task OnInitializedAsync()
     {
         await Cart.InitializeAsync();
+        var mealTypes = await Meals.GetMealTypesAsync();
+        mealTypeFilterOptions = mealTypes
+            .Select(t => new BrowseFilterOption(t.Id, t.Name))
+            .ToList();
         await LoadPageAsync();
     }
 
@@ -173,15 +190,26 @@ else
         new(meal.Id, meal.Name, meal.Description, meal.ImageUrl, meal.Price,
             meal.RestaurantId, meal.MealTypeId, meal.MealTypeName);
 
-    private async Task ApplySearchAsync()
+    private async Task ApplyFiltersAsync()
     {
         currentPage = 1;
         await LoadPageAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnMealTypeFilterChangedAsync(IReadOnlyCollection<int> ids)
+    {
+        selectedMealTypeIds = ids.ToHashSet();
+        await ApplyFiltersAsync();
     }
 
     private async Task LoadPageAsync()
     {
-        paged = await Meals.GetPageAsync(currentPage, pageSize, searchTerm);
+        IEnumerable<int>? mealTypeIds = selectedMealTypeIds.Count > 0 ? selectedMealTypeIds : null;
+        paged = null;
+        await InvokeAsync(StateHasChanged);
+
+        paged = await Meals.GetPageAsync(currentPage, pageSize, searchTerm, mealTypeIds);
     }
 
     private async Task GoToPage(int page)

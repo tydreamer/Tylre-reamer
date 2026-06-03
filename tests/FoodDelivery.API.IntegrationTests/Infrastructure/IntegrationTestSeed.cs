@@ -57,7 +57,9 @@ public static class IntegrationTestSeed
             });
 
         db.Cuisines.Add(new Cuisine { Id = 1, Name = "Italian" });
-        db.MealTypes.Add(new MealType { Id = 1, Name = "Main" });
+        db.MealTypes.AddRange(
+            new MealType { Id = 1, Name = "Main" },
+            new MealType { Id = 2, Name = "Dessert" });
 
         db.Restaurants.Add(new Restaurant
         {
@@ -70,15 +72,25 @@ public static class IntegrationTestSeed
             Longitude = -74.0
         });
 
-        db.Meals.Add(new Meal
-        {
-            Id = IntegrationTestIds.AvailableMealId,
-            Name = "Burger",
-            Description = "Tasty",
-            Price = 10m,
-            MealTypeId = 1,
-            RestaurantId = IntegrationTestIds.RestaurantId
-        });
+        db.Meals.AddRange(
+            new Meal
+            {
+                Id = IntegrationTestIds.AvailableMealId,
+                Name = "Burger",
+                Description = "Tasty",
+                Price = 10m,
+                MealTypeId = 1,
+                RestaurantId = IntegrationTestIds.RestaurantId
+            },
+            new Meal
+            {
+                Id = 101,
+                Name = "Cake",
+                Description = "Sweet",
+                Price = 6m,
+                MealTypeId = 2,
+                RestaurantId = IntegrationTestIds.RestaurantId
+            });
 
         db.Coupons.AddRange(
             new Coupon

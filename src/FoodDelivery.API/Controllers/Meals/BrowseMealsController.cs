@@ -12,7 +12,8 @@ public class BrowseMealsController(AppDbContext db) : ControllerBase
     public async Task<IActionResult> GetAll(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 12,
-        [FromQuery] string? search = null)
+        [FromQuery] string? search = null,
+        [FromQuery] int[]? mealTypeIds = null)
     {
         if (page < 1) page = 1;
         if (pageSize < 1 || pageSize > 100) pageSize = 12;
@@ -29,6 +30,13 @@ public class BrowseMealsController(AppDbContext db) : ControllerBase
                 EF.Functions.ILike(m.Name, term) ||
                 EF.Functions.ILike(m.Description, term) ||
                 EF.Functions.ILike(m.MealType.Name, term));
+        }
+
+        if (mealTypeIds is { Length: > 0 })
+        {
+            var ids = mealTypeIds.Where(id => id > 0).Distinct().ToArray();
+            if (ids.Length > 0)
+                query = query.Where(m => ids.Contains(m.MealTypeId));
         }
 
         var totalCount = await query.CountAsync();

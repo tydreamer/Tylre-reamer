@@ -17,7 +17,8 @@ public class RestaurantsController(AppDbContext db) : ControllerBase
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 12,
         [FromQuery] int? ownerId = null,
-        [FromQuery] string? search = null)
+        [FromQuery] string? search = null,
+        [FromQuery] int[]? cuisineIds = null)
     {
         if (page < 1) page = 1;
         if (pageSize < 1 || pageSize > 100) pageSize = 12;
@@ -37,6 +38,13 @@ public class RestaurantsController(AppDbContext db) : ControllerBase
                 EF.Functions.ILike(r.Name, term) ||
                 EF.Functions.ILike(r.Description, term) ||
                 EF.Functions.ILike(r.Cuisine.Name, term));
+        }
+
+        if (cuisineIds is { Length: > 0 })
+        {
+            var ids = cuisineIds.Where(id => id > 0).Distinct().ToArray();
+            if (ids.Length > 0)
+                query = query.Where(r => ids.Contains(r.CuisineId));
         }
 
         var totalCount = await query.CountAsync();

@@ -7,7 +7,17 @@
 
 <h1 class="mb-4">Restaurants</h1>
 
-<BrowseSearchBar @bind-SearchTerm="searchTerm" OnSearch="ApplySearchAsync" />
+<BrowseToolbar>
+    <BrowseSearchBar @bind-SearchTerm="searchTerm" OnSearch="ApplyFiltersAsync"
+                     Placeholder="Search by name, description, or cuisine..." />
+    @if (cuisineFilterOptions.Count > 0)
+    {
+        <BrowseMultiFilter Label="Cuisine" EmptySummary="All cuisines"
+                           Options="cuisineFilterOptions"
+                           SelectedIds="selectedCuisineIds"
+                           SelectedIdsChanged="OnCuisineFilterChangedAsync" />
+    }
+</BrowseToolbar>
 
 @if (paged is null)
 {
@@ -16,7 +26,7 @@
 else if (paged.TotalCount == 0)
 {
     <div class="alert alert-info">
-        @(HasActiveSearch ? "No restaurants match your search." : "No restaurants available yet.")
+        @(HasActiveFilters ? "No restaurants match your search or filters." : "No restaurants available yet.")
     </div>
 }
 else
@@ -58,24 +68,43 @@ else
     private int currentPage = 1;
     private int pageSize = 12;
     private string searchTerm = "";
+    private HashSet<int> selectedCuisineIds = [];
+    private IReadOnlyList<BrowseFilterOption> cuisineFilterOptions = [];
     private static readonly int[] BrowsePageSizeOptions = [12, 24, 48];
 
-    private bool HasActiveSearch => !string.IsNullOrWhiteSpace(searchTerm);
+    private bool HasActiveFilters =>
+        !string.IsNullOrWhiteSpace(searchTerm) || selectedCuisineIds.Count > 0;
 
     protected override async Task OnInitializedAsync()
     {
+        var cuisines = await Restaurants.GetCuisinesAsync();
+        cuisineFilterOptions = cuisines
+            .Select(c => new BrowseFilterOption(c.Id, c.Name))
+            .ToList();
         await LoadPageAsync();
     }
 
-    private async Task ApplySearchAsync()
+    private async Task ApplyFiltersAsync()
     {
         currentPage = 1;
         await LoadPageAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnCuisineFilterChangedAsync(IReadOnlyCollection<int> ids)
+    {
+        selectedCuisineIds = ids.ToHashSet();
+        await ApplyFiltersAsync();
     }
 
     private async Task LoadPageAsync()
     {
-        paged = await Restaurants.GetPageAsync(currentPage, pageSize, search: searchTerm);
+        IEnumerable<int>? cuisineIds = selectedCuisineIds.Count > 0 ? selectedCuisineIds : null;
+        paged = null;
+        await InvokeAsync(StateHasChanged);
+
+        paged = await Restaurants.GetPageAsync(
+            currentPage, pageSize, search: searchTerm, cuisineIds: cuisineIds);
     }
 
     private async Task GoToPage(int page)
