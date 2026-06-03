@@ -26,4 +26,4 @@ public record ResetPasswordRequest(
     [Required(ErrorMessage = PasswordRequired), MinLength(6, ErrorMessage = PasswordTooShort), MaxLength(100, ErrorMessage = PasswordTooLong)] string NewPassword
 );
 
-public record ForgotPasswordResponse(string Message, string? ResetUrl = null);
+public record ForgotPasswordResponse(string Message, string? DeliveryNote = null);

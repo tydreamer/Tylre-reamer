@@ -39,14 +39,17 @@ public class AuthService(HttpClient http, IJSRuntime js, AuthenticationStateProv
         ((JwtAuthStateProvider)authStateProvider).NotifyUserLoggedOut();
     }
 
-    public async Task<(bool Success, string Message, string? ResetUrl)> ForgotPasswordAsync(string email)
+    public async Task<(bool Success, string Message, string? DeliveryNote)> ForgotPasswordAsync(string email)
     {
         var response = await http.PostAsJsonAsync("api/auth/forgot-password", new { Email = email });
         if (!response.IsSuccessStatusCode)
             return (false, "Unable to process your request. Please try again.", null);
 
         var result = await response.Content.ReadFromJsonAsync<ForgotPasswordResponse>();
-        return (true, result?.Message ?? "If an account exists for this email, you will receive password reset instructions.", result?.ResetUrl);
+        return (
+            true,
+            result?.Message ?? "If an account exists for this email, you will receive password reset instructions. Check your inbox and spam folder.",
+            result?.DeliveryNote);
     }
 
     public async Task<(bool Success, string? Error)> ResetPasswordAsync(string token, string newPassword)
@@ -59,4 +62,4 @@ public class AuthService(HttpClient http, IJSRuntime js, AuthenticationStateProv
     }
 }
 
-public record ForgotPasswordResponse(string Message, string? ResetUrl);
+public record ForgotPasswordResponse(string Message, string? DeliveryNote);

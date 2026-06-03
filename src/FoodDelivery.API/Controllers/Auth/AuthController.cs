@@ -1,5 +1,7 @@
 using FoodDelivery.API.Data;
+using FoodDelivery.API.Helpers.Users;
 using FoodDelivery.API.Models;
+using FoodDelivery.API.Services.Email;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,10 +14,11 @@ public class AuthController(
     IConfiguration config,
     IWebHostEnvironment env,
     ILogger<AuthController> logger,
-    JwtTokenService jwtTokens) : ControllerBase
+    JwtTokenService jwtTokens,
+    IEmailSender emailSender) : ControllerBase
 {
     private const string ForgotPasswordMessage =
-        "If an account exists for this email, you will receive password reset instructions.";
+        "If an account exists for this email, you will receive password reset instructions. Check your inbox and spam folder.";
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequest req)
     {
@@ -64,10 +67,11 @@ public class AuthController(
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest req)
     {
-        var user = await db.Users.FirstOrDefaultAsync(u => u.Email == req.Email);
-        string? resetUrl = null;
+        var normalizedEmail = UserEmailNormalizer.Normalize(req.Email);
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
+        string? deliveryNote = null;
 
-        if (user is not null && !user.IsBlocked)
+        if (user is not null && !user.IsBlocked && user.GoogleSubjectId is null)
         {
             var existing = await db.PasswordResetTokens.Where(t => t.UserId == user.Id).ToListAsync();
             db.PasswordResetTokens.RemoveRange(existing);
@@ -82,14 +86,22 @@ public class AuthController(
             await db.SaveChangesAsync();
 
             var webBaseUrl = config["App:WebBaseUrl"] ?? "http://localhost:5196";
-            resetUrl = $"{webBaseUrl.TrimEnd('/')}/reset-password?token={token}";
-            logger.LogInformation("Password reset link for {Email}: {ResetUrl}", user.Email, resetUrl);
+            var resetUrl = $"{webBaseUrl.TrimEnd('/')}/reset-password?token={token}";
+
+            try
+            {
+                await emailSender.SendPasswordResetAsync(user.Email, user.Name, resetUrl);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to send password reset email to {Email}", user.Email);
+                if (env.IsDevelopment())
+                    deliveryNote =
+                        "SendGrid failed to send the reset email. Verify ApiKey and a verified sender/domain in appsettings.";
+            }
         }
 
-        if (env.IsDevelopment())
-            return Ok(new ForgotPasswordResponse(ForgotPasswordMessage, resetUrl));
-
-        return Ok(new ForgotPasswordResponse(ForgotPasswordMessage));
+        return Ok(new ForgotPasswordResponse(ForgotPasswordMessage, deliveryNote));
     }
 
     [HttpPost("reset-password")]

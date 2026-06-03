@@ -2,6 +2,7 @@ using System.Text;
 using FoodDelivery.API.Data;
 using FoodDelivery.API.Hubs;
 using FoodDelivery.API.Options;
+using FoodDelivery.API.Services.Email;
 using FoodDelivery.API.Services.Images;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.FileProviders;
@@ -24,6 +25,8 @@ builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<GoogleAuthService>();
 builder.Services.Configure<ImageUploadOptions>(builder.Configuration.GetSection(ImageUploadOptions.SectionName));
 builder.Services.AddSingleton<IImageStorageService, LocalImageStorageService>();
+builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection(EmailOptions.SectionName));
+builder.Services.AddSingleton<IEmailSender, SendGridEmailSender>();
 
 var googleClientId = builder.Configuration["Google:ClientId"];
 var googleClientSecret = builder.Configuration["Google:ClientSecret"];
