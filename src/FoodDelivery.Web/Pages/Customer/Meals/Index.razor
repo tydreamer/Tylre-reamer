@@ -14,7 +14,7 @@
                      Placeholder="Search by name, description, or meal type..." />
     @if (mealTypeFilterOptions.Count > 0)
     {
-        <BrowseMultiFilter Label="Meal type" EmptySummary="All types"
+        <BrowseMultiFilter Label="Meal type"
                            Options="mealTypeFilterOptions"
                            SelectedIds="selectedMealTypeIds"
                            SelectedIdsChanged="OnMealTypeFilterChangedAsync" />
@@ -28,7 +28,14 @@
 else if (paged.TotalCount == 0)
 {
     <EmptyState Icon="bi bi-fork-knife"
-                Message="@(HasActiveFilters ? "No meals match your search or filters." : "No meals available yet.")" />
+                Message="@(HasActiveFilters ? "No meals match your search or filters." : "No meals available yet.")">
+        @if (HasActiveFilters)
+        {
+            <button type="button" class="btn btn-primary" @onclick="ClearFiltersAsync">
+                Browse all meals
+            </button>
+        }
+    </EmptyState>
 }
 else
 {
@@ -200,6 +207,15 @@ else
     {
         selectedMealTypeIds = ids.ToHashSet();
         await ApplyFiltersAsync();
+    }
+
+    private async Task ClearFiltersAsync()
+    {
+        searchTerm = "";
+        selectedMealTypeIds = [];
+        currentPage = 1;
+        await LoadPageAsync();
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task LoadPageAsync()

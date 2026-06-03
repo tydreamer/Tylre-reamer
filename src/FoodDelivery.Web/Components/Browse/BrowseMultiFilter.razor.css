@@ -1,15 +1,8 @@
 .browse-multi-filter {
     position: relative;
-    flex-wrap: nowrap;
     width: 18rem;
     flex: 0 0 18rem;
     max-width: 100%;
-}
-
-.browse-multi-filter .browse-filter-label {
-    flex-shrink: 0;
-    font-weight: 500;
-    white-space: nowrap;
 }
 
 .browse-multi-filter-trigger {
@@ -17,9 +10,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 0.35rem;
-    flex: 1 1 auto;
-    min-width: 0;
-    width: 1%;
+    width: 100%;
     padding-right: 0.65rem;
     text-align: left;
     cursor: pointer;
@@ -32,7 +23,6 @@
     outline: none;
 }
 
-.browse-multi-filter:focus-within .input-group-text,
 .browse-multi-filter:focus-within .browse-multi-filter-trigger {
     border-color: var(--bs-primary);
 }
@@ -43,6 +33,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.browse-multi-filter-summary--placeholder {
+    color: var(--bs-secondary-color);
 }
 
 .browse-multi-filter-icon {

@@ -851,10 +851,6 @@ a.btn.btn-sm.table-icon-btn .bi {
     max-width: 100%;
 }
 
-.browse-toolbar-row .browse-multi-filter.input-group {
-    flex-wrap: nowrap;
-}
-
 @media (max-width: 767.98px) {
     .browse-toolbar-row {
         flex-direction: column;

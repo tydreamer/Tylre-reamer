@@ -12,7 +12,7 @@
                      Placeholder="Search by name, description, or cuisine..." />
     @if (cuisineFilterOptions.Count > 0)
     {
-        <BrowseMultiFilter Label="Cuisine" EmptySummary="All cuisines"
+        <BrowseMultiFilter Label="Cuisine"
                            Options="cuisineFilterOptions"
                            SelectedIds="selectedCuisineIds"
                            SelectedIdsChanged="OnCuisineFilterChangedAsync" />
@@ -26,7 +26,14 @@
 else if (paged.TotalCount == 0)
 {
     <EmptyState Icon="bi bi-shop"
-                Message="@(HasActiveFilters ? "No restaurants match your search or filters." : "No restaurants available yet.")" />
+                Message="@(HasActiveFilters ? "No restaurants match your search or filters." : "No restaurants available yet.")">
+        @if (HasActiveFilters)
+        {
+            <button type="button" class="btn btn-primary" @onclick="ClearFiltersAsync">
+                Browse all restaurants
+            </button>
+        }
+    </EmptyState>
 }
 else
 {
@@ -90,6 +97,15 @@ else
     {
         selectedCuisineIds = ids.ToHashSet();
         await ApplyFiltersAsync();
+    }
+
+    private async Task ClearFiltersAsync()
+    {
+        searchTerm = "";
+        selectedCuisineIds = [];
+        currentPage = 1;
+        await LoadPageAsync();
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task LoadPageAsync()

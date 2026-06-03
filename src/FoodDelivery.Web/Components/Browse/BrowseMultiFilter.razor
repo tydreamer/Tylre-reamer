@@ -1,8 +1,13 @@
-<div class="input-group browse-multi-filter">
-    <span class="input-group-text browse-filter-label">@Label</span>
-    <button type="button" class="form-control browse-multi-filter-trigger"
-            aria-expanded="@menuOpen" aria-haspopup="listbox" @onclick="ToggleMenu">
-        <span class="browse-multi-filter-summary">@SummaryText</span>
+<div class="browse-multi-filter">
+    <button type="button"
+            class="form-control browse-multi-filter-trigger"
+            aria-expanded="@menuOpen"
+            aria-haspopup="listbox"
+            aria-label="@Label"
+            @onclick="ToggleMenu">
+        <span class="browse-multi-filter-summary @(IsPlaceholder ? "browse-multi-filter-summary--placeholder" : null)">
+            @SummaryText
+        </span>
         @if (SelectedIds.Count > 0)
         {
             <span class="browse-multi-filter-icon" role="button" tabindex="-1"
@@ -37,13 +42,33 @@
     private bool menuOpen;
 
     [Parameter] public string Label { get; set; } = "Filter";
-    [Parameter] public string EmptySummary { get; set; } = "All";
     [Parameter] public IReadOnlyList<BrowseFilterOption> Options { get; set; } = [];
     [Parameter] public IReadOnlyCollection<int> SelectedIds { get; set; } = [];
     [Parameter] public EventCallback<IReadOnlyCollection<int>> SelectedIdsChanged { get; set; }
 
-    private string SummaryText =>
-        SelectedIds.Count == 0 ? EmptySummary : $"{SelectedIds.Count} selected";
+    private bool IsPlaceholder => SelectedIds.Count == 0;
+
+    private string SummaryText
+    {
+        get
+        {
+            if (SelectedIds.Count == 0)
+                return Label;
+
+            var selectedNames = Options
+                .Where(o => SelectedIds.Contains(o.Id))
+                .Select(o => o.Name)
+                .ToList();
+
+            if (selectedNames.Count == 0)
+                return Label;
+
+            if (selectedNames.Count == 1)
+                return selectedNames[0];
+
+            return $"{selectedNames[0]} +{selectedNames.Count - 1}";
+        }
+    }
 
     private bool IsSelected(int id) => SelectedIds.Contains(id);
 
