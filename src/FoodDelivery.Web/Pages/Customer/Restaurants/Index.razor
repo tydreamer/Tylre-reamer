@@ -38,11 +38,7 @@ else
             <div class="col">
                 <a href="restaurants/@restaurant.Id" class="text-decoration-none text-dark">
                     <div class="card h-100 shadow-sm restaurant-card meal-browse-card">
-                        @if (!string.IsNullOrWhiteSpace(restaurant.ImageUrl))
-                        {
-                            <img src="@restaurant.ImageUrl" class="card-img-top" alt="@restaurant.Name"
-                                 style="height: 180px; object-fit: cover;" />
-                        }
+                        <RestaurantCardImage Name="@restaurant.Name" ImageUrl="@restaurant.ImageUrl" />
                         <div class="card-body">
                             <div class="meal-card-title-row mb-1">
                                 <h5 class="card-title mb-0 meal-card-truncate" title="@restaurant.Name">@restaurant.Name</h5>

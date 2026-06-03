@@ -1,0 +1,45 @@
+.restaurant-card-thumb {
+    position: relative;
+    height: 180px;
+    background-color: var(--bs-secondary-bg);
+    overflow: hidden;
+}
+
+.restaurant-card-thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.restaurant-card-thumb-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    height: 100%;
+    padding: 1rem;
+    text-align: center;
+    color: var(--bs-secondary-color);
+    background: linear-gradient(
+        180deg,
+        var(--bs-secondary-bg) 0%,
+        var(--bs-tertiary-bg) 100%);
+}
+
+.restaurant-card-thumb-icon {
+    font-size: 2.5rem;
+    opacity: 0.65;
+}
+
+.restaurant-card-thumb-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 1.3;
+    max-width: 100%;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
