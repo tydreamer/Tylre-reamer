@@ -109,7 +109,7 @@
 
     private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        await Cart.RefreshFromStorageAsync();
+        await Cart.RefreshAsync();
         await InvokeAsync(StateHasChanged);
     }
 

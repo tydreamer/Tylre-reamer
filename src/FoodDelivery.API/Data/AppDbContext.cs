@@ -15,6 +15,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<OrderStatusHistory> OrderStatusHistories => Set<OrderStatusHistory>();
     public DbSet<Coupon> Coupons => Set<Coupon>();
+    public DbSet<Cart> Carts => Set<Cart>();
+    public DbSet<CartItem> CartItems => Set<CartItem>();
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -103,6 +105,38 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasOne(t => t.User)
             .WithMany()
             .HasForeignKey(t => t.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Cart>()
+            .HasIndex(c => c.CustomerId)
+            .IsUnique();
+
+        modelBuilder.Entity<Cart>()
+            .HasOne(c => c.Customer)
+            .WithMany()
+            .HasForeignKey(c => c.CustomerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Cart>()
+            .HasOne(c => c.Restaurant)
+            .WithMany()
+            .HasForeignKey(c => c.RestaurantId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<CartItem>()
+            .HasIndex(i => new { i.CartId, i.MealId })
+            .IsUnique();
+
+        modelBuilder.Entity<CartItem>()
+            .HasOne(i => i.Cart)
+            .WithMany(c => c.Items)
+            .HasForeignKey(i => i.CartId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CartItem>()
+            .HasOne(i => i.Meal)
+            .WithMany()
+            .HasForeignKey(i => i.MealId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -11,7 +11,9 @@ public static class IntegrationTestIds
     public const int GloballyBlockedCustomerId = 4;
 
     public const int RestaurantId = 10;
+    public const int OtherRestaurantId = 11;
     public const int AvailableMealId = 100;
+    public const int OtherRestaurantMealId = 102;
 
     public const string ValidCouponCode = "SAVE10";
     public const string ExpiredCouponCode = "OLD";
@@ -61,16 +63,27 @@ public static class IntegrationTestSeed
             new MealType { Id = 1, Name = "Main" },
             new MealType { Id = 2, Name = "Dessert" });
 
-        db.Restaurants.Add(new Restaurant
-        {
-            Id = IntegrationTestIds.RestaurantId,
-            Name = "Test Bistro",
-            Description = "Integration test restaurant",
-            CuisineId = 1,
-            OwnerId = IntegrationTestIds.OwnerId,
-            Latitude = 40.7,
-            Longitude = -74.0
-        });
+        db.Restaurants.AddRange(
+            new Restaurant
+            {
+                Id = IntegrationTestIds.RestaurantId,
+                Name = "Test Bistro",
+                Description = "Integration test restaurant",
+                CuisineId = 1,
+                OwnerId = IntegrationTestIds.OwnerId,
+                Latitude = 40.7,
+                Longitude = -74.0
+            },
+            new Restaurant
+            {
+                Id = IntegrationTestIds.OtherRestaurantId,
+                Name = "Other Place",
+                Description = "Second test restaurant",
+                CuisineId = 1,
+                OwnerId = IntegrationTestIds.OwnerId,
+                Latitude = 40.8,
+                Longitude = -74.1
+            });
 
         db.Meals.AddRange(
             new Meal
@@ -90,6 +103,15 @@ public static class IntegrationTestSeed
                 Price = 6m,
                 MealTypeId = 2,
                 RestaurantId = IntegrationTestIds.RestaurantId
+            },
+            new Meal
+            {
+                Id = IntegrationTestIds.OtherRestaurantMealId,
+                Name = "Pasta",
+                Description = "From other restaurant",
+                Price = 12m,
+                MealTypeId = 1,
+                RestaurantId = IntegrationTestIds.OtherRestaurantId
             });
 
         db.Coupons.AddRange(

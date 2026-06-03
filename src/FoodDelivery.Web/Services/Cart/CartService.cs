@@ -1,5 +1,7 @@
-using System.Text.Json;
-using Microsoft.JSInterop;
+using System.Net.Http.Json;
+using FoodDelivery.Web.Extensions;
+using FoodDelivery.Web.Models.Cart;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace FoodDelivery.Web.Services.Cart;
 
@@ -10,19 +12,11 @@ public class CartItem(MealDto meal, int quantity)
     public decimal LineTotal => Meal.Price * Quantity;
 }
 
-public class CartService(IJSRuntime js) : IAsyncDisposable
+public class CartService(HttpClient http, AuthenticationStateProvider authStateProvider) : IDisposable
 {
-    private const string StorageKey = "cart";
-
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        PropertyNameCaseInsensitive = true
-    };
-
     private readonly Dictionary<int, CartItem> items = new();
-    private DotNetObjectReference<CartService>? selfRef;
     private bool listenerRegistered;
+    private int? currentUserId;
 
     public int? RestaurantId { get; private set; }
     public string? RestaurantName { get; private set; }
@@ -39,17 +33,17 @@ public class CartService(IJSRuntime js) : IAsyncDisposable
 
     public async Task InitializeAsync()
     {
+        await UpdateUserContextAsync();
         await LoadAsync();
 
         if (listenerRegistered)
             return;
 
         listenerRegistered = true;
-        selfRef = DotNetObjectReference.Create(this);
-        await js.InvokeVoidAsync("cartSync.register", selfRef);
+        authStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
     }
 
-    public async Task RefreshFromStorageAsync()
+    public async Task RefreshAsync()
     {
         await LoadAsync();
         OnChange?.Invoke();
@@ -57,140 +51,141 @@ public class CartService(IJSRuntime js) : IAsyncDisposable
 
     public async Task AddAsync(MealDto meal, string restaurantName, int quantity = 1)
     {
-        if (quantity <= 0)
+        if (quantity <= 0 || currentUserId is null)
             return;
 
         if (HasItemsFromDifferentRestaurant(meal.RestaurantId))
             return;
 
-        RestaurantId = meal.RestaurantId;
-        RestaurantName = restaurantName;
+        var response = await http.PostAsJsonAsync(
+            "api/cart/items",
+            new AddCartItemRequest(meal.Id, quantity));
 
-        if (items.TryGetValue(meal.Id, out var existing))
-            existing.Quantity += quantity;
-        else
-            items[meal.Id] = new CartItem(meal, quantity);
-
-        await NotifyAndPersistAsync();
+        await ApplyResponseAsync(response);
     }
 
     public async Task SetQuantityAsync(int mealId, int quantity)
     {
-        if (!items.TryGetValue(mealId, out var item))
+        if (currentUserId is null)
             return;
 
-        if (quantity <= 0)
-            items.Remove(mealId);
-        else
-            item.Quantity = quantity;
+        var response = await http.PutAsJsonAsync(
+            $"api/cart/items/{mealId}",
+            new SetCartItemQuantityRequest(quantity));
 
-        if (items.Count == 0)
-            ClearRestaurant();
-
-        await NotifyAndPersistAsync();
+        await ApplyResponseAsync(response);
     }
 
     public async Task RemoveAsync(int mealId)
     {
-        items.Remove(mealId);
+        if (currentUserId is null)
+            return;
 
-        if (items.Count == 0)
-            ClearRestaurant();
-
-        await NotifyAndPersistAsync();
+        var response = await http.DeleteAsync($"api/cart/items/{mealId}");
+        await ApplyResponseAsync(response);
     }
 
     public async Task ClearAsync()
     {
-        ClearItems();
-        await NotifyAndPersistAsync();
+        if (currentUserId is null)
+        {
+            ClearItems();
+            OnChange?.Invoke();
+            return;
+        }
+
+        var response = await http.DeleteAsync("api/cart");
+        await ApplyResponseAsync(response);
     }
 
-    [JSInvokable]
-    public async Task OnCartChangedExternally()
+    private async void OnAuthenticationStateChanged(Task<AuthenticationState> authStateTask)
     {
+        try
+        {
+            var authState = await authStateTask;
+            if (!await UpdateUserContextAsync(authState))
+                return;
+
+            await LoadAsync();
+            OnChange?.Invoke();
+        }
+        catch
+        {
+            // Ignore auth/cart sync failures during sign-in/out transitions.
+        }
+    }
+
+    private async Task<bool> UpdateUserContextAsync(AuthenticationState? authState = null)
+    {
+        authState ??= await authStateProvider.GetAuthenticationStateAsync();
+        var userId = authState.User.GetUserId();
+
+        if (userId == currentUserId)
+            return false;
+
+        currentUserId = userId;
+        return true;
+    }
+
+    private async Task LoadAsync()
+    {
+        await UpdateUserContextAsync();
+        ClearItems();
+
+        if (currentUserId is null)
+            return;
+
+        try
+        {
+            var cart = await http.GetFromJsonAsync<CartDto>("api/cart");
+            if (cart is not null)
+                ApplyCart(cart);
+        }
+        catch
+        {
+            ClearItems();
+        }
+    }
+
+    private async Task<bool> ApplyResponseAsync(HttpResponseMessage response)
+    {
+        if (response.IsSuccessStatusCode)
+        {
+            var cart = await response.Content.ReadFromJsonAsync<CartDto>();
+            ApplyCart(cart ?? new CartDto(null, null, []));
+            OnChange?.Invoke();
+            return true;
+        }
+
         await LoadAsync();
         OnChange?.Invoke();
+        return false;
+    }
+
+    private void ApplyCart(CartDto cart)
+    {
+        ClearItems();
+        RestaurantId = cart.RestaurantId;
+        RestaurantName = cart.RestaurantName;
+
+        foreach (var item in cart.Items)
+        {
+            if (item.Quantity <= 0)
+                continue;
+
+            items[item.Meal.Id] = new CartItem(item.Meal, item.Quantity);
+        }
     }
 
     private void ClearItems()
     {
         items.Clear();
-        ClearRestaurant();
-    }
-
-    private void ClearRestaurant()
-    {
         RestaurantId = null;
         RestaurantName = null;
     }
 
-    private async Task NotifyAndPersistAsync()
+    public void Dispose()
     {
-        await SaveAsync();
-        OnChange?.Invoke();
+        authStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
     }
-
-    private async Task LoadAsync()
-    {
-        try
-        {
-            var json = await js.InvokeAsync<string?>("localStorage.getItem", StorageKey);
-
-            items.Clear();
-            ClearRestaurant();
-
-            if (string.IsNullOrWhiteSpace(json))
-                return;
-
-            var stored = JsonSerializer.Deserialize<StoredCart>(json, JsonOptions);
-            if (stored?.Items is null || stored.Items.Count == 0)
-                return;
-
-            RestaurantId = stored.RestaurantId;
-            RestaurantName = stored.RestaurantName;
-
-            foreach (var item in stored.Items)
-            {
-                if (item.Meal is null || item.Quantity <= 0)
-                    continue;
-
-                items[item.Meal.Id] = new CartItem(item.Meal, item.Quantity);
-            }
-        }
-        catch (JsonException)
-        {
-            items.Clear();
-            ClearRestaurant();
-            await js.InvokeVoidAsync("localStorage.removeItem", StorageKey);
-        }
-    }
-
-    private async Task SaveAsync()
-    {
-        if (items.Count == 0)
-        {
-            await js.InvokeVoidAsync("localStorage.removeItem", StorageKey);
-            return;
-        }
-
-        var stored = new StoredCart(
-            RestaurantId,
-            RestaurantName,
-            items.Values.Select(i => new StoredItem(i.Meal, i.Quantity)).ToList());
-
-        await js.InvokeVoidAsync(
-            "localStorage.setItem",
-            StorageKey,
-            JsonSerializer.Serialize(stored, JsonOptions));
-    }
-
-    public ValueTask DisposeAsync()
-    {
-        selfRef?.Dispose();
-        return ValueTask.CompletedTask;
-    }
-
-    private record StoredItem(MealDto Meal, int Quantity);
-    private record StoredCart(int? RestaurantId, string? RestaurantName, List<StoredItem> Items);
 }
