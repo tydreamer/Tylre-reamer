@@ -4,6 +4,8 @@
 @inject OrderService Orders
 @inject OrderNotificationService Notifications
 @inject PaginatedPageLoadService PageLoad
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <PageTitle>Orders</PageTitle>
 
@@ -51,7 +53,7 @@ else
                                          CurrentSortBy="@sortBy" SortDesc="@sortDesc" OnSortChanged="ChangeSortAsync" />
                     <SortableTableHeader ColumnKey="total" Label="Total" Class="col-total text-end"
                                          CurrentSortBy="@sortBy" SortDesc="@sortDesc" OnSortChanged="ChangeSortAsync" />
-                    <SortableTableHeader ColumnKey="status" Label="Status" Class="col-status"
+                    <SortableTableHeader ColumnKey="status" Label="Status" Class="col-status text-center"
                                          CurrentSortBy="@sortBy" SortDesc="@sortDesc" OnSortChanged="ChangeSortAsync" />
                     <th class="col-actions"></th>
                 </tr>
@@ -59,7 +61,13 @@ else
             <tbody>
                 @foreach (var order in paged.Items)
                 {
-                    <tr>
+                    <tr class="orders-list-row"
+                        role="button"
+                        tabindex="0"
+                        aria-label="@($"View order #{order.Id}")"
+                        @onmousedown="e => RowNav.OnPointerDown(e, order.Id)"
+                        @onmouseup="e => RowNav.OnPointerUpAsync(e, NavigateToOrder)"
+                        @onkeydown="e => OnRowKeyDown(e, order.Id)">
                         <td>#@order.Id</td>
                         <td>@order.RestaurantName</td>
                         <td>@order.CustomerName</td>
@@ -70,7 +78,7 @@ else
                         <td class="text-nowrap">@order.CreatedAt.ToLocalTime().ToString("g")</td>
                         <td class="col-total text-end text-nowrap">@order.TotalPrice.ToString("C")</td>
                         <td class="col-status"><span class="badge @StatusClass(order.Status)">@order.Status</span></td>
-                        <td class="col-actions text-end">
+                        <td class="col-actions text-end" @onclick:stopPropagation="true">
                             <OwnerOrderRowActions Order="@order"
                                                   MenuOpen="@(openActionsOrderId == order.Id)"
                                                   MenuOpenChanged="@(open => SetActionsMenuOpen(order.Id, open))"
@@ -99,6 +107,10 @@ else
     private bool sortDesc = true;
     private bool listBusy;
     private int? openActionsOrderId;
+    private ClickableRowNavigator RowNav = null!;
+
+    protected override void OnInitialized() =>
+        RowNav = new ClickableRowNavigator(JS);
 
     protected override async Task OnInitializedAsync()
     {
@@ -116,6 +128,14 @@ else
         openActionsOrderId = open ? orderId : null;
 
     private void CloseActionsMenu() => openActionsOrderId = null;
+
+    private void NavigateToOrder(int orderId) => Navigation.NavigateTo($"owner/orders/{orderId}");
+
+    private void OnRowKeyDown(KeyboardEventArgs e, int orderId)
+    {
+        if (e.Key is "Enter" or " ")
+            NavigateToOrder(orderId);
+    }
 
     private async Task ChangeSortAsync((string SortBy, bool SortDesc) sort)
     {

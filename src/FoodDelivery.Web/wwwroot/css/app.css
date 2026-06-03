@@ -588,6 +588,11 @@ a.btn.btn-sm.table-icon-btn .bi {
     max-width: 100%;
 }
 
+.orders-list-table th.text-center .sortable-th {
+    width: 100%;
+    justify-content: center;
+}
+
 .orders-list-table th.text-end .sortable-th {
     width: 100%;
     justify-content: flex-end;
@@ -617,18 +622,51 @@ a.btn.btn-sm.table-icon-btn .bi {
     padding-right: 1.25rem;
 }
 
-.orders-list-table .col-status {
-    padding-left: 0.75rem;
+.orders-list-table--owner th.col-status,
+.orders-list-table--owner td.col-status {
+    text-align: center;
 }
 
-/* Customer: Id | Restaurant | Items | Order Date | Total | Status | View */
+.orders-list-table--owner th.col-status .sortable-th {
+    width: 100%;
+    justify-content: center;
+}
+
+.orders-list-table--customer th.col-status,
+.orders-list-table--customer td.col-status {
+    text-align: center;
+}
+
+.orders-list-table--customer th.col-status .sortable-th {
+    width: 100%;
+    justify-content: center;
+}
+
+.orders-list-table tbody tr.orders-list-row {
+    cursor: pointer;
+}
+
+.orders-list-table tbody tr.orders-list-row > td {
+    transition: background-color 0.15s ease;
+    user-select: text;
+}
+
+.orders-list-table tbody tr.orders-list-row:hover > td {
+    background-color: #f1f3f4;
+}
+
+.orders-list-table tbody tr.orders-list-row:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: -2px;
+}
+
+/* Customer: Id | Restaurant | Items | Order Date | Total | Status */
 .orders-list-table--customer .col-id { width: 5rem; }
 .orders-list-table--customer .col-restaurant { width: 11rem; }
-.orders-list-table--customer .col-items { width: 36%; }
+.orders-list-table--customer .col-items { width: 40%; }
 .orders-list-table--customer .col-date { width: 11rem; }
 .orders-list-table--customer .col-total { width: 7rem; }
 .orders-list-table--customer .col-status { width: 8.5rem; }
-.orders-list-table--customer .col-actions { width: 4.75rem; }
 
 /* Owner: adds Customer column */
 .orders-list-table--owner .col-id { width: 5rem; }
@@ -638,7 +676,7 @@ a.btn.btn-sm.table-icon-btn .bi {
 .orders-list-table--owner .col-date { width: 11rem; }
 .orders-list-table--owner .col-total { width: 7rem; }
 .orders-list-table--owner .col-status { width: 8.5rem; }
-.orders-list-table--owner .col-actions { width: 4.75rem; }
+.orders-list-table--owner .col-actions { width: 3.25rem; }
 
 .owner-order-block-notice {
     margin-top: 1.25rem;

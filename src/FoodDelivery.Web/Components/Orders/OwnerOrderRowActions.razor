@@ -2,8 +2,7 @@
 @inject UserService Users
 @inject ToastService Toast
 
-<div class="owner-order-row-actions">
-    <a href="owner/orders/@Order.Id" class="btn btn-sm btn-outline-primary">View</a>
+<div class="owner-order-row-actions" @onclick:stopPropagation="true">
     <div class="dropdown">
         <button type="button"
                 class="btn btn-sm btn-outline-secondary owner-order-actions-toggle"

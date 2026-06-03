@@ -67,7 +67,7 @@ else
                                     <button type="button"
                                             class="btn btn-sm btn-outline-danger table-icon-btn"
                                             title="Remove"
-                                            aria-label="@($"Remove coupon {coupon.Code}")"
+                                            aria-label="@($"Remove coupon {DisplayTextHelper.TruncateWithEllipsis(coupon.Code)}")"
                                             disabled="@(removingId == coupon.Id)"
                                             @onclick="() => RequestRemove(coupon)">
                                         @if (removingId == coupon.Id)
@@ -137,7 +137,8 @@ else
     private void RequestRemove(CouponDto coupon)
     {
         pendingRemoveCouponId = coupon.Id;
-        removeDialogMessage = $"Remove coupon \"{coupon.Code}\"? This cannot be undone.";
+        var code = DisplayTextHelper.TruncateWithEllipsis(coupon.Code);
+        removeDialogMessage = $"Remove coupon \"{code}\"? This cannot be undone.";
         showRemoveDialog = true;
     }
 
