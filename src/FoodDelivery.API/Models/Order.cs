@@ -15,6 +15,7 @@ public class Order
     public int? CouponId { get; set; }
     public Coupon? Coupon { get; set; }
     public decimal TotalPrice { get; set; }
+    public decimal DiscountAmount { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public ICollection<OrderStatusHistory> StatusHistory { get; set; } = [];
 }

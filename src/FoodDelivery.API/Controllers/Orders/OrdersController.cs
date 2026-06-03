@@ -129,6 +129,7 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub, OrderP
             Tip = req.Tip,
             CouponId = priced.Coupon?.Id,
             TotalPrice = priced.Total,
+            DiscountAmount = priced.Discount,
             Items = req.Items.Select(i => new OrderItem
             {
                 MealId = i.MealId,
@@ -270,14 +271,5 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub, OrderP
                 .Select(h => new OrderStatusHistoryResponse(h.Status.ToString(), h.ChangedAt)).ToList(),
             blockedFromOwner,
             o.Coupon?.Code,
-            GetCouponDiscount(o));
-
-    private static decimal? GetCouponDiscount(Order o)
-    {
-        if (o.Coupon is null)
-            return null;
-
-        var subtotal = o.Items.Sum(i => i.UnitPrice * i.Quantity);
-        return Math.Max(0, subtotal - (o.TotalPrice - o.Tip));
-    }
+            o.Coupon is null ? null : (decimal?)o.DiscountAmount);
 }
