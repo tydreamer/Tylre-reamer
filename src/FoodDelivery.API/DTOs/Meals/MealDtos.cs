@@ -16,7 +16,6 @@ public record UpdateMealRequest(
     [MaxLength(500, ErrorMessage = DescriptionTooLong)] string? Description,
     [MaxLength(500, ErrorMessage = ImageUrlTooLong)] string? ImageUrl,
     [Range(0.01, 100_000, ErrorMessage = PriceInvalid)] decimal Price,
-    bool IsAvailable,
     [Required(ErrorMessage = MealTypeRequired)] int MealTypeId
 );
 
@@ -26,7 +25,6 @@ public record MealResponse(
     string Description,
     string ImageUrl,
     decimal Price,
-    bool IsAvailable,
     int RestaurantId,
     int MealTypeId,
     string MealTypeName);
@@ -37,7 +35,6 @@ public record MealBrowseResponse(
     string Description,
     string ImageUrl,
     decimal Price,
-    bool IsAvailable,
     int RestaurantId,
     string RestaurantName,
     int MealTypeId,

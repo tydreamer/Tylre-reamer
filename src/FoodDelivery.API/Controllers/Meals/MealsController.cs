@@ -84,7 +84,6 @@ public class MealsController(AppDbContext db) : ControllerBase
         meal.Description = req.Description ?? string.Empty;
         meal.ImageUrl = req.ImageUrl ?? string.Empty;
         meal.Price = req.Price;
-        meal.IsAvailable = req.IsAvailable;
         meal.MealTypeId = req.MealTypeId;
         await db.SaveChangesAsync();
         return NoContent();

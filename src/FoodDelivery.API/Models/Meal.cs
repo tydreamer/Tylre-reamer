@@ -11,7 +11,6 @@ public class Meal
     [MaxLength(500)]
     public string ImageUrl { get; set; } = string.Empty;
     public decimal Price { get; set; }
-    public bool IsAvailable { get; set; } = true;
     public int MealTypeId { get; set; }
     public MealType MealType { get; set; } = null!;
     public int RestaurantId { get; set; }

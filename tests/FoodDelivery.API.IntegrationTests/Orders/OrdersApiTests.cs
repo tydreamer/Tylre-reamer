@@ -60,18 +60,19 @@ public class OrdersApiTests(CustomWebApplicationFactory factory)
     }
 
     [Fact]
-    public async Task PlaceOrder_UnavailableMeal_ReturnsBadRequest()
+    public async Task PlaceOrder_InvalidMeal_ReturnsBadRequest()
     {
         var client = factory.CreateClient().AsUser(factory, IntegrationTestIds.CustomerId);
 
+        const int invalidMealId = 9999;
         var response = await client.PostAsJsonAsync("api/orders", new PlaceOrderRequest(
             IntegrationTestIds.RestaurantId,
-            [new OrderItemRequest(IntegrationTestIds.UnavailableMealId, 1)],
+            [new OrderItemRequest(invalidMealId, 1)],
             Tip: 0m,
             CouponCode: null));
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        (await response.ReadBodyAsync()).Should().Be("One or more meals are invalid or unavailable.");
+        (await response.ReadBodyAsync()).Should().Be("One or more meals are invalid.");
     }
 
     [Fact]

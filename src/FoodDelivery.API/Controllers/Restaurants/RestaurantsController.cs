@@ -24,6 +24,7 @@ public class RestaurantsController(AppDbContext db) : ControllerBase
 
         var query = db.Restaurants
             .Include(r => r.Cuisine)
+            .Include(r => r.Owner)
             .AsQueryable();
 
         if (ownerId.HasValue)
@@ -54,6 +55,7 @@ public class RestaurantsController(AppDbContext db) : ControllerBase
     {
         var restaurant = await db.Restaurants
             .Include(r => r.Cuisine)
+            .Include(r => r.Owner)
             .FirstOrDefaultAsync(r => r.Id == id);
 
         if (restaurant is null) return NotFound();
@@ -83,6 +85,7 @@ public class RestaurantsController(AppDbContext db) : ControllerBase
         await db.SaveChangesAsync();
 
         await db.Entry(restaurant).Reference(r => r.Cuisine).LoadAsync();
+        await db.Entry(restaurant).Reference(r => r.Owner).LoadAsync();
 
         return CreatedAtAction(nameof(GetById), new { id = restaurant.Id },
             RestaurantMapper.ToResponse(restaurant));

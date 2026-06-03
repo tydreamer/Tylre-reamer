@@ -61,13 +61,6 @@ else
                     <InputNumber class="form-control" @bind-Value="formModel.Price" />
                     <FirstValidationMessage For="() => formModel.Price" />
                 </div>
-                @if (!IsNew)
-                {
-                    <div class="mb-3 form-check">
-                        <InputCheckbox class="form-check-input" @bind-Value="formModel.IsAvailable" />
-                        <label class="form-check-label">Available</label>
-                    </div>
-                }
                 @if (submitError is not null)
                 {
                     <div class="alert alert-danger">@submitError</div>
@@ -140,7 +133,6 @@ else
             Description = meal.Description,
             ImageUrl = meal.ImageUrl,
             Price = meal.Price,
-            IsAvailable = meal.IsAvailable,
             MealTypeId = meal.MealTypeId
         };
     }
@@ -175,7 +167,6 @@ else
             formModel.Description,
             formModel.ImageUrl,
             formModel.Price,
-            formModel.IsAvailable,
             formModel.MealTypeId);
         var (updated, updateError) = await Meals.UpdateAsync(RestaurantId, MealId!.Value, updateRequest);
         saving = false;
@@ -205,7 +196,5 @@ else
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.Range(0.01, double.MaxValue)]
         public decimal Price { get; set; }
-
-        public bool IsAvailable { get; set; } = true;
     }
 }

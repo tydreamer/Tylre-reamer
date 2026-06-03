@@ -16,7 +16,14 @@ else
     <div class="mb-4">
         <a href="/restaurants" class="btn btn-link ps-0">&larr; Back to restaurants</a>
         <h1>@restaurant.Name</h1>
-        <p class="text-muted">@restaurant.Description</p>
+        <p class="text-muted mb-1">@restaurant.Description</p>
+        @if (!string.IsNullOrWhiteSpace(restaurant.OwnerEmail))
+        {
+            <p class="text-muted mb-0">
+                <i class="bi bi-envelope me-1" aria-hidden="true"></i>
+                <a href="mailto:@restaurant.OwnerEmail">@restaurant.OwnerEmail</a>
+            </p>
+        }
     </div>
 
     <h4 class="mb-3">Menu</h4>
@@ -56,30 +63,23 @@ else
                             <div class="meal-card-price-row">
                                 <div class="meal-card-price-start">
                                     <span class="badge bg-success fs-6">@meal.Price.ToString("C")</span>
-                                    @if (!meal.IsAvailable)
-                                    {
-                                        <span class="badge bg-secondary">Unavailable</span>
-                                    }
                                 </div>
-                                @if (meal.IsAvailable)
-                                {
-                                    <div class="meal-card-cart">
-                                        <div class="d-inline-flex align-items-center gap-1" role="group" aria-label="Quantity for @meal.Name">
-                                            <button type="button" class="btn btn-sm btn-outline-secondary"
-                                                    disabled="@(GetQuantity(meal.Id) <= 1 || addingMealId == meal.Id)"
-                                                    @onclick="() => DecreaseQuantity(meal.Id)">−</button>
-                                            <span class="cart-qty-display">@GetQuantity(meal.Id)</span>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary"
-                                                    disabled="@(addingMealId == meal.Id)"
-                                                    @onclick="() => IncreaseQuantity(meal.Id)">+</button>
-                                        </div>
-                                        <button type="button" class="btn btn-sm btn-primary"
+                                <div class="meal-card-cart">
+                                    <div class="d-inline-flex align-items-center gap-1" role="group" aria-label="Quantity for @meal.Name">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                disabled="@(GetQuantity(meal.Id) <= 1 || addingMealId == meal.Id)"
+                                                @onclick="() => DecreaseQuantity(meal.Id)">−</button>
+                                        <span class="cart-qty-display">@GetQuantity(meal.Id)</span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary"
                                                 disabled="@(addingMealId == meal.Id)"
-                                                @onclick="() => RequestAddToCart(meal)">
-                                            @(addingMealId == meal.Id ? "Adding..." : "Add to cart")
-                                        </button>
+                                                @onclick="() => IncreaseQuantity(meal.Id)">+</button>
                                     </div>
-                                }
+                                    <button type="button" class="btn btn-sm btn-primary"
+                                            disabled="@(addingMealId == meal.Id)"
+                                            @onclick="() => RequestAddToCart(meal)">
+                                        @(addingMealId == meal.Id ? "Adding..." : "Add to cart")
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -131,7 +131,7 @@ else
 
     private async Task RequestAddToCart(MealDto meal)
     {
-        if (restaurant is null || !meal.IsAvailable)
+        if (restaurant is null)
             return;
 
         var quantity = GetQuantity(meal.Id);

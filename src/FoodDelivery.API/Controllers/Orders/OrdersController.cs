@@ -93,11 +93,11 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
 
         var mealIds = req.Items.Select(i => i.MealId).ToList();
         var meals = await db.Meals
-            .Where(m => mealIds.Contains(m.Id) && m.RestaurantId == req.RestaurantId && m.IsAvailable)
+            .Where(m => mealIds.Contains(m.Id) && m.RestaurantId == req.RestaurantId)
             .ToListAsync();
 
         if (meals.Count != req.Items.Count)
-            return BadRequest("One or more meals are invalid or unavailable.");
+            return BadRequest("One or more meals are invalid.");
 
         decimal subtotal = req.Items.Sum(i => meals.First(m => m.Id == i.MealId).Price * i.Quantity);
         decimal discount = 0;
@@ -198,7 +198,7 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
             return BadRequest(ValidationMessages.CustomerBlockedFromRestaurant);
 
         var meals = await db.Meals
-            .Where(m => original.Items.Select(i => i.MealId).Contains(m.Id) && m.IsAvailable)
+            .Where(m => original.Items.Select(i => i.MealId).Contains(m.Id))
             .ToListAsync();
 
         var order = new Order

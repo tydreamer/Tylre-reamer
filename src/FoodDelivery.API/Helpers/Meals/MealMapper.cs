@@ -11,7 +11,6 @@ public static class MealMapper
             meal.Description,
             meal.ImageUrl,
             meal.Price,
-            meal.IsAvailable,
             meal.RestaurantId,
             meal.MealTypeId,
             meal.MealType.Name);
@@ -23,7 +22,6 @@ public static class MealMapper
             meal.Description,
             meal.ImageUrl,
             meal.Price,
-            meal.IsAvailable,
             meal.RestaurantId,
             meal.Restaurant.Name,
             meal.MealTypeId,

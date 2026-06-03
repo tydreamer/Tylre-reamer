@@ -49,30 +49,23 @@ else
                         <div class="meal-card-price-row">
                             <div class="meal-card-price-start">
                                 <span class="badge bg-success fs-6">@meal.Price.ToString("C")</span>
-                                @if (!meal.IsAvailable)
-                                {
-                                    <span class="badge bg-secondary">Unavailable</span>
-                                }
                             </div>
-                            @if (meal.IsAvailable)
-                            {
-                                <div class="meal-card-cart">
-                                    <div class="d-inline-flex align-items-center gap-1" role="group" aria-label="Quantity for @meal.Name">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary"
-                                                disabled="@(GetQuantity(meal.Id) <= 1 || addingMealId == meal.Id)"
-                                                @onclick="() => DecreaseQuantity(meal.Id)">−</button>
-                                        <span class="cart-qty-display">@GetQuantity(meal.Id)</span>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary"
-                                                disabled="@(addingMealId == meal.Id)"
-                                                @onclick="() => IncreaseQuantity(meal.Id)">+</button>
-                                    </div>
-                                    <button type="button" class="btn btn-sm btn-primary"
+                            <div class="meal-card-cart">
+                                <div class="d-inline-flex align-items-center gap-1" role="group" aria-label="Quantity for @meal.Name">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                                            disabled="@(GetQuantity(meal.Id) <= 1 || addingMealId == meal.Id)"
+                                            @onclick="() => DecreaseQuantity(meal.Id)">−</button>
+                                    <span class="cart-qty-display">@GetQuantity(meal.Id)</span>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary"
                                             disabled="@(addingMealId == meal.Id)"
-                                            @onclick="() => RequestAddToCart(meal)">
-                                        @(addingMealId == meal.Id ? "Adding..." : "Add to cart")
-                                    </button>
+                                            @onclick="() => IncreaseQuantity(meal.Id)">+</button>
                                 </div>
-                            }
+                                <button type="button" class="btn btn-sm btn-primary"
+                                        disabled="@(addingMealId == meal.Id)"
+                                        @onclick="() => RequestAddToCart(meal)">
+                                    @(addingMealId == meal.Id ? "Adding..." : "Add to cart")
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -130,9 +123,6 @@ else
 
     private async Task RequestAddToCart(MealBrowseDto meal)
     {
-        if (!meal.IsAvailable)
-            return;
-
         var quantity = GetQuantity(meal.Id);
 
         if (Cart.HasItemsFromDifferentRestaurant(meal.RestaurantId))
@@ -181,7 +171,7 @@ else
 
     private static MealDto ToMealDto(MealBrowseDto meal) =>
         new(meal.Id, meal.Name, meal.Description, meal.ImageUrl, meal.Price,
-            meal.IsAvailable, meal.RestaurantId, meal.MealTypeId, meal.MealTypeName);
+            meal.RestaurantId, meal.MealTypeId, meal.MealTypeName);
 
     private async Task ApplySearchAsync()
     {

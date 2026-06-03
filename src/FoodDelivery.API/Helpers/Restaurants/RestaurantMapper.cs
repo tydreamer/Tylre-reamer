@@ -11,6 +11,7 @@ public static class RestaurantMapper
             restaurant.Description,
             restaurant.ImageUrl,
             restaurant.OwnerId,
+            restaurant.Owner.Email,
             restaurant.CuisineId,
             restaurant.Cuisine.Name,
             restaurant.Latitude,

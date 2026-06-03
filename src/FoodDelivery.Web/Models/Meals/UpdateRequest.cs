@@ -5,6 +5,5 @@ public record MealUpdateRequest(
     string Description,
     string ImageUrl,
     decimal Price,
-    bool IsAvailable,
     int MealTypeId
 );

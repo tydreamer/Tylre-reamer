@@ -27,6 +27,7 @@ public record RestaurantResponse(
     string Description,
     string ImageUrl,
     int OwnerId,
+    string OwnerEmail,
     int CuisineId,
     string CuisineName,
     double Latitude,

@@ -6,7 +6,6 @@ public record MealBrowseDto(
     string Description,
     string ImageUrl,
     decimal Price,
-    bool IsAvailable,
     int RestaurantId,
     string RestaurantName,
     int MealTypeId,

@@ -182,7 +182,7 @@ else
 
         foreach (var item in order.Items)
         {
-            var meal = meals.FirstOrDefault(m => m.Id == item.MealId && m.IsAvailable);
+            var meal = meals.FirstOrDefault(m => m.Id == item.MealId);
             if (meal is null)
                 continue;
 
@@ -192,7 +192,7 @@ else
         busy = false;
 
         if (Cart.IsEmpty)
-            error = "None of these meals are currently available to reorder.";
+            error = "None of these meals are available to reorder.";
         else
             Navigation.NavigateTo("/cart");
     }

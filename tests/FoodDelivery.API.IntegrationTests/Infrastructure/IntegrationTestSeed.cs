@@ -12,7 +12,6 @@ public static class IntegrationTestIds
 
     public const int RestaurantId = 10;
     public const int AvailableMealId = 100;
-    public const int UnavailableMealId = 101;
 
     public const string ValidCouponCode = "SAVE10";
     public const string ExpiredCouponCode = "OLD";
@@ -71,27 +70,15 @@ public static class IntegrationTestSeed
             Longitude = -74.0
         });
 
-        db.Meals.AddRange(
-            new Meal
-            {
-                Id = IntegrationTestIds.AvailableMealId,
-                Name = "Burger",
-                Description = "Tasty",
-                Price = 10m,
-                IsAvailable = true,
-                MealTypeId = 1,
-                RestaurantId = IntegrationTestIds.RestaurantId
-            },
-            new Meal
-            {
-                Id = IntegrationTestIds.UnavailableMealId,
-                Name = "Sold Out Soup",
-                Description = "Gone",
-                Price = 5m,
-                IsAvailable = false,
-                MealTypeId = 1,
-                RestaurantId = IntegrationTestIds.RestaurantId
-            });
+        db.Meals.Add(new Meal
+        {
+            Id = IntegrationTestIds.AvailableMealId,
+            Name = "Burger",
+            Description = "Tasty",
+            Price = 10m,
+            MealTypeId = 1,
+            RestaurantId = IntegrationTestIds.RestaurantId
+        });
 
         db.Coupons.AddRange(
             new Coupon

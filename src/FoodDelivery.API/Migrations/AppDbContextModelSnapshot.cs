@@ -97,9 +97,6 @@ namespace FoodDelivery.API.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<bool>("IsAvailable")
-                        .HasColumnType("boolean");
-
                     b.Property<int>("MealTypeId")
                         .HasColumnType("integer");
 
