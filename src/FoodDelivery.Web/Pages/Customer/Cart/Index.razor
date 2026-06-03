@@ -23,8 +23,9 @@
 }
 else if (Cart.IsEmpty)
 {
-    <div class="alert alert-info">Your cart is empty.</div>
-    <a href="/restaurants" class="btn btn-primary">Browse restaurants</a>
+    <EmptyState Icon="bi bi-cart" Title="Your cart is empty" Message="Add meals from a restaurant to get started.">
+        <a href="/restaurants" class="btn btn-primary">Browse restaurants</a>
+    </EmptyState>
 }
 else
 {

@@ -25,9 +25,8 @@
 }
 else if (paged.TotalCount == 0)
 {
-    <div class="alert alert-info">
-        @(HasActiveFilters ? "No restaurants match your search or filters." : "No restaurants available yet.")
-    </div>
+    <EmptyState Icon="bi bi-shop"
+                Message="@(HasActiveFilters ? "No restaurants match your search or filters." : "No restaurants available yet.")" />
 }
 else
 {

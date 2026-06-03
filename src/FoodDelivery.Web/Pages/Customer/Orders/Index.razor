@@ -15,8 +15,10 @@
 }
 else if (paged.TotalCount == 0)
 {
-    <div class="alert alert-info">You haven't placed any orders yet.</div>
-    <a href="/restaurants" class="btn btn-primary">Browse restaurants</a>
+    <EmptyState Icon="bi bi-receipt" Title="No orders yet"
+                Message="When you place an order, it will show up here.">
+        <a href="/restaurants" class="btn btn-primary">Browse restaurants</a>
+    </EmptyState>
 }
 else
 {

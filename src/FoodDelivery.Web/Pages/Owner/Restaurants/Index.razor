@@ -21,7 +21,10 @@
 }
 else if (restaurants.Count == 0)
 {
-    <div class="alert alert-info">You don't have any restaurants yet.</div>
+    <EmptyState Icon="bi bi-shop" Title="No restaurants yet"
+                Message="Create your first restaurant to start adding meals and coupons.">
+        <a href="owner/restaurants/new" class="btn btn-primary">Add restaurant</a>
+    </EmptyState>
 }
 else
 {

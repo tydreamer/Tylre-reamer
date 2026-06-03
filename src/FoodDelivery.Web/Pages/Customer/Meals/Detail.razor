@@ -9,8 +9,9 @@
 }
 else if (meal is null)
 {
-    <div class="alert alert-warning">Meal not found.</div>
-    <a href="/meals" class="btn btn-link ps-0">&larr; Back to meals</a>
+    <EmptyState Icon="bi bi-search" Title="Meal not found" Message="This meal may have been removed or the link is invalid.">
+        <a href="/meals" class="btn btn-primary">Back to meals</a>
+    </EmptyState>
 }
 else
 {

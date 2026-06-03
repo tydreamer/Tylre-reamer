@@ -1,0 +1,57 @@
+.empty-state-region {
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    bottom: 0;
+    left: var(--layout-sidebar-width, 0px);
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    pointer-events: none;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0 1.5rem;
+    color: var(--bs-secondary-color);
+    pointer-events: auto;
+}
+
+.empty-state-icon {
+    font-size: 5rem;
+    line-height: 1;
+    margin-bottom: 1.25rem;
+    opacity: 0.5;
+}
+
+.empty-state-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--bs-body-color);
+    margin: 0 0 0.75rem;
+}
+
+.empty-state-message {
+    font-size: 1.25rem;
+    max-width: 32rem;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.empty-state-actions {
+    margin-top: 1.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.empty-state-actions ::deep .btn {
+    font-size: 1.05rem;
+    padding: 0.5rem 1.25rem;
+}

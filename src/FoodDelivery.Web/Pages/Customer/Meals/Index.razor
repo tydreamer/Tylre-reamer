@@ -27,9 +27,8 @@
 }
 else if (paged.TotalCount == 0)
 {
-    <div class="alert alert-info">
-        @(HasActiveFilters ? "No meals match your search or filters." : "No meals available yet.")
-    </div>
+    <EmptyState Icon="bi bi-fork-knife"
+                Message="@(HasActiveFilters ? "No meals match your search or filters." : "No meals available yet.")" />
 }
 else
 {

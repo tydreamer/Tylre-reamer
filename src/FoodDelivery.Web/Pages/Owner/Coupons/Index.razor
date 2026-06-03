@@ -58,7 +58,7 @@ else
             <h5 class="mb-3">Coupons</h5>
             @if (coupons.Count == 0)
             {
-                <div class="alert alert-info">No coupons yet.</div>
+                <EmptyState Icon="bi bi-ticket-perforated" Message="No coupons yet." />
             }
             else
             {

@@ -31,7 +31,9 @@ else
 
     @if (meals.Count == 0)
     {
-        <div class="alert alert-info">This restaurant has no meals yet.</div>
+        <EmptyState Icon="bi bi-fork-knife" Message="This restaurant has no meals yet.">
+            <a href="owner/restaurants/@RestaurantId/meals/new" class="btn btn-primary">Add meal</a>
+        </EmptyState>
     }
     else
     {
