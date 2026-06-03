@@ -1,12 +1,21 @@
 using System.Net.Http.Json;
+using FoodDelivery.Web.Helpers;
 
 namespace FoodDelivery.Web.Services.Users;
 
 public class UserService(HttpClient http)
 {
-    public async Task<PagedResult<UserDto>?> GetPageAsync(int page = 1, int pageSize = 10)
+    public async Task<PagedResult<UserDto>?> GetPageAsync(
+        int page = 1,
+        int pageSize = 10,
+        string? sortBy = null,
+        bool sortDesc = false)
     {
-        return await http.GetFromJsonAsync<PagedResult<UserDto>>($"api/users?page={page}&pageSize={pageSize}");
+        var url = $"api/users?page={page}&pageSize={pageSize}";
+        if (!string.IsNullOrWhiteSpace(sortBy))
+            url += $"&sortBy={Uri.EscapeDataString(sortBy.Trim())}&sortDesc={sortDesc.ToString().ToLowerInvariant()}";
+
+        return await http.GetBrowseJsonAsync<PagedResult<UserDto>>(url);
     }
 
     public async Task<(bool Success, UserDto? User, string? Error)> CreateAsync(CreateUserRequest request)

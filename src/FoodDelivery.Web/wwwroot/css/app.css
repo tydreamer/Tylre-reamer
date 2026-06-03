@@ -660,11 +660,16 @@ a.btn.btn-sm.table-icon-btn .bi {
     text-overflow: clip;
 }
 
-.users-list-table .col-name { width: 11rem; }
-.users-list-table .col-email { width: 42%; }
-.users-list-table .col-role { width: 11.5rem; }
-.users-list-table .col-status { width: 6.5rem; }
-.users-list-table .col-actions { width: 6.5rem; }
+.users-list-table .col-name { width: 20%; }
+.users-list-table .col-email { width: 30%; }
+.users-list-table .col-user-type { width: 20%; }
+.users-list-table .col-status { width: 15%; }
+.users-list-table .col-actions { width: 15%; }
+
+.users-list-table th.col-status .sortable-th {
+    width: 100%;
+    justify-content: center;
+}
 
 /* Owner meals list — fixed column widths (table-layout: fixed) */
 .meals-list-table {

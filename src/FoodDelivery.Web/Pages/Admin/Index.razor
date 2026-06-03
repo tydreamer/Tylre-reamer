@@ -4,22 +4,24 @@
 @inject ToastService Toast
 @inject PaginatedPageLoadService PageLoad
 
-<PageTitle>Create & Block Users</PageTitle>
+<PageTitle>Users</PageTitle>
 
-<h1 class="mb-4">Create &amp; Block Users</h1>
-
-<div class="row g-4">
-    <div class="col-md-4">
-        <CreateUserForm @key="createFormKey" Error="@error" Busy="@busy" OnCreate="CreateUserAsync" />
-    </div>
-
-    <div class="col-md-8">
-        <UsersTable Paged="@paged" Busy="@busy"
-                    CurrentPage="@currentPage" PageSize="@pageSize"
-                    OnPageChanged="GoToPage" OnPageSizeChanged="ChangePageSize"
-                    OnRequestBlock="RequestBlock" OnUnblock="UnblockAsync" />
-    </div>
+<div class="page-header mb-4">
+    <h1 class="mb-0">Users</h1>
+    <a href="admin/users/new" class="btn btn-primary">Create User</a>
 </div>
+
+@if (error is not null)
+{
+    <div class="alert alert-danger">@error</div>
+}
+
+<UsersTable Paged="@paged" Busy="@busy"
+            CurrentPage="@currentPage" PageSize="@pageSize"
+            SortBy="@sortBy" SortDesc="@sortDesc"
+            OnPageChanged="GoToPage" OnPageSizeChanged="ChangePageSize"
+            OnSortChanged="ChangeSortAsync"
+            OnRequestBlock="RequestBlock" OnUnblock="UnblockAsync" />
 
 <ConfirmDialog @bind-IsVisible="showBlockDialog"
                Title="Block user"
@@ -35,14 +37,26 @@
     private bool busy;
     private int currentPage = 1;
     private int pageSize = 20;
-    private int createFormKey;
+    private string sortBy = "name";
+    private bool sortDesc;
     private bool showBlockDialog;
     private int? pendingBlockUserId;
     private string blockDialogMessage = "";
 
     protected override async Task OnInitializedAsync() => await LoadPageAsync();
 
-    private async Task LoadPageAsync() => paged = await Users.GetPageAsync(currentPage, pageSize);
+    private async Task LoadPageAsync()
+    {
+        paged = await Users.GetPageAsync(currentPage, pageSize, sortBy, sortDesc);
+    }
+
+    private async Task ChangeSortAsync((string SortBy, bool SortDesc) sort)
+    {
+        sortBy = sort.SortBy;
+        sortDesc = sort.SortDesc;
+        currentPage = 1;
+        await LoadPageAsync();
+    }
 
     private async Task GoToPage(int page)
     {
@@ -64,27 +78,6 @@
             await LoadPageAsync();
         });
         await InvokeAsync(StateHasChanged);
-    }
-
-    private async Task CreateUserAsync(CreateUserRequest request)
-    {
-        busy = true;
-        error = null;
-
-        var (success, _, err) = await Users.CreateAsync(request);
-
-        if (success)
-        {
-            createFormKey++;
-            await LoadPageAsync();
-            Toast.ShowSuccess($"User \"{request.Name}\" was created successfully.");
-        }
-        else
-        {
-            error = err;
-        }
-
-        busy = false;
     }
 
     private void RequestBlock(UserDto user)

@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using FoodDelivery.API.Data;
+using FoodDelivery.API.Helpers.Users;
 using FoodDelivery.API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,11 @@ public class UsersController(AppDbContext db) : ControllerBase
 {
     [HttpGet]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] bool sortDesc = false)
     {
         if (page < 1) page = 1;
         if (pageSize < 1 || pageSize > 100) pageSize = 10;
@@ -22,8 +27,7 @@ public class UsersController(AppDbContext db) : ControllerBase
         var query = db.Users.Where(u => u.Role != UserRole.Admin);
         var totalCount = await query.CountAsync();
 
-        var items = await query
-            .OrderByDescending(u => u.CreatedAt)
+        var items = await UserQuerySort.Apply(query, sortBy, sortDesc)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(u => new UserResponse(u.Id, u.Name, u.Email, u.Role.ToString(), u.IsBlocked))

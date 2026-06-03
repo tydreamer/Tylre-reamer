@@ -4,7 +4,9 @@
 }
 else if (Paged.TotalCount == 0)
 {
-    <EmptyState Icon="bi bi-people" Message="No users yet." />
+    <EmptyState Icon="bi bi-people" Title="No users yet" Message="Create a user to get started.">
+        <a href="admin/users/new" class="btn btn-primary">Create User</a>
+    </EmptyState>
 }
 else
 {
@@ -14,17 +16,21 @@ else
             <colgroup>
                 <col class="col-name" />
                 <col class="col-email" />
-                <col class="col-role" />
+                <col class="col-user-type" />
                 <col class="col-status" />
                 <col class="col-actions" />
             </colgroup>
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th></th>
+                    <SortableTableHeader ColumnKey="name" Label="Name" Class="col-name"
+                                         CurrentSortBy="@SortBy" SortDesc="@SortDesc" OnSortChanged="OnSortChanged" />
+                    <SortableTableHeader ColumnKey="email" Label="Email" Class="col-email"
+                                         CurrentSortBy="@SortBy" SortDesc="@SortDesc" OnSortChanged="OnSortChanged" />
+                    <SortableTableHeader ColumnKey="role" Label="User Type" Class="col-user-type"
+                                         CurrentSortBy="@SortBy" SortDesc="@SortDesc" OnSortChanged="OnSortChanged" />
+                    <SortableTableHeader ColumnKey="status" Label="Status" Class="col-status text-center"
+                                         CurrentSortBy="@SortBy" SortDesc="@SortDesc" OnSortChanged="OnSortChanged" />
+                    <th class="col-actions"></th>
                 </tr>
             </thead>
             <tbody>
@@ -34,7 +40,7 @@ else
                         <td title="@user.Name">@user.Name</td>
                         <td title="@user.Email">@user.Email</td>
                         <td>@(user.Role == "Customer" ? "Regular User" : "Restaurant Owner")</td>
-                        <td>
+                        <td class="col-status text-center">
                             @if (user.IsBlocked)
                             {
                                 <span class="badge bg-danger">Blocked</span>
@@ -79,8 +85,11 @@ else
     [Parameter] public bool Busy { get; set; }
     [Parameter] public int CurrentPage { get; set; }
     [Parameter] public int PageSize { get; set; }
+    [Parameter] public string SortBy { get; set; } = "name";
+    [Parameter] public bool SortDesc { get; set; }
     [Parameter, EditorRequired] public EventCallback<int> OnPageChanged { get; set; }
     [Parameter, EditorRequired] public EventCallback<int> OnPageSizeChanged { get; set; }
+    [Parameter, EditorRequired] public EventCallback<(string SortBy, bool SortDesc)> OnSortChanged { get; set; }
     [Parameter, EditorRequired] public EventCallback<UserDto> OnRequestBlock { get; set; }
     [Parameter, EditorRequired] public EventCallback<int> OnUnblock { get; set; }
 }
