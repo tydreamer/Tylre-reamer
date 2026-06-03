@@ -18,3 +18,4 @@ global using FoodDelivery.API.Helpers.Meals;
 global using FoodDelivery.API.Helpers.Orders;
 global using FoodDelivery.API.Helpers.Coupons;
 global using FoodDelivery.API.Services;
+global using FoodDelivery.API.Services.Orders;

@@ -13,7 +13,7 @@ namespace FoodDelivery.API.Controllers.Orders;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : ControllerBase
+public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub, OrderPricingService pricingService) : ControllerBase
 {
     protected int CurrentUserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
     protected string CurrentUserRole => User.FindFirstValue(ClaimTypes.Role)!;
@@ -114,36 +114,26 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
         if (meals.Count != req.Items.Count)
             return BadRequest("One or more meals are invalid.");
 
-        decimal subtotal = req.Items.Sum(i => meals.First(m => m.Id == i.MealId).Price * i.Quantity);
-        decimal discount = 0;
+        var mealPrices = meals.ToDictionary(m => m.Id, m => m.Price);
+        var priced = await pricingService.PriceAsync(
+            req.Items.Select(i => (i.MealId, i.Quantity)).ToList(),
+            mealPrices, req.RestaurantId, req.Tip, req.CouponCode);
 
-        Coupon? coupon = null;
-        if (!string.IsNullOrWhiteSpace(req.CouponCode))
-        {
-            var validation = await CouponValidator.ValidateAsync(
-                db, req.RestaurantId, req.CouponCode, subtotal);
-
-            if (validation.Status != CouponValidationStatus.Valid || validation.Coupon is null)
-                return BadRequest(CouponValidator.ErrorMessage(validation.Status));
-
-            coupon = validation.Coupon;
-            discount = validation.DiscountAmount;
-        }
-
-        var total = subtotal - discount + req.Tip;
+        if (!string.IsNullOrWhiteSpace(req.CouponCode) && priced.Coupon is null)
+            return BadRequest(CouponValidator.ErrorMessage(priced.CouponStatus ?? CouponValidationStatus.Invalid));
 
         var order = new Order
         {
             CustomerId = customerId,
             RestaurantId = req.RestaurantId,
             Tip = req.Tip,
-            CouponId = coupon?.Id,
-            TotalPrice = total,
+            CouponId = priced.Coupon?.Id,
+            TotalPrice = priced.Total,
             Items = req.Items.Select(i => new OrderItem
             {
                 MealId = i.MealId,
                 Quantity = i.Quantity,
-                UnitPrice = meals.First(m => m.Id == i.MealId).Price
+                UnitPrice = mealPrices[i.MealId]
             }).ToList(),
             StatusHistory = [new OrderStatusHistory { Status = OrderStatus.Placed }]
         };
@@ -217,17 +207,22 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
             .Where(m => original.Items.Select(i => i.MealId).Contains(m.Id))
             .ToListAsync();
 
+        var mealPrices = meals.ToDictionary(m => m.Id, m => m.Price);
+        var priced = await pricingService.PriceAsync(
+            original.Items.Select(i => (i.MealId, i.Quantity)).ToList(),
+            mealPrices, original.RestaurantId, original.Tip, null);
+
         var order = new Order
         {
             CustomerId = original.CustomerId,
             RestaurantId = original.RestaurantId,
             Tip = original.Tip,
-            TotalPrice = meals.Sum(m => original.Items.First(i => i.MealId == m.Id).Quantity * m.Price) + original.Tip,
+            TotalPrice = priced.Total,
             Items = original.Items.Select(i => new OrderItem
             {
                 MealId = i.MealId,
                 Quantity = i.Quantity,
-                UnitPrice = meals.FirstOrDefault(m => m.Id == i.MealId)?.Price ?? i.UnitPrice
+                UnitPrice = mealPrices.GetValueOrDefault(i.MealId, i.UnitPrice)
             }).ToList(),
             StatusHistory = [new OrderStatusHistory { Status = OrderStatus.Placed }]
         };

@@ -22,6 +22,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<GoogleAuthService>();
+builder.Services.AddScoped<OrderPricingService>();
 builder.Services.Configure<ImageUploadOptions>(builder.Configuration.GetSection(ImageUploadOptions.SectionName));
 builder.Services.AddSingleton<IImageStorageService, LocalImageStorageService>();
 
