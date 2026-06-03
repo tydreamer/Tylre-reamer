@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using FoodDelivery.API.Constants;
 using FoodDelivery.API.Data;
 using FoodDelivery.API.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -38,6 +39,12 @@ public class CouponsController(AppDbContext db) : ControllerBase
 
         if (await db.Coupons.AnyAsync(c => c.Code == req.Code))
             return Conflict("Coupon code already exists.");
+
+        var expiresUtc = req.ExpiresAt.Kind == DateTimeKind.Utc
+            ? req.ExpiresAt
+            : req.ExpiresAt.ToUniversalTime();
+        if (expiresUtc.Date < DateTime.UtcNow.Date)
+            return BadRequest(ValidationMessages.ExpiresAtNotBeforeToday);
 
         var coupon = new Coupon
         {

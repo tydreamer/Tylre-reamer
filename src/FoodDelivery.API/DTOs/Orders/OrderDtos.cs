@@ -37,4 +37,6 @@ public record OrderResponse(
     DateTime CreatedAt,
     List<OrderItemResponse> Items,
     List<OrderStatusHistoryResponse> StatusHistory,
-    bool CustomerBlockedFromOwner = false);
+    bool CustomerBlockedFromOwner = false,
+    string? CouponCode = null,
+    decimal? CouponDiscount = null);

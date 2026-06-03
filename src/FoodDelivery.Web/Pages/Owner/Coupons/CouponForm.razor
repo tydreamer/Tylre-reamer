@@ -1,0 +1,124 @@
+@page "/owner/restaurants/{RestaurantId:int}/coupons/new"
+@attribute [Authorize(Roles = "Owner")]
+@inject RestaurantService Restaurants
+@inject CouponService Coupons
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+
+<PageTitle>Add Coupon</PageTitle>
+
+<div class="mb-4">
+    <a href="owner/restaurants/@RestaurantId/coupons" class="btn btn-link ps-0">&larr; Back to coupons</a>
+    <h1>Add Coupon</h1>
+    @if (restaurant is not null)
+    {
+        <p class="text-muted mb-0">@restaurant.Name</p>
+    }
+</div>
+
+@if (loadError is not null)
+{
+    <div class="alert alert-danger">@loadError</div>
+}
+else if (restaurant is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-6">
+            <EditForm Model="formModel" OnValidSubmit="HandleSubmit">
+                <DataAnnotationsValidator />
+                <div class="mb-3">
+                    <label class="form-label">Code</label>
+                    <InputText class="form-control" @bind-Value="formModel.Code" />
+                    <FirstValidationMessage For="() => formModel.Code" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Discount (%)</label>
+                    <InputNumber class="form-control" @bind-Value="formModel.DiscountValue" min="1" max="100" />
+                    <FirstValidationMessage For="() => formModel.DiscountValue" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Expires</label>
+                    <InputDate class="form-control" @bind-Value="formModel.ExpiresAt" Min="@minExpiresDate" />
+                    <FirstValidationMessage For="() => formModel.ExpiresAt" />
+                </div>
+                @if (submitError is not null)
+                {
+                    <div class="alert alert-danger">@submitError</div>
+                }
+                <button class="btn btn-primary" type="submit" disabled="@saving">
+                    @(saving ? "Saving..." : "Create")
+                </button>
+                <a href="owner/restaurants/@RestaurantId/coupons" class="btn btn-outline-secondary ms-2">Cancel</a>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int RestaurantId { get; set; }
+
+    private RestaurantDto? restaurant;
+    private readonly CouponFormModel formModel = new() { ExpiresAt = DateTime.Today.AddDays(30) };
+    private readonly DateTime minExpiresDate = DateTime.Today;
+    private string? loadError;
+    private string? submitError;
+    private bool saving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthStateProvider.GetAuthenticationStateAsync()).User;
+        var ownerId = user.GetUserId();
+        if (ownerId is null)
+        {
+            loadError = "Unable to determine your account. Please sign in again.";
+            return;
+        }
+
+        restaurant = await Restaurants.GetByIdAsync(RestaurantId);
+        if (restaurant is null)
+        {
+            loadError = "Restaurant not found.";
+            return;
+        }
+
+        if (restaurant.OwnerId != ownerId)
+            loadError = "You do not have permission to manage coupons for this restaurant.";
+    }
+
+    private async Task HandleSubmit()
+    {
+        saving = true;
+        submitError = null;
+
+        var expiresAt = DateTime.SpecifyKind(formModel.ExpiresAt.Date, DateTimeKind.Utc).AddDays(1).AddTicks(-1);
+        var request = new CouponCreateRequest(formModel.Code, formModel.DiscountValue, expiresAt);
+        var (success, _, error) = await Coupons.CreateAsync(RestaurantId, request);
+        saving = false;
+
+        if (!success)
+        {
+            submitError = error ?? "Failed to create coupon.";
+            return;
+        }
+
+        Navigation.NavigateTo($"owner/restaurants/{RestaurantId}/coupons");
+    }
+
+    private class CouponFormModel
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = ValidationMessages.CodeRequired)]
+        public string Code { get; set; } = "";
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = ValidationMessages.DiscountRequired)]
+        [System.ComponentModel.DataAnnotations.Range(1, 100, ErrorMessage = ValidationMessages.DiscountInvalid)]
+        public decimal DiscountValue { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = ValidationMessages.ExpiresAtRequired)]
+        [NotBeforeToday]
+        public DateTime ExpiresAt { get; set; }
+    }
+}

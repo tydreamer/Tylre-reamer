@@ -49,6 +49,20 @@ else
                         }
                     </tbody>
                     <tfoot>
+                        @{
+                            var subtotal = order.Items.Sum(i => i.UnitPrice * i.Quantity);
+                        }
+                        <tr>
+                            <td colspan="3" class="text-end">Subtotal</td>
+                            <td class="text-end text-nowrap">@subtotal.ToString("C")</td>
+                        </tr>
+                        @if (!string.IsNullOrWhiteSpace(order.CouponCode) && order.CouponDiscount is > 0)
+                        {
+                            <tr>
+                                <td colspan="3" class="text-end">Coupon (@order.CouponCode)</td>
+                                <td class="text-end text-nowrap text-success">-@order.CouponDiscount.Value.ToString("C")</td>
+                            </tr>
+                        }
                         <tr>
                             <td colspan="3" class="text-end">Tip</td>
                             <td class="text-end text-nowrap">@order.Tip.ToString("C")</td>

@@ -29,6 +29,7 @@ public static class ValidationMessages
 
     public const string CodeRequired = "Code is required.";
     public const string DiscountInvalid = "Discount must be between 1% and 100%.";
+    public const string ExpiresAtNotBeforeToday = "Expiration date cannot be before today.";
 
     public const string StatusRequired = "Status is required.";
     public const string CustomerBlockedFromRestaurant =

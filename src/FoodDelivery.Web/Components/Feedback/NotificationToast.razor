@@ -1,6 +1,7 @@
 @implements IAsyncDisposable
 @inject OrderNotificationService Notifications
 @inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
 
 <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
     @foreach (var toast in toasts)
@@ -11,7 +12,7 @@
                 <button type="button" class="btn-close" @onclick="() => Dismiss(toast)"></button>
             </div>
             <div class="toast-body" role="button" @onclick="() => Open(toast)">
-                <strong>@toast.RestaurantName</strong> is now <span class="fw-bold">@toast.Status</span>.
+                @OrderStatusNotificationMessages.Format(toast, isOwner)
             </div>
         </div>
     }
@@ -19,9 +20,12 @@
 
 @code {
     private readonly List<OrderStatusNotification> toasts = new();
+    private bool isOwner;
 
     protected override async Task OnInitializedAsync()
     {
+        var user = (await AuthStateProvider.GetAuthenticationStateAsync()).User;
+        isOwner = user.IsInRole("Owner");
         Notifications.OnOrderStatusChanged += HandleStatusChanged;
         await Notifications.StartAsync();
     }
@@ -48,7 +52,10 @@
     private void Open(OrderStatusNotification notification)
     {
         Dismiss(notification);
-        Navigation.NavigateTo($"orders/{notification.OrderId}");
+        var path = isOwner
+            ? $"owner/orders/{notification.OrderId}"
+            : $"orders/{notification.OrderId}";
+        Navigation.NavigateTo(path);
     }
 
     public async ValueTask DisposeAsync()

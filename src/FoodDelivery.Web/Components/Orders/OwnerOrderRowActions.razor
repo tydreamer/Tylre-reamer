@@ -1,5 +1,6 @@
 @inject OrderService Orders
 @inject UserService Users
+@inject ToastService Toast
 
 <div class="owner-order-row-actions">
     <a href="owner/orders/@Order.Id" class="btn btn-sm btn-outline-primary">View</a>
@@ -142,6 +143,7 @@
         }
 
         await OnOrderUpdated.InvokeAsync(Order with { CustomerBlockedFromOwner = true });
+        Toast.ShowSuccess($"{Order.CustomerName} can no longer order from your restaurants.");
     }
 
     private async Task UnblockCustomerAsync()
@@ -159,6 +161,7 @@
         }
 
         await OnOrderUpdated.InvokeAsync(Order with { CustomerBlockedFromOwner = false });
+        Toast.ShowSuccess($"{Order.CustomerName} can order from your restaurants again.");
     }
 
     private async Task SetBusyAsync(bool value)

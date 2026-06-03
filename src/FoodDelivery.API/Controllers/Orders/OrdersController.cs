@@ -35,6 +35,7 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
             .Include(o => o.Items).ThenInclude(i => i.Meal)
             .Include(o => o.Restaurant)
             .Include(o => o.Customer)
+            .Include(o => o.Coupon)
             .Include(o => o.StatusHistory)
             .AsQueryable();
 
@@ -64,6 +65,7 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
             .Include(o => o.Items).ThenInclude(i => i.Meal)
             .Include(o => o.Restaurant)
             .Include(o => o.Customer)
+            .Include(o => o.Coupon)
             .Include(o => o.StatusHistory)
             .FirstOrDefaultAsync(o => o.Id == id);
 
@@ -140,6 +142,7 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
             .Include(o => o.Items).ThenInclude(i => i.Meal)
             .Include(o => o.Restaurant)
             .Include(o => o.Customer)
+            .Include(o => o.Coupon)
             .Include(o => o.StatusHistory)
             .FirstAsync(o => o.Id == order.Id);
 
@@ -266,6 +269,17 @@ public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub) : Cont
             o.Items.Select(i => new OrderItemResponse(i.MealId, i.Meal.Name, i.Quantity, i.UnitPrice)).ToList(),
             o.StatusHistory.OrderBy(h => h.ChangedAt)
                 .Select(h => new OrderStatusHistoryResponse(h.Status.ToString(), h.ChangedAt)).ToList(),
-            blockedFromOwner);
+            blockedFromOwner,
+            o.Coupon?.Code,
+            GetCouponDiscount(o));
+    }
+
+    private static decimal? GetCouponDiscount(Order o)
+    {
+        if (o.Coupon is null)
+            return null;
+
+        var subtotal = o.Items.Sum(i => i.UnitPrice * i.Quantity);
+        return Math.Max(0, subtotal - (o.TotalPrice - o.Tip));
     }
 }

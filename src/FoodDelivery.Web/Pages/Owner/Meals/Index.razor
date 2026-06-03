@@ -64,12 +64,29 @@ else
                             <td class="text-end text-nowrap">@meal.Price.ToString("C")</td>
                             <td>@meal.MealTypeName</td>
                             <td class="col-actions text-end text-nowrap">
-                                <a href="owner/restaurants/@RestaurantId/meals/@meal.Id/edit" class="btn btn-sm btn-outline-primary">Edit</a>
-                                <button type="button" class="btn btn-sm btn-outline-danger"
-                                        disabled="@(removingId == meal.Id)"
-                                        @onclick="() => RequestRemove(meal)">
-                                    @(removingId == meal.Id ? "Removing..." : "Remove")
-                                </button>
+                                <div class="table-row-actions">
+                                    <a href="owner/restaurants/@RestaurantId/meals/@meal.Id/edit"
+                                       class="btn btn-sm btn-outline-primary table-icon-btn"
+                                       title="Edit"
+                                       aria-label="@($"Edit {meal.Name}")">
+                                        <i class="bi bi-pencil" aria-hidden="true"></i>
+                                    </a>
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger table-icon-btn"
+                                            title="Remove"
+                                            aria-label="@($"Remove {meal.Name}")"
+                                            disabled="@(removingId == meal.Id)"
+                                            @onclick="() => RequestRemove(meal)">
+                                        @if (removingId == meal.Id)
+                                        {
+                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-trash" aria-hidden="true"></i>
+                                        }
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     }

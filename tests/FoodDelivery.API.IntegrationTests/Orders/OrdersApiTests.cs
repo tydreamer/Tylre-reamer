@@ -104,6 +104,8 @@ public class OrdersApiTests(CustomWebApplicationFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var order = await response.ReadJsonAsync<OrderResponse>();
         order!.TotalPrice.Should().Be(18m); // 20 subtotal - 10% (2) discount
+        order.CouponCode.Should().Be(IntegrationTestIds.ValidCouponCode);
+        order.CouponDiscount.Should().Be(2m);
     }
 
     [Fact]

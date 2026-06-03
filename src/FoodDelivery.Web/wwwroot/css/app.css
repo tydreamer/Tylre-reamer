@@ -732,12 +732,31 @@ a.btn.btn-sm.table-icon-btn .bi {
 .meals-list-table .col-type { width: 8.5rem; }
 .meals-list-table .col-actions { width: 10.5rem; }
 
-.coupon-code-cell {
-    max-width: 12rem;
+/* Owner coupons list — fixed column widths (table-layout: fixed) */
+.coupons-list-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.coupons-list-table th,
+.coupons-list-table td {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    vertical-align: middle;
 }
+
+.coupons-list-table .col-actions,
+.coupons-list-table td.col-actions {
+    overflow: visible;
+    text-overflow: clip;
+}
+
+.coupons-list-table .col-code { width: 28%; }
+.coupons-list-table .col-discount { width: 10rem; }
+.coupons-list-table .col-expires { width: 10rem; }
+.coupons-list-table .col-active { width: 6rem; }
+.coupons-list-table .col-actions { width: 5rem; }
 
 /* Customer browse: search + filters toolbar */
 .browse-toolbar-row {
