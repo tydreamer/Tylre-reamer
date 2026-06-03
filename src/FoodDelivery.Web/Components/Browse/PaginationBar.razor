@@ -71,7 +71,7 @@
     [Parameter, EditorRequired] public int TotalPages { get; set; }
     [Parameter, EditorRequired] public int TotalCount { get; set; }
     [Parameter, EditorRequired] public int PageSize { get; set; }
-    [Parameter] public int[] PageSizeOptions { get; set; } = [10, 20, 50];
+    [Parameter] public int[] PageSizeOptions { get; set; } = [20, 50];
     [Parameter, EditorRequired] public EventCallback<int> OnPageChanged { get; set; }
     [Parameter, EditorRequired] public EventCallback<int> OnPageSizeChanged { get; set; }
 

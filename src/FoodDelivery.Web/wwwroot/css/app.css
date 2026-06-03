@@ -260,20 +260,62 @@ code {
     position: relative;
     height: 180px;
     background-color: var(--bs-secondary-bg);
+    overflow: hidden;
 }
 
 .meal-card-thumb-img {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.meal-card-thumb-img.is-loaded {
+    opacity: 1;
+}
+
+.meal-card-thumb-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    padding: 1rem;
+    text-align: center;
+    color: var(--bs-secondary-color);
+    background: linear-gradient(
+        180deg,
+        var(--bs-secondary-bg) 0%,
+        var(--bs-tertiary-bg) 100%);
+}
+
+.meal-card-thumb-icon {
+    font-size: 2.5rem;
+    opacity: 0.65;
+}
+
+.meal-card-thumb-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 1.3;
+    max-width: 100%;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
 }
 
 .meal-restaurant-badge {
     position: absolute;
     top: 0.5rem;
     right: 0.5rem;
-    z-index: 1;
+    z-index: 2;
     max-width: calc(100% - 1rem);
     font-size: 0.7rem;
     font-weight: 600;

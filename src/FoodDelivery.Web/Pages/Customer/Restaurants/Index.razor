@@ -19,46 +19,45 @@
     }
 </BrowseToolbar>
 
-@if (paged is null)
-{
-    <p><em>Loading...</em></p>
-}
-else if (paged.TotalCount == 0)
-{
-    <EmptyState Icon="bi bi-shop"
-                Message="@(HasActiveFilters ? "No restaurants match your search or filters." : "No restaurants available yet.")">
-        @if (HasActiveFilters)
-        {
-            <button type="button" class="btn btn-primary" @onclick="ClearFiltersAsync">
-                Browse all restaurants
-            </button>
-        }
-    </EmptyState>
-}
-else
-{
-    <PaginatedPageContent>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-        @foreach (var restaurant in paged.Items)
-        {
-            <div class="col">
-                <a href="restaurants/@restaurant.Id" class="text-decoration-none text-dark">
-                    <div class="card h-100 shadow-sm restaurant-card meal-browse-card">
-                        <RestaurantCardImage Name="@restaurant.Name" ImageUrl="@restaurant.ImageUrl" />
-                        <div class="card-body">
-                            <div class="meal-card-title-row mb-1">
-                                <h5 class="card-title mb-0 meal-card-truncate" title="@restaurant.Name">@restaurant.Name</h5>
-                                <span class="badge meal-type-badge">@restaurant.CuisineName</span>
+<PaginatedPageContent>
+    @if (paged?.TotalCount == 0)
+    {
+        <EmptyState Icon="bi bi-shop"
+                    Message="@(HasActiveFilters ? "No restaurants match your search or filters." : "No restaurants available yet.")">
+            @if (HasActiveFilters)
+            {
+                <button type="button" class="btn btn-primary" @onclick="ClearFiltersAsync">
+                    Browse all restaurants
+                </button>
+            }
+        </EmptyState>
+    }
+    else if (paged is not null)
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+            @foreach (var restaurant in paged.Items)
+            {
+                <div class="col">
+                    <a href="restaurants/@restaurant.Id" class="text-decoration-none text-dark">
+                        <div class="card h-100 shadow-sm restaurant-card meal-browse-card">
+                            <RestaurantCardImage Name="@restaurant.Name" ImageUrl="@restaurant.ImageUrl" />
+                            <div class="card-body">
+                                <div class="meal-card-title-row mb-1">
+                                    <h5 class="card-title mb-0 meal-card-truncate" title="@restaurant.Name">@restaurant.Name</h5>
+                                    <span class="badge meal-type-badge">@restaurant.CuisineName</span>
+                                </div>
+                                <p class="card-text meal-card-line" title="@restaurant.Description">@restaurant.Description</p>
                             </div>
-                            <p class="card-text meal-card-line" title="@restaurant.Description">@restaurant.Description</p>
                         </div>
-                    </div>
-                </a>
-            </div>
-        }
-    </div>
-    </PaginatedPageContent>
+                    </a>
+                </div>
+            }
+        </div>
+    }
+</PaginatedPageContent>
 
+@if (paged?.TotalCount > 0)
+{
     <PaginationBar CurrentPage="@currentPage" TotalPages="paged.TotalPages"
                    TotalCount="paged.TotalCount" PageSize="@pageSize"
                    PageSizeOptions="BrowsePageSizeOptions"
@@ -83,14 +82,13 @@ else
         cuisineFilterOptions = cuisines
             .Select(c => new BrowseFilterOption(c.Id, c.Name))
             .ToList();
-        await LoadPageAsync();
+        await ReloadPageAsync();
     }
 
     private async Task ApplyFiltersAsync()
     {
         currentPage = 1;
-        await LoadPageAsync();
-        await InvokeAsync(StateHasChanged);
+        await ReloadPageAsync();
     }
 
     private async Task OnCuisineFilterChangedAsync(IReadOnlyCollection<int> ids)
@@ -104,16 +102,15 @@ else
         searchTerm = "";
         selectedCuisineIds = [];
         currentPage = 1;
-        await LoadPageAsync();
-        await InvokeAsync(StateHasChanged);
+        await ReloadPageAsync();
     }
 
-    private async Task LoadPageAsync()
+    private async Task ReloadPageAsync() =>
+        await PageLoad.NavigateAsync(LoadPageDataAsync, waitForImages: false);
+
+    private async Task LoadPageDataAsync()
     {
         IEnumerable<int>? cuisineIds = selectedCuisineIds.Count > 0 ? selectedCuisineIds : null;
-        paged = null;
-        await InvokeAsync(StateHasChanged);
-
         paged = await Restaurants.GetPageAsync(
             currentPage, pageSize, search: searchTerm, cuisineIds: cuisineIds);
     }
@@ -121,22 +118,14 @@ else
     private async Task GoToPage(int page)
     {
         if (paged is null || page < 1 || page > paged.TotalPages) return;
-        await PageLoad.NavigateAsync(async () =>
-        {
-            currentPage = page;
-            await LoadPageAsync();
-        });
-        await InvokeAsync(StateHasChanged);
+        currentPage = page;
+        await ReloadPageAsync();
     }
 
     private async Task ChangePageSize(int size)
     {
-        await PageLoad.NavigateAsync(async () =>
-        {
-            pageSize = size;
-            currentPage = 1;
-            await LoadPageAsync();
-        });
-        await InvokeAsync(StateHasChanged);
+        pageSize = size;
+        currentPage = 1;
+        await ReloadPageAsync();
     }
 }

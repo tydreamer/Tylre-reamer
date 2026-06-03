@@ -1,18 +1,22 @@
-<div class="restaurant-card-thumb">
+<div class="meal-card-thumb">
     @if (ShowPlaceholder)
     {
-        <div class="restaurant-card-thumb-placeholder">
-            <i class="bi bi-shop restaurant-card-thumb-icon" aria-hidden="true"></i>
-            <span class="restaurant-card-thumb-name">@Name</span>
+        <div class="meal-card-thumb-placeholder">
+            <i class="bi bi-fork-knife meal-card-thumb-icon" aria-hidden="true"></i>
+            <span class="meal-card-thumb-name">@Name</span>
         </div>
     }
     @if (HasImage && !imageLoadFailed)
     {
         <img src="@ImageUrl"
-             class="restaurant-card-thumb-img @(imageLoaded ? "is-loaded" : "")"
+             class="meal-card-thumb-img @(imageLoaded ? "is-loaded" : "")"
              alt="@Name"
              @onload="OnImageLoaded"
              @onerror="OnImageError" />
+    }
+    @if (!string.IsNullOrWhiteSpace(RestaurantName))
+    {
+        <span class="badge meal-restaurant-badge meal-card-truncate" title="@RestaurantName">@RestaurantName</span>
     }
 </div>
 
@@ -23,6 +27,7 @@
 
     [Parameter, EditorRequired] public string Name { get; set; } = "";
     [Parameter] public string? ImageUrl { get; set; }
+    [Parameter] public string? RestaurantName { get; set; }
 
     private bool HasImage => !string.IsNullOrWhiteSpace(ImageUrl);
 
