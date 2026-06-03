@@ -10,12 +10,14 @@
                 aria-label="Order actions"
                 aria-expanded="@MenuOpen"
                 disabled="@Disabled"
-                @onclick="ToggleMenuAsync">
+                @onclick="ToggleMenuAsync"
+                @onclick:stopPropagation="true">
             <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
         </button>
         @if (MenuOpen)
         {
-            <ul class="dropdown-menu dropdown-menu-end show owner-order-actions-menu">
+            <ul class="dropdown-menu dropdown-menu-end show owner-order-actions-menu"
+                @onclick:stopPropagation="true">
                 @foreach (var action in OwnerOrderActionDefinitions.GetStatusActions(Order.Status))
                 {
                     <li>
