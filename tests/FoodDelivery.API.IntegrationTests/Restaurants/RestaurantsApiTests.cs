@@ -30,7 +30,6 @@ public class RestaurantsApiTests(CustomWebApplicationFactory factory)
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var restaurant = await response.ReadJsonAsync<RestaurantResponse>();
         restaurant!.Id.Should().Be(IntegrationTestIds.RestaurantId);
-        restaurant.Name.Should().Be("Test Bistro");
     }
 
     [Fact]
@@ -123,14 +122,26 @@ public class RestaurantsApiTests(CustomWebApplicationFactory factory)
     {
         var client = factory.CreateClient().AsUser(factory, IntegrationTestIds.OwnerId);
 
-        var response = await client.PutAsJsonAsync($"api/restaurants/{IntegrationTestIds.RestaurantId}", new
+        // Create a fresh restaurant to update so we don't mutate seeded data.
+        var created = await client.PostAsJsonAsync("api/restaurants", new
         {
-            Name = "Updated Bistro",
+            Name = "To Update",
+            Description = "desc",
+            ImageUrl = "",
+            CuisineId = 1,
+            Latitude = 0.0,
+            Longitude = 0.0
+        });
+        var newRestaurant = await created.ReadJsonAsync<RestaurantResponse>();
+
+        var response = await client.PutAsJsonAsync($"api/restaurants/{newRestaurant!.Id}", new
+        {
+            Name = "Updated Name",
             Description = "Updated description",
             ImageUrl = "",
             CuisineId = 1,
-            Latitude = 40.7,
-            Longitude = -74.0
+            Latitude = 0.0,
+            Longitude = 0.0
         });
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);

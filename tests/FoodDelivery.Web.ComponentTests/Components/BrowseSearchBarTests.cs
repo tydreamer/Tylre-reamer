@@ -56,10 +56,7 @@ public class BrowseSearchBarTests : ComponentTestBase
         var cut = Render<BrowseSearchBar>(ps => ps
             .Add(p => p.SearchTermChanged, EventCallback.Factory.Create<string>(this, v => captured = v)));
 
-        await cut.Find("input").InputAsync(new Microsoft.AspNetCore.Components.Web.ChangeEventArgs
-        {
-            Value = "burger"
-        });
+        await cut.Find("input").InputAsync("burger");
 
         captured.Should().Be("burger");
     }
