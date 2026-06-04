@@ -184,11 +184,11 @@ else
     {
         busy = true;
         error = null;
-        var (success, err) = await Orders.UpdateStatusAsync(Id, status);
-        if (success)
+        var result = await Orders.UpdateStatusAsync(Id, status);
+        if (result.Success)
             order = await Orders.GetByIdAsync(Id);
         else
-            error = err;
+            error = result.Error;
         busy = false;
     }
 
@@ -199,12 +199,12 @@ else
         busy = true;
         error = null;
         blockSuccess = null;
-        var (success, err) = await Users.BlockAsync(order.CustomerId);
+        var result = await Users.BlockAsync(order.CustomerId);
         busy = false;
 
-        if (!success)
+        if (!result.Success)
         {
-            error = err ?? "Failed to block customer.";
+            error = result.Error ?? "Failed to block customer.";
             return;
         }
 
@@ -219,12 +219,12 @@ else
         busy = true;
         error = null;
         blockSuccess = null;
-        var (success, err) = await Users.UnblockAsync(order.CustomerId);
+        var result = await Users.UnblockAsync(order.CustomerId);
         busy = false;
 
-        if (!success)
+        if (!result.Success)
         {
-            error = err ?? "Failed to unblock customer.";
+            error = result.Error ?? "Failed to unblock customer.";
             return;
         }
 

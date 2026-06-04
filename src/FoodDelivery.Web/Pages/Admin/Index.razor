@@ -101,11 +101,11 @@
     {
         busy = true;
         error = null;
-        var (success, err) = await Users.BlockAsync(userId);
-        if (success)
+        var result = await Users.BlockAsync(userId);
+        if (result.Success)
             await LoadPageAsync();
         else
-            error = err;
+            error = result.Error;
         busy = false;
     }
 
@@ -113,11 +113,11 @@
     {
         busy = true;
         error = null;
-        var (success, err) = await Users.UnblockAsync(userId);
-        if (success)
+        var result = await Users.UnblockAsync(userId);
+        if (result.Success)
             await LoadPageAsync();
         else
-            error = err;
+            error = result.Error;
         busy = false;
     }
 }

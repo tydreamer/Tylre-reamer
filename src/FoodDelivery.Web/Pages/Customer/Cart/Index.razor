@@ -272,12 +272,12 @@ else
             tip,
             HasAppliedCoupon ? appliedCouponCode : null);
 
-        var (success, order, err) = await Orders.PlaceOrderAsync(request);
+        var result = await Orders.PlaceOrderAsync(request);
         placing = false;
 
-        if (success)
+        if (result.Success)
         {
-            placedOrder = order;
+            placedOrder = result.Value;
             await Cart.ClearAsync();
             ClearCouponState();
             couponCode = null;
@@ -285,7 +285,7 @@ else
         }
         else
         {
-            checkoutError = err;
+            checkoutError = result.Error;
         }
     }
 

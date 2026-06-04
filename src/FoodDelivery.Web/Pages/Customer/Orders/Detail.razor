@@ -164,11 +164,11 @@ else
     {
         busy = true;
         error = null;
-        var (success, err) = await Orders.UpdateStatusAsync(Id, "Cancelled");
-        if (success)
+        var result = await Orders.UpdateStatusAsync(Id, "Cancelled");
+        if (result.Success)
             order = await Orders.GetByIdAsync(Id);
         else
-            error = err;
+            error = result.Error;
         busy = false;
     }
 
@@ -176,11 +176,11 @@ else
     {
         busy = true;
         error = null;
-        var (success, err) = await Orders.UpdateStatusAsync(Id, "Received");
-        if (success)
+        var result = await Orders.UpdateStatusAsync(Id, "Received");
+        if (result.Success)
             order = await Orders.GetByIdAsync(Id);
         else
-            error = err;
+            error = result.Error;
         busy = false;
     }
 

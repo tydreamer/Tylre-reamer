@@ -96,12 +96,12 @@ else
 
         var expiresAt = DateTime.SpecifyKind(formModel.ExpiresAt.Date, DateTimeKind.Utc).AddDays(1).AddTicks(-1);
         var request = new CouponCreateRequest(formModel.Code, formModel.DiscountValue, expiresAt);
-        var (success, _, error) = await Coupons.CreateAsync(RestaurantId, request);
+        var result = await Coupons.CreateAsync(RestaurantId, request);
         saving = false;
 
-        if (!success)
+        if (!result.Success)
         {
-            submitError = error ?? "Failed to create coupon.";
+            submitError = result.Error ?? "Failed to create coupon.";
             return;
         }
 

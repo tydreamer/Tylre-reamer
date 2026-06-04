@@ -109,8 +109,8 @@
     {
         await SetBusyAsync(true);
         actionError = null;
-        var (success, err) = await Orders.UpdateStatusAsync(Order.Id, status);
-        if (success)
+        var result = await Orders.UpdateStatusAsync(Order.Id, status);
+        if (result.Success)
         {
             var updated = await Orders.GetByIdAsync(Order.Id);
             if (updated is not null)
@@ -118,7 +118,7 @@
         }
         else
         {
-            actionError = err;
+            actionError = result.Error;
         }
 
         await SetBusyAsync(false);
@@ -134,12 +134,12 @@
     {
         await SetBusyAsync(true);
         actionError = null;
-        var (success, err) = await Users.BlockAsync(Order.CustomerId);
+        var result = await Users.BlockAsync(Order.CustomerId);
         await SetBusyAsync(false);
 
-        if (!success)
+        if (!result.Success)
         {
-            actionError = err ?? "Failed to block customer.";
+            actionError = result.Error ?? "Failed to block customer.";
             return;
         }
 
@@ -152,12 +152,12 @@
         await CloseMenuAsync();
         await SetBusyAsync(true);
         actionError = null;
-        var (success, err) = await Users.UnblockAsync(Order.CustomerId);
+        var result = await Users.UnblockAsync(Order.CustomerId);
         await SetBusyAsync(false);
 
-        if (!success)
+        if (!result.Success)
         {
-            actionError = err ?? "Failed to unblock customer.";
+            actionError = result.Error ?? "Failed to unblock customer.";
             return;
         }
 

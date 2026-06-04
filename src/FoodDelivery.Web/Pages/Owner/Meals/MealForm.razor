@@ -162,22 +162,22 @@ else
                 "",
                 formModel.Price,
                 formModel.MealTypeId);
-            var (success, created, error) = await Meals.CreateAsync(RestaurantId, request);
-            if (!success)
+            var createResult = await Meals.CreateAsync(RestaurantId, request);
+            if (!createResult.Success)
             {
                 saving = false;
-                submitError = error ?? "Failed to create meal.";
+                submitError = createResult.Error ?? "Failed to create meal.";
                 return;
             }
 
-            if (created is not null && imageSelection.HasPendingUpload && imageSelection.PendingFile is not null)
+            if (createResult.Value is not null && imageSelection.HasPendingUpload && imageSelection.PendingFile is not null)
             {
-                var (uploaded, _, uploadError) = await ImageUpload.UploadMealImageAsync(
-                    RestaurantId, created.Id, imageSelection.PendingFile);
-                if (!uploaded)
+                var uploadResult = await ImageUpload.UploadMealImageAsync(
+                    RestaurantId, createResult.Value.Id, imageSelection.PendingFile);
+                if (!uploadResult.Success)
                 {
                     saving = false;
-                    submitError = uploadError ?? "Meal was created but the image could not be uploaded.";
+                    submitError = uploadResult.Error ?? "Meal was created but the image could not be uploaded.";
                     return;
                 }
             }
@@ -201,11 +201,11 @@ else
             imageUrl,
             formModel.Price,
             formModel.MealTypeId);
-        var (updated, updateError) = await Meals.UpdateAsync(RestaurantId, MealId!.Value, updateRequest);
+        var updateResult = await Meals.UpdateAsync(RestaurantId, MealId!.Value, updateRequest);
         saving = false;
-        if (!updated)
+        if (!updateResult.Success)
         {
-            submitError = updateError ?? "Failed to update meal.";
+            submitError = updateResult.Error ?? "Failed to update meal.";
             return;
         }
 
@@ -219,10 +219,10 @@ else
 
         if (imageSelection.PendingFile is { } file)
         {
-            var (uploaded, url, error) = await ImageUpload.UploadMealImageAsync(RestaurantId, mealId, file);
-            return uploaded
-                ? (url ?? "", null)
-                : ("", error ?? "Failed to upload image.");
+            var uploadResult = await ImageUpload.UploadMealImageAsync(RestaurantId, mealId, file);
+            return uploadResult.Success
+                ? (uploadResult.Value ?? "", null)
+                : ("", uploadResult.Error ?? "Failed to upload image.");
         }
 
         return (formModel.ImageUrl, null);

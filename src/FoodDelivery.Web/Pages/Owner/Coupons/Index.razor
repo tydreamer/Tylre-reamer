@@ -152,12 +152,12 @@ else
 
         removingId = couponId;
         error = null;
-        var (success, removeError) = await Coupons.RemoveAsync(RestaurantId, couponId);
+        var result = await Coupons.RemoveAsync(RestaurantId, couponId);
         removingId = null;
 
-        if (!success)
+        if (!result.Success)
         {
-            error = removeError ?? "Failed to remove coupon.";
+            error = result.Error ?? "Failed to remove coupon.";
             return;
         }
 

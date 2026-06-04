@@ -65,12 +65,12 @@
             formModel.Password,
             formModel.Role);
 
-        var (success, _, err) = await Users.CreateAsync(request);
+        var result = await Users.CreateAsync(request);
         saving = false;
 
-        if (!success)
+        if (!result.Success)
         {
-            submitError = err ?? "Failed to create user.";
+            submitError = result.Error ?? "Failed to create user.";
             return;
         }
 

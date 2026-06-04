@@ -211,10 +211,11 @@
 
         loading = true;
         error = null;
-        error = await Auth.RegisterAsync(model.Name, model.Email, model.Password, model.Role);
+        var result = await Auth.RegisterAsync(model.Name, model.Email, model.Password, model.Role);
+        error = result.Error;
         loading = false;
 
-        if (error is null)
+        if (result.Success)
             Navigation.NavigateTo("/sign-in?registered=true");
     }
 

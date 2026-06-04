@@ -126,12 +126,12 @@ else
 
         removingId = restaurantId;
         error = null;
-        var (success, removeError) = await Restaurants.RemoveAsync(restaurantId);
+        var result = await Restaurants.RemoveAsync(restaurantId);
         removingId = null;
 
-        if (!success)
+        if (!result.Success)
         {
-            error = removeError ?? "Failed to remove restaurant.";
+            error = result.Error ?? "Failed to remove restaurant.";
             return;
         }
 
