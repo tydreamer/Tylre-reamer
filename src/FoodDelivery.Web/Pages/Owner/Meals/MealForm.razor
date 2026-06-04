@@ -28,8 +28,8 @@ else if (restaurant is null || mealTypes is null || (!IsNew && meal is null))
 }
 else
 {
-    <div class="row">
-        <div class="col-md-6">
+    <div class="row g-4">
+        <div class="col-lg-7">
             <EditForm Model="formModel" OnValidSubmit="HandleSubmit">
                 <DataAnnotationsValidator />
                 <div class="mb-3">
@@ -54,14 +54,6 @@ else
                     <FirstValidationMessage For="() => formModel.MealTypeId" />
                 </div>
                 <div class="mb-3">
-                    <OwnerImageUpload Label="Image"
-                                      ExistingImageUrl="@formModel.ImageUrl"
-                                      Selection="imageSelection"
-                                      SelectionChanged="OnImageSelectionChanged"
-                                      PreviewAlt="@(string.IsNullOrWhiteSpace(formModel.Name) ? "Meal image" : formModel.Name)"
-                                      Disabled="@saving" />
-                </div>
-                <div class="mb-3">
                     <label class="form-label">Price</label>
                     <InputNumber class="form-control" @bind-Value="formModel.Price" />
                     <FirstValidationMessage For="() => formModel.Price" />
@@ -75,6 +67,14 @@ else
                 </button>
                 <a href="owner/restaurants/@RestaurantId/meals" class="btn btn-outline-secondary ms-2">Cancel</a>
             </EditForm>
+        </div>
+        <div class="col-lg-5">
+            <OwnerImageUpload Label="Image"
+                              ExistingImageUrl="@formModel.ImageUrl"
+                              Selection="imageSelection"
+                              SelectionChanged="OnImageSelectionChanged"
+                              PreviewAlt="@(string.IsNullOrWhiteSpace(formModel.Name) ? "Meal image" : formModel.Name)"
+                              Disabled="@saving" />
         </div>
     </div>
 }

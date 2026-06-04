@@ -1,28 +1,40 @@
 @inject IConfiguration Configuration
 
 <div class="owner-image-upload">
-    <label class="form-label">@Label</label>
+    <p class="form-label">@Label</p>
 
-    @if (PreviewUrl is not null)
+    @if (HasImage)
     {
-        <div class="owner-image-upload-preview mb-2">
+        <div class="owner-image-upload-preview">
             <img src="@PreviewUrl" alt="@PreviewAlt" class="owner-image-upload-preview-img" />
+            <button type="button" class="owner-form-image-remove"
+                    disabled="@Disabled"
+                    title="Remove image"
+                    @onclick="RemoveImage">
+                <i class="bi bi-x" aria-hidden="true"></i>
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="owner-image-upload-dropzone">
+            <i class="bi bi-image owner-image-upload-icon" aria-hidden="true"></i>
+            <p class="owner-image-upload-hint">
+                Drag and drop or click below to select a photo to upload.
+            </p>
+            <label for="@inputId" class="btn btn-dark owner-image-upload-btn @(Disabled ? "disabled" : "")">
+                <i class="bi bi-upload me-2" aria-hidden="true"></i>Choose photo
+            </label>
+            <p class="owner-image-upload-meta">JPG, PNG, or WebP · up to 5 MB</p>
         </div>
     }
 
-    <div class="d-flex flex-wrap gap-2 align-items-center">
-        <InputFile OnChange="OnFileSelected"
-                   accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
-                   class="form-control owner-image-upload-input"
-                   disabled="@Disabled" />
-        @if (PreviewUrl is not null)
-        {
-            <button type="button" class="btn btn-outline-secondary btn-sm" disabled="@Disabled" @onclick="RemoveImage">
-                Remove image
-            </button>
-        }
-    </div>
-    <div class="form-text">Optional. JPG, PNG, or WebP up to 5 MB.</div>
+    <InputFile id="@inputId"
+               OnChange="OnFileSelected"
+               accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+               style="display:none"
+               disabled="@Disabled" />
+
     @if (validationError is not null)
     {
         <div class="text-danger small mt-1">@validationError</div>
@@ -31,6 +43,7 @@
 
 @code {
     private const long MaxFileBytes = ImageUploadService.MaxFileBytes;
+    private readonly string inputId = $"owner-img-{Guid.NewGuid():N}";
 
     [Parameter, EditorRequired] public string Label { get; set; } = "Image";
     [Parameter] public string? ExistingImageUrl { get; set; }
@@ -46,6 +59,14 @@
         Selection.PendingPreviewDataUrl
         ?? (Selection.Removed ? null : MediaUrlHelper.Resolve(ExistingImageUrl, ApiBaseUrl));
 
+    private bool HasImage => PreviewUrl is not null;
+
+    private async Task RemoveImage()
+    {
+        Selection = new ImageUploadSelection { Removed = true };
+        await SelectionChanged.InvokeAsync(Selection);
+    }
+
     private async Task OnFileSelected(InputFileChangeEventArgs e)
     {
         validationError = null;
@@ -59,12 +80,6 @@
         Selection.PendingFile = file;
         Selection.Removed = false;
         Selection.PendingPreviewDataUrl = await CreatePreviewDataUrlAsync(file);
-        await SelectionChanged.InvokeAsync(Selection);
-    }
-
-    private async Task RemoveImage()
-    {
-        Selection = new ImageUploadSelection { Removed = true };
         await SelectionChanged.InvokeAsync(Selection);
     }
 
