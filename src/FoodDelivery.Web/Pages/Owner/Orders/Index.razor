@@ -70,7 +70,13 @@ else
                         @onkeydown="e => OnRowKeyDown(e, order.Id)">
                         <td>#@order.Id</td>
                         <td>@order.RestaurantName</td>
-                        <td>@order.CustomerName</td>
+                        <td>
+                            @order.CustomerName
+                            @if (order.CustomerBlockedFromOwner)
+                            {
+                                <span class="badge bg-danger ms-1">Blocked</span>
+                            }
+                        </td>
                         @{
                             var itemsDisplay = OrderItemsFormatter.FormatForDisplay(order.Items);
                         }
@@ -78,7 +84,7 @@ else
                         <td class="text-nowrap">@order.CreatedAt.ToLocalTime().ToString("g")</td>
                         <td class="col-total text-end text-nowrap">@order.TotalPrice.ToString("C")</td>
                         <td class="col-status"><span class="badge @StatusClass(order.Status)">@order.Status</span></td>
-                        <td class="col-actions text-end" @onclick:stopPropagation="true">
+                        <td class="col-actions text-end" @onclick:stopPropagation="true" @onmousedown:stopPropagation="true" @onmouseup:stopPropagation="true">
                             <OwnerOrderRowActions Order="@order"
                                                   MenuOpen="@(openActionsOrderId == order.Id)"
                                                   MenuOpenChanged="@(open => SetActionsMenuOpen(order.Id, open))"
