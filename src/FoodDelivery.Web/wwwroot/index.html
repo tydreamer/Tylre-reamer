@@ -46,8 +46,8 @@
         (function () {
             const root = document.documentElement;
             const loader = document.getElementById('app-loader');
-            const holdCompleteMs = 450;
-            const fadeOutMs = 500;
+            const holdCompleteMs = 150;
+            const fadeOutMs = 250;
 
             let displayed = 0;
             let target = 0;
@@ -91,7 +91,7 @@
 
             function frame() {
                 const delta = target - displayed;
-                if (Math.abs(delta) < 0.25) {
+                if (target >= 100 || Math.abs(delta) < 0.25) {
                     displayed = target;
                 } else {
                     displayed += delta * 0.14;
@@ -150,7 +150,7 @@
                     return Promise.resolve();
                 }
 
-                var timeoutMs = 12000;
+                var timeoutMs = 3000;
                 var waits = Array.prototype.map.call(images, function (img) {
                     if (img.complete && img.naturalWidth > 0) {
                         return Promise.resolve();

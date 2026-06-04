@@ -30,15 +30,9 @@ public sealed class PaginatedPageLoadService
         _waitAfterRender = false;
         try
         {
-            if (_waitForImages)
-                await _js.InvokeVoidAsync("foodDelivery.waitForImages", contentRoot);
-
             await _js.InvokeVoidAsync("foodDelivery.scrollToTop");
         }
-        catch (JSException)
-        {
-            await _js.InvokeVoidAsync("foodDelivery.scrollToTop");
-        }
+        catch (JSException) { }
         finally
         {
             IsLoading = false;
