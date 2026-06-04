@@ -12,11 +12,7 @@
     </main>
 </div>
 
-<AuthorizeView Roles="Customer">
-    <Authorized>
-        <CartInitializer />
-    </Authorized>
-</AuthorizeView>
+<CartInitializer />
 <AuthorizeView>
     <Authorized>
         <NotificationToast />

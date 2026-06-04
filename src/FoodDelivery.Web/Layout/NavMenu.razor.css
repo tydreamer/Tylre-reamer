@@ -27,11 +27,6 @@
     font-size: 1.15rem;
 }
 
-.nav-item ::deep .material-symbols-outlined.nav-icon {
-    font-size: 1.35rem;
-    font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
-}
-
 .nav-menu-body {
     flex-direction: column;
 }
