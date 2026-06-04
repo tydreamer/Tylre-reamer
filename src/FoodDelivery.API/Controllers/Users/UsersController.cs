@@ -70,8 +70,8 @@ public class UsersController(AppDbContext db) : ControllerBase
         if (user.Role == UserRole.Admin)
             return BadRequest("Admins cannot be blocked.");
 
-        var currentRole = User.FindFirstValue(ClaimTypes.Role);
-        var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var currentRole = User.GetRole();
+        var currentUserId = User.GetUserId();
 
         if (currentRole == "Owner")
         {
@@ -105,8 +105,8 @@ public class UsersController(AppDbContext db) : ControllerBase
         var user = await db.Users.FindAsync(id);
         if (user is null) return NotFound();
 
-        var currentRole = User.FindFirstValue(ClaimTypes.Role);
-        var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var currentRole = User.GetRole();
+        var currentUserId = User.GetUserId();
 
         if (currentRole == "Owner")
         {

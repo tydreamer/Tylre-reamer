@@ -41,7 +41,7 @@ public class MealsController(AppDbContext db, IImageStorageService imageStorage)
     [HttpPost]
     public async Task<IActionResult> Create(int restaurantId, CreateMealRequest req)
     {
-        var ownerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var ownerId = User.GetUserId();
         var restaurant = await db.Restaurants.FindAsync(restaurantId);
         if (restaurant is null) return NotFound();
         if (restaurant.OwnerId != ownerId) return Forbid();
@@ -70,7 +70,7 @@ public class MealsController(AppDbContext db, IImageStorageService imageStorage)
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int restaurantId, int id, UpdateMealRequest req)
     {
-        var ownerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var ownerId = User.GetUserId();
         var restaurant = await db.Restaurants.FindAsync(restaurantId);
         if (restaurant is null) return NotFound();
         if (restaurant.OwnerId != ownerId) return Forbid();
@@ -94,7 +94,7 @@ public class MealsController(AppDbContext db, IImageStorageService imageStorage)
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int restaurantId, int id)
     {
-        var ownerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var ownerId = User.GetUserId();
         var restaurant = await db.Restaurants.FindAsync(restaurantId);
         if (restaurant is null) return NotFound();
         if (restaurant.OwnerId != ownerId) return Forbid();

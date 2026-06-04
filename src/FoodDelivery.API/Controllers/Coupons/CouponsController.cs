@@ -13,7 +13,7 @@ namespace FoodDelivery.API.Controllers.Coupons;
 [Authorize(Roles = "Owner")]
 public class CouponsController(AppDbContext db) : ControllerBase
 {
-    private int CurrentUserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    private int CurrentUserId => User.GetUserId();
 
     [HttpGet]
     public async Task<IActionResult> GetAll(int restaurantId)

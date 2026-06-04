@@ -75,7 +75,7 @@ public class RestaurantsController(AppDbContext db, IImageStorageService imageSt
     [HttpPost]
     public async Task<IActionResult> Create(CreateRestaurantRequest req)
     {
-        var ownerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var ownerId = User.GetUserId();
 
         if (!await db.Cuisines.AnyAsync(c => c.Id == req.CuisineId))
             return BadRequest(ValidationMessages.CuisineInvalid);
@@ -104,7 +104,7 @@ public class RestaurantsController(AppDbContext db, IImageStorageService imageSt
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, UpdateRestaurantRequest req)
     {
-        var ownerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var ownerId = User.GetUserId();
         var restaurant = await db.Restaurants.FindAsync(id);
         if (restaurant is null) return NotFound();
         if (restaurant.OwnerId != ownerId) return Forbid();
@@ -126,7 +126,7 @@ public class RestaurantsController(AppDbContext db, IImageStorageService imageSt
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var ownerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var ownerId = User.GetUserId();
         var restaurant = await db.Restaurants.FindAsync(id);
         if (restaurant is null) return NotFound();
         if (restaurant.OwnerId != ownerId) return Forbid();

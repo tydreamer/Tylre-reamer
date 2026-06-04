@@ -15,8 +15,8 @@ namespace FoodDelivery.API.Controllers.Orders;
 [Authorize]
 public class OrdersController(AppDbContext db, IHubContext<OrderHub> hub, OrderPricingService pricingService) : ControllerBase
 {
-    protected int CurrentUserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-    protected string CurrentUserRole => User.FindFirstValue(ClaimTypes.Role)!;
+    protected int CurrentUserId => User.GetUserId();
+    protected string CurrentUserRole => User.GetRole();
 
     [HttpGet]
     public async Task<IActionResult> GetAll(

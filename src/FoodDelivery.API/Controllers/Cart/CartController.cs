@@ -15,7 +15,7 @@ namespace FoodDelivery.API.Controllers.Cart;
 [Authorize(Roles = "Customer")]
 public class CartController(AppDbContext db) : ControllerBase
 {
-    private int CurrentUserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    private int CurrentUserId => User.GetUserId();
 
     [HttpGet]
     public async Task<IActionResult> Get()
