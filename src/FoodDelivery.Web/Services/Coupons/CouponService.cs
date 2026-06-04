@@ -16,24 +16,9 @@ public class CouponService(HttpClient http)
         return await http.GetFromJsonAsync<CouponValidationDto>(url);
     }
 
-    public async Task<(bool Success, CouponDto? Coupon, string? Error)> CreateAsync(int restaurantId, CouponCreateRequest request)
-    {
-        var response = await http.PostAsJsonAsync($"api/restaurants/{restaurantId}/coupons", request);
-        if (response.IsSuccessStatusCode)
-        {
-            var coupon = await response.Content.ReadFromJsonAsync<CouponDto>();
-            return (true, coupon, null);
-        }
+    public Task<Result<CouponDto>> CreateAsync(int restaurantId, CouponCreateRequest request) =>
+        http.PostForResultAsync<CouponDto>($"api/restaurants/{restaurantId}/coupons", request);
 
-        return (false, null, await response.Content.ReadAsStringAsync());
-    }
-
-    public async Task<(bool Success, string? Error)> RemoveAsync(int restaurantId, int couponId)
-    {
-        var response = await http.DeleteAsync($"api/restaurants/{restaurantId}/coupons/{couponId}");
-        if (response.IsSuccessStatusCode)
-            return (true, null);
-
-        return (false, await response.Content.ReadAsStringAsync());
-    }
+    public Task<Result> RemoveAsync(int restaurantId, int couponId) =>
+        http.DeleteForResultAsync($"api/restaurants/{restaurantId}/coupons/{couponId}");
 }

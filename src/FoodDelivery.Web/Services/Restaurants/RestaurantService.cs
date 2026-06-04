@@ -34,33 +34,12 @@ public class RestaurantService(HttpClient http)
         return paged?.Items ?? [];
     }
 
-    public async Task<(bool Success, RestaurantDto? Restaurant, string? Error)> CreateAsync(RestaurantUpsertRequest request)
-    {
-        var response = await http.PostAsJsonAsync("api/restaurants", request);
-        if (response.IsSuccessStatusCode)
-        {
-            var restaurant = await response.Content.ReadFromJsonAsync<RestaurantDto>();
-            return (true, restaurant, null);
-        }
+    public Task<Result<RestaurantDto>> CreateAsync(RestaurantUpsertRequest request) =>
+        http.PostForResultAsync<RestaurantDto>("api/restaurants", request);
 
-        return (false, null, await response.Content.ReadAsStringAsync());
-    }
+    public Task<Result> UpdateAsync(int id, RestaurantUpsertRequest request) =>
+        http.PutForResultAsync($"api/restaurants/{id}", request);
 
-    public async Task<(bool Success, string? Error)> UpdateAsync(int id, RestaurantUpsertRequest request)
-    {
-        var response = await http.PutAsJsonAsync($"api/restaurants/{id}", request);
-        if (response.IsSuccessStatusCode)
-            return (true, null);
-
-        return (false, await response.Content.ReadAsStringAsync());
-    }
-
-    public async Task<(bool Success, string? Error)> RemoveAsync(int id)
-    {
-        var response = await http.DeleteAsync($"api/restaurants/{id}");
-        if (response.IsSuccessStatusCode)
-            return (true, null);
-
-        return (false, await response.Content.ReadAsStringAsync());
-    }   
+    public Task<Result> RemoveAsync(int id) =>
+        http.DeleteForResultAsync($"api/restaurants/{id}");
 }

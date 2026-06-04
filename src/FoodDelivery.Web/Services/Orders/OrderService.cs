@@ -4,18 +4,8 @@ namespace FoodDelivery.Web.Services.Orders;
 
 public class OrderService(HttpClient http)
 {
-    public async Task<(bool Success, OrderResponse? Order, string? Error)> PlaceOrderAsync(PlaceOrderRequest request)
-    {
-        var response = await http.PostAsJsonAsync("api/orders", request);
-        if (response.IsSuccessStatusCode)
-        {
-            var order = await response.Content.ReadFromJsonAsync<OrderResponse>();
-            return (true, order, null);
-        }
-
-        var error = await response.Content.ReadAsStringAsync();
-        return (false, null, error);
-    }
+    public Task<Result<OrderResponse>> PlaceOrderAsync(PlaceOrderRequest request) =>
+        http.PostForResultAsync<OrderResponse>("api/orders", request);
 
     public async Task<PagedResult<OrderResponse>?> GetMyOrdersAsync(
         int page = 1,
@@ -35,13 +25,6 @@ public class OrderService(HttpClient http)
         return await http.GetFromJsonAsync<OrderResponse>($"api/orders/{id}");
     }
 
-    public async Task<(bool Success, string? Error)> UpdateStatusAsync(int id, string status)
-    {
-        var response = await http.PutAsJsonAsync($"api/orders/{id}/status", new { Status = status });
-        if (response.IsSuccessStatusCode)
-            return (true, null);
-
-        var error = await response.Content.ReadAsStringAsync();
-        return (false, error);
-    }
+    public Task<Result> UpdateStatusAsync(int id, string status) =>
+        http.PutForResultAsync($"api/orders/{id}/status", new { Status = status });
 }

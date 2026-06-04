@@ -26,12 +26,8 @@ public class AuthService(HttpClient http, IJSRuntime js, AuthenticationStateProv
         return result.Role;
     }
 
-    public async Task<string?> RegisterAsync(string name, string email, string password, string role)
-    {
-        var response = await http.PostAsJsonAsync("api/auth/register", new { Name = name, Email = email, Password = password, Role = role });
-        if (response.IsSuccessStatusCode) return null;
-        return await response.Content.ReadAsStringAsync();
-    }
+    public Task<Result> RegisterAsync(string name, string email, string password, string role) =>
+        http.PostForResultAsync("api/auth/register", new { Name = name, Email = email, Password = password, Role = role });
 
     public async Task LogoutAsync()
     {
@@ -49,14 +45,8 @@ public class AuthService(HttpClient http, IJSRuntime js, AuthenticationStateProv
         return (true, result?.Message ?? "If an account exists for this email, you will receive password reset instructions.", result?.ResetUrl);
     }
 
-    public async Task<(bool Success, string? Error)> ResetPasswordAsync(string token, string newPassword)
-    {
-        var response = await http.PostAsJsonAsync("api/auth/reset-password", new { Token = token, NewPassword = newPassword });
-        if (response.IsSuccessStatusCode)
-            return (true, null);
-
-        return (false, await response.Content.ReadAsStringAsync());
-    }
+    public Task<Result> ResetPasswordAsync(string token, string newPassword) =>
+        http.PostForResultAsync("api/auth/reset-password", new { Token = token, NewPassword = newPassword });
 }
 
 public record ForgotPasswordResponse(string Message, string? ResetUrl);

@@ -9,8 +9,14 @@ internal static class HttpResultExtensions
     public static Task<Result<T>> PostForResultAsync<T>(this HttpClient http, string url, object body) =>
         SendForResultAsync<T>(http.PostAsJsonAsync(url, body));
 
+    public static Task<Result> PostForResultAsync(this HttpClient http, string url, object body) =>
+        SendForResultAsync(http.PostAsJsonAsync(url, body));
+
     public static Task<Result> PutForResultAsync(this HttpClient http, string url, object body) =>
         SendForResultAsync(http.PutAsJsonAsync(url, body));
+
+    public static Task<Result> PutForResultAsync(this HttpClient http, string url) =>
+        SendForResultAsync(http.PutAsync(url, null));
 
     public static Task<Result> DeleteForResultAsync(this HttpClient http, string url) =>
         SendForResultAsync(http.DeleteAsync(url));
@@ -31,7 +37,7 @@ internal static class HttpResultExtensions
             : Result.Fail(await ReadErrorAsync(response));
     }
 
-    private static async Task<string> ReadErrorAsync(HttpResponseMessage response)
+    internal static async Task<string> ReadErrorAsync(HttpResponseMessage response)
     {
         var raw = await response.Content.ReadAsStringAsync();
         if (string.IsNullOrWhiteSpace(raw)) return $"Request failed ({(int)response.StatusCode}).";

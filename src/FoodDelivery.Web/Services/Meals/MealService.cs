@@ -37,33 +37,12 @@ public class MealService(HttpClient http)
         return await http.GetFromJsonAsync<MealDto>($"api/restaurants/{restaurantId}/meals/{mealId}");
     }
 
-    public async Task<(bool Success, MealDto? Meal, string? Error)> CreateAsync(int restaurantId, MealCreateRequest request)
-    {
-        var response = await http.PostAsJsonAsync($"api/restaurants/{restaurantId}/meals", request);
-        if (response.IsSuccessStatusCode)
-        {
-            var meal = await response.Content.ReadFromJsonAsync<MealDto>();
-            return (true, meal, null);
-        }
+    public Task<Result<MealDto>> CreateAsync(int restaurantId, MealCreateRequest request) =>
+        http.PostForResultAsync<MealDto>($"api/restaurants/{restaurantId}/meals", request);
 
-        return (false, null, await response.Content.ReadAsStringAsync());
-    }
+    public Task<Result> UpdateAsync(int restaurantId, int mealId, MealUpdateRequest request) =>
+        http.PutForResultAsync($"api/restaurants/{restaurantId}/meals/{mealId}", request);
 
-    public async Task<(bool Success, string? Error)> UpdateAsync(int restaurantId, int mealId, MealUpdateRequest request)
-    {
-        var response = await http.PutAsJsonAsync($"api/restaurants/{restaurantId}/meals/{mealId}", request);
-        if (response.IsSuccessStatusCode)
-            return (true, null);
-
-        return (false, await response.Content.ReadAsStringAsync());
-    }
-
-    public async Task<(bool Success, string? Error)> RemoveAsync(int restaurantId, int mealId)
-    {
-        var response = await http.DeleteAsync($"api/restaurants/{restaurantId}/meals/{mealId}");
-        if (response.IsSuccessStatusCode)
-            return (true, null);
-
-        return (false, await response.Content.ReadAsStringAsync());
-    }
+    public Task<Result> RemoveAsync(int restaurantId, int mealId) =>
+        http.DeleteForResultAsync($"api/restaurants/{restaurantId}/meals/{mealId}");
 }
