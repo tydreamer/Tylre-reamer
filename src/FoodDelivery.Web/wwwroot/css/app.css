@@ -520,6 +520,13 @@ code {
     min-width: 2.75rem;
 }
 
+.meal-detail-price {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #198754;
+}
+
 /* Auth pages (layout shell + cards rendered via @Body) */
 .auth-layout {
     position: relative;
