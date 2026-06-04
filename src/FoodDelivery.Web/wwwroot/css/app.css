@@ -252,12 +252,19 @@ code {
     overflow: hidden;
 }
 
+.meal-browse-card > a,
+.meal-browse-card a:first-child {
+    display: block;
+    width: 100%;
+}
+
 .meal-browse-card .card-body {
     min-width: 0;
 }
 
 .meal-card-thumb {
     position: relative;
+    width: 100%;
     height: 180px;
     background-color: var(--bs-secondary-bg);
     overflow: hidden;
