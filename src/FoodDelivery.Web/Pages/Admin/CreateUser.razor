@@ -85,7 +85,7 @@
         public string Name { get; set; } = "";
 
         [System.ComponentModel.DataAnnotations.Required(ErrorMessage = ValidationMessages.EmailRequired)]
-        [System.ComponentModel.DataAnnotations.EmailAddress(ErrorMessage = ValidationMessages.EmailInvalid)]
+        [ValidEmail(ErrorMessage = ValidationMessages.EmailInvalid)]
         [System.ComponentModel.DataAnnotations.MaxLength(255, ErrorMessage = ValidationMessages.EmailTooLong)]
         public string Email { get; set; } = "";
 

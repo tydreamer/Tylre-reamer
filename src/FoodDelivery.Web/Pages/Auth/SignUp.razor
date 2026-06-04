@@ -226,7 +226,7 @@
         public string Name { get; set; } = "";
 
         [Required(ErrorMessage = ValidationMessages.EmailRequired)]
-        [EmailAddress(ErrorMessage = ValidationMessages.EmailInvalid)]
+        [ValidEmail(ErrorMessage = ValidationMessages.EmailInvalid)]
         [MaxLength(255, ErrorMessage = ValidationMessages.EmailTooLong)]
         public string Email { get; set; } = "";
 

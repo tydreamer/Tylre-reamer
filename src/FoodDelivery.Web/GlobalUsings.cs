@@ -22,3 +22,4 @@ global using FoodDelivery.Web.Components.Admin;
 global using FoodDelivery.Web.Components.Cart;
 global using FoodDelivery.Web.Components.Orders;
 global using FoodDelivery.Web.Helpers;
+global using FoodDelivery.Web.Validation;
