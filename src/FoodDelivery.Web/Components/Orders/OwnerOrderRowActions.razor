@@ -1,6 +1,7 @@
 @inject OrderService Orders
 @inject UserService Users
 @inject ToastService Toast
+@inject IJSRuntime JS
 
 <div class="owner-order-row-actions" @onclick:stopPropagation="true">
     <div class="dropdown">
@@ -9,13 +10,15 @@
                 aria-label="Order actions"
                 aria-expanded="@MenuOpen"
                 disabled="@Disabled"
+                @ref="_toggleButton"
                 @onclick="ToggleMenuAsync"
                 @onclick:stopPropagation="true">
             <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
         </button>
         @if (MenuOpen)
         {
-            <ul class="dropdown-menu dropdown-menu-end show owner-order-actions-menu"
+            <ul class="dropdown-menu show owner-order-actions-menu"
+                style="@_menuStyle"
                 @onclick:stopPropagation="true">
                 @foreach (var action in OwnerOrderActionDefinitions.GetStatusActions(Order.Status))
                 {
@@ -79,13 +82,27 @@
     [Parameter] public EventCallback OnCompleted { get; set; }
     [Parameter, EditorRequired] public EventCallback<OrderResponse> OnOrderUpdated { get; set; }
 
+    private ElementReference _toggleButton;
+    private string? _menuStyle;
+
     private bool showCancelDialog;
     private bool showBlockDialog;
     private string? actionError;
 
-    private Task ToggleMenuAsync() => MenuOpenChanged.InvokeAsync(!MenuOpen);
+    private async Task ToggleMenuAsync()
+    {
+        var opening = !MenuOpen;
+        if (opening)
+        {
+            var pos = await JS.InvokeAsync<DropdownPosition>("foodDelivery.getDropdownPosition", _toggleButton);
+            _menuStyle = $"top:{pos.Top}px;right:{pos.Right}px";
+        }
+        await MenuOpenChanged.InvokeAsync(opening);
+    }
 
     private Task CloseMenuAsync() => MenuOpen ? MenuOpenChanged.InvokeAsync(false) : Task.CompletedTask;
+
+    private record DropdownPosition(double Top, double Right);
 
     private async Task OnStatusActionAsync(string status)
     {
