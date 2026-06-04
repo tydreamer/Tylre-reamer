@@ -9,15 +9,11 @@ namespace FoodDelivery.API.Data;
 
 public static class DbSeeder
 {
-    private const string DefaultSeedPassword = "Password123!";
-
-    private sealed record AccountRow(string Name, string Email, string Role);
+    private sealed record AccountRow(string Name, string Email, string Role, string Password);
     private sealed record RestaurantRow(
         string Name,
         string Description,
         string ImageUrl,
-        string OwnerName,
-        string OwnerEmail,
         string Cuisine,
         double Latitude,
         double Longitude);
@@ -63,7 +59,7 @@ public static class DbSeeder
             if (!Enum.TryParse<UserRole>(row.Role, ignoreCase: true, out var role))
                 continue;
 
-            await EnsureUserAsync(db, row.Name.Trim(), row.Email.Trim().ToLowerInvariant(), role);
+            await EnsureUserAsync(db, row.Name.Trim(), row.Email.Trim().ToLowerInvariant(), role, row.Password);
         }
     }
 
@@ -72,25 +68,37 @@ public static class DbSeeder
         if (await db.Restaurants.AnyAsync())
             return;
 
+        var rows = ReadCsv<RestaurantRow>("restaurants.csv");
+        if (rows.Count == 0)
+            return;
+
         var cuisineIdsByName = await db.Cuisines.ToDictionaryAsync(c => c.Name, c => c.Id);
-        var restaurants = new List<Restaurant>();
 
-        foreach (var row in ReadCsv<RestaurantRow>("restaurants.csv"))
+        // Assign each owner 4-7 restaurants. Fixed seed keeps assignments stable across runs.
+        var rng = new Random(42);
+        var ownerAssignments = new List<(RestaurantRow Row, int OwnerNumber)>();
+        var ownerNumber = 1;
+        var i = 0;
+        while (i < rows.Count)
         {
-            var ownerEmail = row.OwnerEmail.Trim().ToLowerInvariant();
-            var owner = await EnsureUserAsync(
-                db,
-                row.OwnerName.Trim(),
-                ownerEmail,
-                UserRole.Owner);
+            var batch = Math.Min(rng.Next(4, 8), rows.Count - i);
+            for (var j = 0; j < batch; j++)
+                ownerAssignments.Add((rows[i++], ownerNumber));
+            ownerNumber++;
+        }
 
+        var ownerUsers = new Dictionary<int, User>();
+        foreach (var n in ownerAssignments.Select(a => a.OwnerNumber).Distinct())
+            ownerUsers[n] = await EnsureUserAsync(db, $"Owner {n}", $"owner{n}@gmail.com", UserRole.Owner, "ownerpass");
+
+        var restaurants = new List<Restaurant>();
+        foreach (var (row, num) in ownerAssignments)
+        {
             var cuisineName = row.Cuisine.Trim();
             if (!cuisineIdsByName.TryGetValue(cuisineName, out var cuisineId))
-            {
                 throw new InvalidOperationException(
                     $"Unknown Cuisine '{cuisineName}' for restaurant '{row.Name}'. " +
                     $"Expected one of: {string.Join(", ", CuisineNames.All)}.");
-            }
 
             restaurants.Add(new Restaurant
             {
@@ -100,12 +108,9 @@ public static class DbSeeder
                 CuisineId = cuisineId,
                 Latitude = row.Latitude,
                 Longitude = row.Longitude,
-                OwnerId = owner.Id
+                OwnerId = ownerUsers[num].Id
             });
         }
-
-        if (restaurants.Count == 0)
-            return;
 
         db.Restaurants.AddRange(restaurants);
         await db.SaveChangesAsync();
@@ -156,7 +161,7 @@ public static class DbSeeder
         await db.SaveChangesAsync();
     }
 
-    private static async Task<User> EnsureUserAsync(AppDbContext db, string name, string email, UserRole role)
+    private static async Task<User> EnsureUserAsync(AppDbContext db, string name, string email, UserRole role, string password)
     {
         var normalizedEmail = email.Trim().ToLowerInvariant();
         var existing = await db.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
@@ -167,7 +172,7 @@ public static class DbSeeder
         {
             Name = name.Trim(),
             Email = normalizedEmail,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(DefaultSeedPassword),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
             Role = role
         };
 

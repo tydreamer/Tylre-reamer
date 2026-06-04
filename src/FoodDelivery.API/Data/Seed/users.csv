@@ -1,3 +1,3 @@
-Name,Email,Role
-Administrator,admin@example.com,Admin
-Demo Customer,customer@example.com,Customer
+Name,Email,Role,Password
+Administrator,admin@gmail.com,Admin,adminpass
+Demo Customer,customer@gmail.com,Customer,customerpass
