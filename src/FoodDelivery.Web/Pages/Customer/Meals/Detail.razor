@@ -3,7 +3,6 @@
 @inject MealService Meals
 @inject CartService Cart
 @inject ToastService Toast
-@inject IConfiguration Configuration
 @if (!loaded)
 {
     <p><em>Loading...</em></p>
@@ -24,16 +23,7 @@ else
 
     <div class="row g-4">
         <div class="col-md-5 col-lg-4">
-            @if (MealImageSrc is not null)
-            {
-                <img src="@MealImageSrc" class="img-fluid rounded shadow-sm w-100 meal-detail-image" alt="@meal.Name" />
-            }
-            else
-            {
-                <div class="meal-detail-image-placeholder rounded bg-light d-flex align-items-center justify-content-center text-muted">
-                    No image
-                </div>
-            }
+            <MealDetailImage Name="@meal.Name" ImageUrl="@meal.ImageUrl" />
         </div>
 
         <div class="col-md-7 col-lg-8">
@@ -82,9 +72,6 @@ else
 
     private MealBrowseDto? meal;
     private bool loaded;
-    private string? MealImageSrc => meal is null
-        ? null
-        : MediaUrlHelper.Resolve(meal.ImageUrl, Configuration["ApiBaseUrl"] ?? "");
     private int quantity = 1;
     private bool busy;
     private bool showSwitchRestaurantDialog;

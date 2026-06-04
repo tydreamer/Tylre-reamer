@@ -1,0 +1,50 @@
+@inject IConfiguration Configuration
+
+<div class="meal-detail-image-wrap rounded shadow-sm">
+    @if (ShowPlaceholder)
+    {
+        <div class="meal-detail-image-placeholder">
+            <i class="bi bi-fork-knife meal-detail-image-icon" aria-hidden="true"></i>
+            <span class="meal-detail-image-name">@Name</span>
+        </div>
+    }
+    @if (HasImage && !imageLoadFailed)
+    {
+        <img src="@ResolvedImageUrl"
+             class="meal-detail-image-img @(imageLoaded ? "is-loaded" : "")"
+             alt="@Name"
+             @onload="OnImageLoaded"
+             @onerror="OnImageError" />
+    }
+</div>
+
+@code {
+    private bool imageLoaded;
+    private bool imageLoadFailed;
+    private string? previousImageUrl;
+
+    [Parameter, EditorRequired] public string Name { get; set; } = "";
+    [Parameter] public string? ImageUrl { get; set; }
+
+    private string ApiBaseUrl => Configuration["ApiBaseUrl"] ?? "";
+
+    private string? ResolvedImageUrl => MediaUrlHelper.Resolve(ImageUrl, ApiBaseUrl);
+
+    private bool HasImage => !string.IsNullOrWhiteSpace(ResolvedImageUrl);
+
+    private bool ShowPlaceholder => !HasImage || imageLoadFailed || !imageLoaded;
+
+    protected override void OnParametersSet()
+    {
+        if (!string.Equals(previousImageUrl, ResolvedImageUrl, StringComparison.Ordinal))
+        {
+            previousImageUrl = ResolvedImageUrl;
+            imageLoaded = false;
+            imageLoadFailed = false;
+        }
+    }
+
+    private void OnImageLoaded() => imageLoaded = true;
+
+    private void OnImageError() => imageLoadFailed = true;
+}
