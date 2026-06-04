@@ -3,3 +3,8 @@ global using FoodDelivery.Web.Components.Browse;
 global using FoodDelivery.Web.Components.Dialogs;
 global using FoodDelivery.Web.Components.Tables;
 global using FoodDelivery.Web.Components.Feedback;
+global using FoodDelivery.Web.Components.Admin;
+global using FoodDelivery.Web.Components.Cart;
+global using FoodDelivery.Web.Components.Orders;
+global using FoodDelivery.Web.Models.Meals;
+global using FoodDelivery.Web.Services.Cart;
