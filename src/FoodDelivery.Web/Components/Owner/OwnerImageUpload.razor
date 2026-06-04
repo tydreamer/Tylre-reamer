@@ -6,7 +6,26 @@
     @if (HasImage)
     {
         <div class="owner-image-upload-preview">
-            <img src="@PreviewUrl" alt="@PreviewAlt" class="owner-image-upload-preview-img" />
+            @if (_imageError)
+            {
+                <div class="owner-image-upload-broken">
+                    <i class="bi bi-image-slash owner-image-upload-broken-icon" aria-hidden="true"></i>
+                    <span class="owner-image-upload-broken-text">Image not available</span>
+                </div>
+            }
+            else
+            {
+                @if (!_imageLoaded)
+                {
+                    <div class="owner-image-upload-skeleton">
+                        <i class="bi bi-image owner-image-upload-skeleton-icon" aria-hidden="true"></i>
+                    </div>
+                }
+                <img src="@PreviewUrl" alt="@PreviewAlt"
+                     class="owner-image-upload-preview-img @(_imageLoaded ? "is-loaded" : "")"
+                     @onload="() => _imageLoaded = true"
+                     @onerror="() => _imageError = true" />
+            }
             <button type="button" class="owner-form-image-remove"
                     disabled="@Disabled"
                     title="Remove image"
@@ -53,7 +72,21 @@
     [Parameter] public bool Disabled { get; set; }
 
     private string? validationError;
+    private bool _imageLoaded;
+    private bool _imageError;
+    private string? _previousPreviewUrl;
     private string ApiBaseUrl => Configuration["ApiBaseUrl"] ?? "";
+
+    protected override void OnParametersSet()
+    {
+        var url = PreviewUrl;
+        if (!string.Equals(_previousPreviewUrl, url, StringComparison.Ordinal))
+        {
+            _previousPreviewUrl = url;
+            _imageLoaded = false;
+            _imageError = false;
+        }
+    }
 
     private string? PreviewUrl =>
         Selection.PendingPreviewDataUrl
